@@ -19,6 +19,29 @@ const DATA_FILE = path.resolve(process.env.DATA_FILE || path.join(__dirname, 'da
 
 app.disable('x-powered-by');
 app.use(express.json({ limit: '100kb' }));
+app.use((_req, res, next) => {
+  res.set({
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(), microphone=()'
+  });
+  next();
+});
+
+const requestBuckets = new Map();
+app.use('/api/', (req, res, next) => {
+  const now = Date.now();
+  const key = req.ip || req.socket.remoteAddress || 'unknown';
+  const bucket = requestBuckets.get(key);
+  if (!bucket || now - bucket.startedAt > 60_000) {
+    requestBuckets.set(key, { startedAt: now, count: 1 });
+    return next();
+  }
+  bucket.count += 1;
+  if (bucket.count > 90) return res.status(429).json({ error: 'ส่งคำขอถี่เกินไป กรุณารอสักครู่' });
+  return next();
+});
 app.use(express.static(__dirname, { extensions: ['html'] }));
 
 function loadOrders() {
@@ -324,6 +347,12 @@ app.post('/api/orders/:orderNumber/pay', (req, res) => {
   if (!order) return res.status(404).json({ success: false, error: 'ไม่พบออเดอร์' });
   if (!['PROMPTPAY', 'COD'].includes(paymentMethod)) {
     return res.status(400).json({ success: false, error: 'รูปแบบการชำระเงินไม่ถูกต้อง' });
+  }
+  if (paymentMethod === 'PROMPTPAY') {
+    return res.status(409).json({
+      success: false,
+      error: 'พร้อมเพย์ต้องได้รับการตรวจสอบยอดจากผู้ดูแลก่อน ขณะนี้กรุณาเลือกชำระเงินสดปลายทาง'
+    });
   }
   if (order.statusPhase !== 'PAYMENT_REQUIRED') {
     return res.status(409).json({ success: false, error: 'ออเดอร์ยังไม่พร้อมรับการชำระเงิน' });
