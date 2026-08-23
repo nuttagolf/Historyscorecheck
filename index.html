@@ -113,15 +113,6 @@
 
       <!-- Real Google Sign-In Button Container -->
       <div class="space-y-3 pt-2 flex flex-col items-center w-full">
-        <div id="g_id_onload"
-             data-client_id="121203388429-uos8ldhujrkhr8r4bo9o0fpkkltf4aoi.apps.googleusercontent.com"
-             data-context="signin"
-             data-ux_mode="popup"
-             data-callback="handleCredentialResponse"
-             data-auto_select="false"
-             data-itp_support="true">
-        </div>
-
         <div id="google-official-btn" class="flex justify-center w-full min-h-[44px]">
           <button onclick="triggerRealGoogleLogin()" class="w-full py-3 px-4 rounded-full border border-slate-300 hover:bg-slate-50 bg-white text-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-3 shadow-sm active:scale-98 transition-all">
             <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -1552,41 +1543,44 @@
 
     // 4. GOOGLE OAUTH
     const GOOGLE_CLIENT_ID = '121203388429-uos8ldhujrkhr8r4bo9o0fpkkltf4aoi.apps.googleusercontent.com';
+    let googleOAuthInitialized = false;
+    let googleOAuthRetryTimer = null;
 
     function initGoogleOAuth() {
-      if (window.google && google.accounts && google.accounts.id) {
+      if (!window.google || !google.accounts || !google.accounts.id) {
+        clearTimeout(googleOAuthRetryTimer);
+        googleOAuthRetryTimer = setTimeout(initGoogleOAuth, 500);
+        return;
+      }
+
+      if (!googleOAuthInitialized) {
         google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
           callback: handleCredentialResponse,
           auto_select: false,
           cancel_on_tap_outside: false
         });
+        googleOAuthInitialized = true;
+      }
 
-        const btnContainer = document.getElementById('google-official-btn');
-        if (btnContainer) {
-          btnContainer.innerHTML = '';
-          google.accounts.id.renderButton(
-            btnContainer,
-            {
-              theme: 'outline',
-              size: 'large',
-              text: 'signin_with',
-              shape: 'pill',
-              logo_alignment: 'left',
-              width: 280
-            }
-          );
-        }
-
-        if (!appState.currentUser) {
-          google.accounts.id.prompt();
-        }
+      const btnContainer = document.getElementById('google-official-btn');
+      if (btnContainer && btnContainer.dataset.googleRendered !== 'true') {
+        btnContainer.innerHTML = '';
+        google.accounts.id.renderButton(btnContainer, {
+          theme: 'outline',
+          size: 'large',
+          text: 'signin_with',
+          shape: 'pill',
+          logo_alignment: 'left',
+          width: 280
+        });
+        btnContainer.dataset.googleRendered = 'true';
       }
     }
 
     function triggerRealGoogleLogin() {
       if (window.google && google.accounts && google.accounts.id) {
-        google.accounts.id.prompt();
+        initGoogleOAuth();
       } else {
         alert('กำลังเชื่อมต่อระบบความปลอดภัย Google Accounts กรุณาลองใหม่อีกครั้ง');
       }
