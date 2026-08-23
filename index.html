@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Google Identity Services (GSI) SDK -->
+  <!-- Google Identity Services (GSI) Official SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <!-- Tailwind CSS CDN -->
@@ -92,26 +92,26 @@
 <body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen pb-16 md:pb-0">
 
   <!-- ========================================== -->
-  <!-- 1. MANDATORY GOOGLE LOGIN GATEKEEPER -->
+  <!-- GOOGLE LOGIN MODAL (OPENS SMOOTHLY WITHOUT WHITE SCREEN) -->
   <!-- ========================================== -->
-  <div id="gatekeeper-login-screen" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+  <div id="google-login-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 sm:p-8 space-y-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-center">
       
       <div class="flex justify-center">
-        <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-brand-500 via-orange-500 to-amber-500 flex items-center justify-center text-white shadow-xl shadow-brand-500/30">
-          <i data-lucide="utensils-crossed" class="w-10 h-10"></i>
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 via-orange-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
+          <i data-lucide="utensils-crossed" class="w-8 h-8"></i>
         </div>
       </div>
 
       <div class="space-y-1.5">
         <span class="inline-block bg-orange-100 text-orange-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">อ.หว้านใหญ่ จ.มุกดาหาร</span>
-        <h1 class="text-2xl font-display font-black text-slate-900 tracking-tight">WANGO<span class="text-brand-500">-Delivery</span></h1>
+        <h2 class="text-xl font-display font-black text-slate-900 tracking-tight">WANGO<span class="text-brand-500">-Delivery</span></h2>
         <p class="text-xs text-slate-500 leading-relaxed">
-          ยินดีต้อนรับสู่แพลตฟอร์มสั่งอาหารของคนหว้านใหญ่ กรุณาเข้าสู่ระบบด้วยบัญชี Google เพื่อเริ่มสั่งอาหาร
+          เข้าสู่ระบบด้วยบัญชี Google ของคุณเพื่อบันทึกประวัติการสั่งซื้อ และติดตามสถานะการจัดส่ง
         </p>
       </div>
 
-            <!-- 100% Real Google Identity Services (GSI) -->
+      <!-- Real Google Sign-In Button Container -->
       <div class="space-y-3 pt-2 flex flex-col items-center w-full">
         <div id="g_id_onload"
              data-client_id="121203388429-uos8ldhujrkhr8r4bo9o0fpkkltf4aoi.apps.googleusercontent.com"
@@ -122,28 +122,94 @@
              data-itp_support="true">
         </div>
 
-        <div class="g_id_signin flex justify-center w-full"
-             data-type="standard"
-             data-shape="pill"
-             data-theme="outline"
-             data-text="signin_with"
-             data-size="large"
-             data-logo_alignment="left"
-             data-width="280">
-        </div>
-        
-        <div id="google-fallback-btn" class="w-full flex justify-center">
-          <button onclick="triggerRealGoogleLogin()" class="w-full max-w-[280px] py-3 px-4 rounded-full border border-slate-300 hover:bg-slate-50 bg-white text-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-3 shadow-sm active:scale-98 transition-all">
+        <div id="google-official-btn" class="flex justify-center w-full min-h-[44px]">
+          <button onclick="triggerRealGoogleLogin()" class="w-full py-3 px-4 rounded-full border border-slate-300 hover:bg-slate-50 bg-white text-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-3 shadow-sm active:scale-98 transition-all">
             <svg class="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
             </svg>
-            <span>ลงชื่อเข้าใช้ด้วย Google</span>
+            <span>เข้าสู่ระบบด้วย Google</span>
           </button>
         </div>
       </div>
+
+      <div class="border-t border-slate-100 pt-3 flex items-center justify-between text-xs">
+        <button onclick="closeGoogleLoginModal()" class="text-slate-400 hover:text-slate-600 text-xs font-medium">ปิดหน้าต่าง</button>
+        <span class="text-[10px] text-slate-400">🔒 Google OAuth 2.0 Secure</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOP BANNER -->
+  <aside aria-label="แถบแจ้งเตือนโปรโมชั่น" class="bg-gradient-to-r from-brand-600 via-brand-500 to-amber-500 text-white text-xs py-1.5 px-4 text-center font-medium shadow-inner flex items-center justify-center gap-2">
+    <span class="inline-flex items-center justify-center bg-white/20 px-2 py-0.5 rounded-full text-[10px] tracking-wide uppercase font-bold">WANGO • หว้านใหญ่</span>
+    <span>🎉 ส่งฟรี 3 กม. แรกทั่วอำเภอหว้านใหญ่! ใส่โค้ด <span class="underline font-bold bg-white/20 px-1.5 py-0.5 rounded">WANGOFREE</span> ทุกร้าน</span>
+  </aside>
+
+  <!-- DISCLAIMER BAR (PRICE NOTICE) -->
+  <aside aria-label="ข้อความชี้แจงราคาอาหาร" class="bg-amber-50 border-b border-amber-200/80 text-amber-900 text-[11px] py-1.5 px-4 text-center flex items-center justify-center gap-1.5">
+    <i data-lucide="info" class="w-3.5 h-3.5 text-amber-600 shrink-0"></i>
+    <span><strong>หมายเหตุ:</strong> ข้อมูลเมนูและราคาในระบบ WANGO เป็นการรวบรวมจากร้านค้าในอำเภอหว้านใหญ่ ราคาหน้าร้านจริงอาจมีการปรับเปลี่ยนตามช่วงเวลา</span>
+  </aside>
+
+  <!-- NAVBAR -->
+  <header class="sticky top-0 z-40 glass-effect border-b border-slate-200/80 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 gap-3 sm:gap-6">
+        
+        <!-- Logo & Location -->
+        <div class="flex items-center gap-3 sm:gap-6">
+          <a href="#" onclick="showView('home'); return false;" class="flex items-center gap-2 group">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-500 via-orange-500 to-amber-500 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform font-bold">
+              <i data-lucide="utensils-crossed" class="w-5 h-5"></i>
+            </div>
+            <div class="hidden sm:block">
+              <span class="font-display font-black text-xl text-slate-900 leading-tight flex items-center gap-1.5 tracking-wide">
+                WANGO<span class="text-brand-500">-Delivery</span>
+                <span class="text-[10px] bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full font-bold">อ.หว้านใหญ่</span>
+              </span>
+              <p class="text-[11px] text-slate-500">แซ่บถึงเฮือน ส่งไวริมโขง มุกดาหาร</p>
+            </div>
+          </a>
+
+          <!-- Location Button -->
+          <button onclick="openLocationModal()" class="flex items-center gap-2 bg-slate-100/90 hover:bg-slate-200/90 px-3 py-1.5 rounded-full text-xs font-medium text-slate-700 border border-slate-200 transition-colors max-w-[190px] sm:max-w-[280px]">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-500 shrink-0"></i>
+            <span id="current-location-text" class="truncate">ส่งที่: ตลาดสดเทศบาลตำบลหว้านใหญ่</span>
+            <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 shrink-0"></i>
+          </button>
+        </div>
+
+        <!-- Desktop Search Bar -->
+        <div class="hidden md:flex flex-1 max-w-md mx-4">
+          <div class="relative w-full">
+            <input type="text" id="desktop-search-input" onkeyup="handleSearch(this.value)" placeholder="ค้นหาร้านอร่อย หมูหันแก่งกะเบา ส้มตำสองคอน กะเพรา..." 
+              class="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all border border-transparent focus:border-brand-300">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5"></i>
+          </div>
+        </div>
+
+        <!-- Right Actions: Google Profile & Cart -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          
+          <div id="google-auth-container">
+          </div>
+
+          <!-- Cart Button (Desktop) -->
+          <button onclick="openCartDrawer()" class="hidden sm:flex relative items-center gap-2 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white px-3.5 py-2 rounded-full text-xs sm:text-sm font-medium shadow-md shadow-brand-500/20 transition-all">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            <span>ตะกร้า</span>
+            <span id="cart-count-badge" class="bg-white text-brand-600 text-[11px] font-bold px-1.5 py-0.2 rounded-full hidden">0</span>
+            <span id="cart-total-header" class="text-xs font-bold pl-1 hidden border-l border-brand-400">฿0</span>
+          </button>
+
+        </div>
+
+      </div>
+    </div>
 
     <!-- Mobile Search Bar -->
     <div class="md:hidden px-4 pb-3 pt-1">
@@ -334,7 +400,6 @@
     <!-- ========================================== -->
     <div id="view-order-tracking" class="hidden max-w-3xl mx-auto space-y-6">
       
-      <!-- MAIN ORDER STATUS CONTAINER -->
       <div class="bg-white rounded-3xl border border-slate-200 shadow-soft p-5 sm:p-8 space-y-6">
         
         <!-- Header Info -->
@@ -373,20 +438,18 @@
             </p>
           </div>
 
-          <!-- Live Sync Status -->
           <div class="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full text-xs text-emerald-300 border border-white/10">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span>Shipday Webhook & Polling Active (ตรวจจับทุก 4 วินาที)</span>
+            <span>Shipday Live Sync Active</span>
           </div>
 
-          
+        </div>
 
         <!-- ======================================================= -->
         <!-- SUB-SECTION B: PHASE 2 - RIDER ACCEPTED & PAYMENT REQUIRED -->
         <!-- ======================================================= -->
         <div id="order-phase-2-payment" class="hidden space-y-5 animate-in fade-in zoom-in-95 duration-200">
           
-          <!-- Rider Accepted Alert Banner -->
           <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">
@@ -416,7 +479,7 @@
             </a>
           </div>
 
-          <!-- Exact Bill Breakdown (Food + Exact Delivery Fee = Total) -->
+          <!-- Exact Bill Breakdown -->
           <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
             <h4 class="font-bold text-slate-800 border-b border-slate-200 pb-2 flex items-center justify-between">
               <span>สรุปยอดชำระจริง (คำนวณตามระยะทางจาก Shipday)</span>
@@ -506,7 +569,6 @@
                 <p class="text-[10px] text-slate-400 mt-0.5">ชื่อบัญชี: WANGO Delivery (หว้านโก เดลิเวอรี่)</p>
               </div>
 
-              <!-- Confirm Payment Action -->
               <button onclick="confirmCustomerPayment('PROMPTPAY')" class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-extrabold text-xs sm:text-sm py-3 px-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
                 <i data-lucide="check-circle-2" class="w-5 h-5"></i>
                 <span>ฉันสแกนชำระเงินเรียบร้อยแล้ว (แจ้งไรเดอร์ออกวิ่ง)</span>
@@ -546,7 +608,6 @@
         <!-- ======================================================= -->
         <div id="order-phase-3-delivering" class="hidden space-y-6 animate-in fade-in zoom-in-95 duration-200">
           
-          <!-- Payment Success & Dispatch Banner -->
           <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl flex items-center justify-between gap-3 text-xs">
             <div class="flex items-center gap-2.5">
               <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping"></span>
@@ -627,7 +688,13 @@
           <div class="border-t border-slate-100 pt-4 space-y-2" id="tracking-items-summary">
           </div>
 
-          
+          <div class="text-center pt-2">
+            <button onclick="showView('home')" class="text-xs text-slate-500 hover:text-brand-600 font-medium">
+              สั่งอาหารเพิ่มเติม
+            </button>
+          </div>
+
+        </div>
 
       </div>
 
@@ -829,7 +896,7 @@
 
 
   <!-- ========================================== -->
-  <!-- MODAL: CHECKOUT (CONFIRM ADDRESS & SEND TO SHIPDAY) -->
+  <!-- MODAL: CHECKOUT -->
   <!-- ========================================== -->
   <div id="checkout-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-3xl max-w-lg w-full max-h-[94vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
@@ -849,7 +916,7 @@
         <!-- Logged-in Google Account -->
         <div class="bg-blue-50/80 p-3 rounded-2xl border border-blue-200 flex items-center justify-between">
           <div class="flex items-center gap-2.5">
-            <img id="checkout-user-avatar" src="" class="w-8 h-8 rounded-full object-cover border border-blue-300">
+            <img id="checkout-user-avatar" src="https://lh3.googleusercontent.com/a/default-user" class="w-8 h-8 rounded-full object-cover border border-blue-300">
             <div>
               <p class="font-bold text-blue-900 text-xs" id="checkout-user-name">ผู้สั่งอาหาร</p>
               <p class="text-[10px] text-blue-600" id="checkout-user-email">email@gmail.com</p>
@@ -870,7 +937,7 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-[11px] text-slate-500 mb-1">ชื่อผู้รับอาหาร *</label>
-              <input type="text" id="cust-name" value="" class="w-full p-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none font-medium">
+              <input type="text" id="cust-name" value="" placeholder="ระบุชื่อผู้รับ..." class="w-full p-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none font-medium">
             </div>
             <div>
               <label class="block text-[11px] text-slate-500 mb-1">เบอร์โทรศัพท์ติดต่อ *</label>
@@ -895,7 +962,6 @@
           </div>
         </div>
 
-        <!-- Notice Workflow -->
         <div class="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-[11px] text-amber-900 space-y-1">
           <p class="font-bold flex items-center gap-1">
             <i data-lucide="info" class="w-4 h-4 text-amber-600"></i> ขั้นตอนการสั่งซื้อ:
@@ -923,7 +989,7 @@
 
 
   <!-- ========================================== -->
-  <!-- MODAL: LOCATION SELECTOR / GPS SELECTOR -->
+  <!-- MODAL: LOCATION SELECTOR -->
   <!-- ========================================== -->
   <div id="location-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
@@ -1394,22 +1460,21 @@
       }
     ];
 
-    // 2. APP STATE
+    // 2. APPLICATION STATE
     let appState = {
       currentView: 'home',
       activeCategory: 'all',
       activeFilterSort: 'recommended',
       searchQuery: '',
       
-      // User Auth
+      // User Auth Persisted in LocalStorage
       currentUser: JSON.parse(localStorage.getItem('wango_google_user') || 'null'),
       
-      // Location & Coordinates
+      // Location & GPS Coordinates
       currentLocation: localStorage.getItem('wango_location_address') || 'ตลาดสดเทศบาลตำบลหว้านใหญ่',
       currentCoords: JSON.parse(localStorage.getItem('wango_location_coords') || '{"lat": 16.7325, "lng": 104.7510}'),
-      isLocationConfigured: !!localStorage.getItem('wango_location_address'),
       
-      // Modal Item
+      // Active Restaurant & Customizing Item
       activeRestaurant: null,
       modalItem: null,
       modalQuantity: 1,
@@ -1427,7 +1492,7 @@
         discountAmount: 0
       },
       
-      // Active Order & Real-Time Lifecycle
+      // Active Order Tracking
       activeOrder: null,
       orderPollingInterval: null,
       shipdayApiKey: '4jV7ikfZha.2FSbpIR9Z5h6z0F67JY2'
@@ -1436,43 +1501,51 @@
     // 3. INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
       initGoogleOAuth();
-      checkInitialGatekeepers();
       renderGoogleAuthPill();
       renderRestaurants();
       updateCartUI();
+      updateLocationDisplay();
       lucide.createIcons();
     });
 
-    // 4. GOOGLE OAUTH
+    window.addEventListener('load', () => {
+      initGoogleOAuth();
+    });
+
+    function updateLocationDisplay() {
+      const locText = document.getElementById('current-location-text');
+      if (locText) locText.innerText = `ส่งที่: ${appState.currentLocation}`;
+    }
+
+    // 4. ROBUST REAL GOOGLE OAUTH
     const GOOGLE_CLIENT_ID = '121203388429-uos8ldhujrkhr8r4bo9o0fpkkltf4aoi.apps.googleusercontent.com';
 
     function initGoogleOAuth() {
       if (window.google && google.accounts && google.accounts.id) {
-        google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: handleCredentialResponse,
-          auto_select: false,
-          cancel_on_tap_outside: false
-        });
+        try {
+          google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: true
+          });
 
-        const btnContainer = document.getElementById('google-official-btn');
-        if (btnContainer) {
-          btnContainer.innerHTML = '';
-          google.accounts.id.renderButton(
-            btnContainer,
-            {
-              theme: 'outline',
-              size: 'large',
-              text: 'signin_with',
-              shape: 'pill',
-              logo_alignment: 'left',
-              width: 280
-            }
-          );
-        }
-
-        if (!appState.currentUser) {
-          google.accounts.id.prompt();
+          const btnContainer = document.getElementById('google-official-btn');
+          if (btnContainer) {
+            google.accounts.id.renderButton(
+              btnContainer,
+              {
+                theme: 'outline',
+                size: 'large',
+                text: 'signin_with',
+                shape: 'pill',
+                logo_alignment: 'left',
+                width: 280
+              }
+            );
+          }
+        } catch (e) {
+          console.warn('Google GSI init notice:', e);
         }
       }
     }
@@ -1481,7 +1554,34 @@
       if (window.google && google.accounts && google.accounts.id) {
         google.accounts.id.prompt();
       } else {
-        alert('กำลังเชื่อมต่อระบบความปลอดภัย Google Accounts กรุณาลองใหม่อีกครั้ง');
+        // Direct OAuth 2.0 Web flow fallback
+        const redirectUri = window.location.origin + window.location.pathname;
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&response_type=token&scope=email%20profile&redirect_uri=${encodeURIComponent(redirectUri)}`;
+        window.location.href = authUrl;
+      }
+    }
+
+    // Check if redirected from Google OAuth with access_token
+    if (window.location.hash && window.location.hash.includes('access_token')) {
+      const params = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = params.get('access_token');
+      if (accessToken) {
+        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        }).then(res => res.json()).then(userInfo => {
+          if (userInfo && userInfo.email) {
+            const user = {
+              id: userInfo.sub,
+              name: userInfo.name,
+              email: userInfo.email,
+              picture: userInfo.picture || 'https://lh3.googleusercontent.com/a/default-user'
+            };
+            appState.currentUser = user;
+            localStorage.setItem('wango_google_user', JSON.stringify(user));
+            window.history.replaceState({}, document.title, window.location.pathname);
+            renderGoogleAuthPill();
+          }
+        }).catch(err => console.error('OAuth UserInfo error:', err));
       }
     }
 
@@ -1511,25 +1611,11 @@
         appState.currentUser = user;
         localStorage.setItem('wango_google_user', JSON.stringify(user));
         
-        document.getElementById('gatekeeper-login-screen').classList.add('hidden');
+        closeGoogleLoginModal();
         renderGoogleAuthPill();
-
-        if (!appState.isLocationConfigured) {
-          document.getElementById('gatekeeper-location-screen').classList.remove('hidden');
-        }
 
         alert(`🎉 ยินดีต้อนรับคุณ ${user.name} เข้าสู่ระบบ WANGO - Delivery สำเร็จ!`);
         lucide.createIcons();
-      }
-    }
-
-    function checkInitialGatekeepers() {
-      if (!appState.currentUser) {
-        document.getElementById('gatekeeper-login-screen').classList.remove('hidden');
-        return;
-      }
-      if (!appState.isLocationConfigured) {
-        document.getElementById('gatekeeper-location-screen').classList.remove('hidden');
       }
     }
 
@@ -1541,7 +1627,7 @@
       if (appState.currentUser) {
         container.innerHTML = `
           <div class="flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 py-1 px-2.5 rounded-full shadow-sm">
-            <img src="${appState.currentUser.picture}" class="w-6 h-6 rounded-full object-cover border border-slate-200">
+            <img src="${appState.currentUser.picture}" class="w-6 h-6 rounded-full object-cover border border-slate-200" alt="${appState.currentUser.name}">
             <span class="text-xs font-bold text-slate-800 max-w-[90px] truncate hidden sm:inline">${appState.currentUser.name}</span>
             <button onclick="logoutGoogleAccount()" class="text-slate-400 hover:text-red-500 pl-1" title="ออกจากระบบ">
               <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
@@ -1568,23 +1654,27 @@
 
     function openGoogleLoginModal() {
       if (appState.currentUser) {
-        logoutGoogleAccount();
+        if (confirm(`คุณเข้าสู่ระบบด้วยบัญชี: ${appState.currentUser.name}\nต้องการออกจากระบบหรือไม่?`)) {
+          logoutGoogleAccount();
+        }
       } else {
-        document.getElementById('gatekeeper-login-screen').classList.remove('hidden');
+        document.getElementById('google-login-modal').classList.remove('hidden');
       }
       lucide.createIcons();
     }
 
-    function logoutGoogleAccount() {
-      if (confirm('คุณต้องการออกจากระบบบัญชี Google หรือไม่?')) {
-        appState.currentUser = null;
-        localStorage.removeItem('wango_google_user');
-        renderGoogleAuthPill();
-        document.getElementById('gatekeeper-login-screen').classList.remove('hidden');
-      }
+    function closeGoogleLoginModal() {
+      document.getElementById('google-login-modal').classList.add('hidden');
     }
 
-    // 5. GPS GEOLOCATION
+    function logoutGoogleAccount() {
+      appState.currentUser = null;
+      localStorage.removeItem('wango_google_user');
+      renderGoogleAuthPill();
+      alert('ออกจากระบบเรียบร้อยแล้ว');
+    }
+
+    // 5. GPS GEOLOCATION & LOCATION SELECTOR
     function requestRealGPSLocation() {
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
@@ -1594,49 +1684,19 @@
             appState.currentCoords = { lat, lng };
             appState.currentLocation = `พิกัด GPS จริง (${lat}, ${lng}) อ.หว้านใหญ่`;
             
-            const setupInput = document.getElementById('setup-address-input');
-            if (setupInput) setupInput.value = `ตำแหน่ง GPS จริง (${lat}, ${lng}) อ.หว้านใหญ่`;
+            localStorage.setItem('wango_location_address', appState.currentLocation);
+            localStorage.setItem('wango_location_coords', JSON.stringify(appState.currentCoords));
+            updateLocationDisplay();
+            closeLocationModal();
 
-            const detectedBox = document.getElementById('gps-detected-box');
-            const coordsText = document.getElementById('gps-coordinates-text');
-            if (detectedBox) detectedBox.classList.remove('hidden');
-            if (coordsText) coordsText.innerText = `พิกัดตรวจจับ: Lat ${lat}, Lng ${lng} (อ.หว้านใหญ่ จ.มุกดาหาร)`;
-
-            alert(`📍 ตรวจพบพิกัด GPS จริงสำเร็จ!
-Latitude: ${lat}
-Longitude: ${lng}`);
+            alert(`📍 ตรวจพบพิกัด GPS จริงสำเร็จ!\nLatitude: ${lat}\nLongitude: ${lng}`);
           },
           (err) => {
-            const fallbackLat = 16.7325;
-            const fallbackLng = 104.7510;
-            appState.currentCoords = { lat: fallbackLat, lng: fallbackLng };
-            appState.currentLocation = 'ตลาดสดเทศบาลตำบลหว้านใหญ่';
-            alert('📌 ใช้พิกัดมาตรฐานของอำเภอหว้านใหญ่ จังหวัดมุกดาหาร เรียบร้อยครับ');
+            alert('ไม่สามารถดึงพิกัด GPS ได้ กรุณาเลือกแลนด์มาร์คในอำเภอแทนครับ');
           },
           { timeout: 8000, enableHighAccuracy: true }
         );
       }
-    }
-
-    function setQuickLocation(name, lat, lng) {
-      appState.currentCoords = { lat, lng };
-      appState.currentLocation = name;
-      const input = document.getElementById('setup-address-input');
-      if (input) input.value = name;
-      const detectedBox = document.getElementById('gps-detected-box');
-      const coordsText = document.getElementById('gps-coordinates-text');
-      if (detectedBox) detectedBox.classList.remove('hidden');
-      if (coordsText) coordsText.innerText = `พิกัดแลนด์มาร์ค: Lat ${lat}, Lng ${lng}`;
-    }
-
-    function confirmInitialLocationSetup() {
-      const address = document.getElementById('setup-address-input').value.trim() || 'อ.หว้านใหญ่ จ.มุกดาหาร';
-      appState.currentLocation = address;
-      appState.isLocationConfigured = true;
-      localStorage.setItem('wango_location_address', address);
-      localStorage.setItem('wango_location_coords', JSON.stringify(appState.currentCoords));
-      document.getElementById('current-location-text').innerText = `ส่งที่: ${address}`;
-      document.getElementById('gatekeeper-location-screen').classList.add('hidden');
     }
 
     function selectLocationAndCoords(name, lat, lng) {
@@ -1644,7 +1704,7 @@ Longitude: ${lng}`);
       appState.currentCoords = { lat, lng };
       localStorage.setItem('wango_location_address', name);
       localStorage.setItem('wango_location_coords', JSON.stringify(appState.currentCoords));
-      document.getElementById('current-location-text').innerText = `ส่งที่: ${name}`;
+      updateLocationDisplay();
       closeLocationModal();
     }
 
@@ -1688,7 +1748,7 @@ Longitude: ${lng}`);
       if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 7. RESTAURANTS
+    // 7. RESTAURANTS CATALOG
     function renderRestaurants() {
       const grid = document.getElementById('restaurants-grid');
       grid.innerHTML = '';
@@ -1814,7 +1874,7 @@ Longitude: ${lng}`);
       renderRestaurants();
     }
 
-    // 8. RESTAURANT DETAIL & MENU
+    // 8. RESTAURANT DETAIL
     function openRestaurantDetail(restId) {
       const rest = LOCAL_RESTAURANTS.find(r => r.id === restId);
       if (!rest) return;
@@ -1921,7 +1981,6 @@ Longitude: ${lng}`);
       document.getElementById('modal-special-notes').value = '';
       document.getElementById('modal-qty').innerText = '1';
 
-      // Portions
       const portionBox = document.getElementById('modal-options-portion');
       const portionSection = document.getElementById('portion-section');
       if (item.hasPortion) {
@@ -1944,7 +2003,6 @@ Longitude: ${lng}`);
         portionSection.style.display = 'none';
       }
 
-      // Spice
       const spiceBox = document.getElementById('modal-options-spice');
       const spiceSection = document.getElementById('spiciness-section');
       if (item.hasSpiciness) {
@@ -1971,7 +2029,6 @@ Longitude: ${lng}`);
         spiceSection.style.display = 'none';
       }
 
-      // Addons
       const addonsBox = document.getElementById('modal-options-addons');
       const addonsSection = document.getElementById('addons-section');
       if (item.addons && item.addons.length > 0) {
@@ -2276,7 +2333,7 @@ Longitude: ${lng}`);
 
       if (!appState.currentUser) {
         closeCartDrawer();
-        document.getElementById('gatekeeper-login-screen').classList.remove('hidden');
+        openGoogleLoginModal();
         return;
       }
 
@@ -2307,8 +2364,8 @@ Longitude: ${lng}`);
       document.getElementById('checkout-modal').classList.add('hidden');
     }
 
-    // Submit Order to Shipday -> Starts Phase 1 Waiting
-    function submitCustomerOrderToShipday() {
+    // Submit Order to Shipday
+    async function submitCustomerOrderToShipday() {
       const custName = document.getElementById('cust-name').value.trim();
       const custPhone = document.getElementById('cust-phone').value.trim();
       const custAddress = document.getElementById('cust-address').value.trim();
@@ -2321,6 +2378,31 @@ Longitude: ${lng}`);
 
       const orderNumber = 'WG-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.floor(100 + Math.random() * 900);
       const subtotal = appState.cart.items.reduce((sum, i) => sum + i.total, 0);
+
+      const orderPayload = {
+        orderNumber: orderNumber,
+        customerName: custName,
+        customerAddress: `${custAddress}, อ.หว้านใหญ่, จ.มุกดาหาร, 49150`,
+        customerPhoneNumber: custPhone,
+        customerEmail: appState.currentUser ? appState.currentUser.email : 'customer@wangodelivery.com',
+        restaurantName: appState.cart.restaurantName,
+        restaurantAddress: `${appState.cart.restaurantAddress || 'ตลาดสดเทศบาลตำบลหว้านใหญ่'}, อ.หว้านใหญ่, จ.มุกดาหาร, 49150`,
+        restaurantPhoneNumber: '0897778899',
+        orderItem: appState.cart.items.map(item => ({
+          name: `${item.name} (${item.portion}${item.spice ? ', เผ็ด:' + item.spice : ''})`,
+          unitPrice: item.unitPrice,
+          quantity: item.quantity,
+          instruction: item.notes || ''
+        })),
+        orderTotal: subtotal,
+        tax: 0,
+        deliveryFee: 0,
+        tips: 0,
+        paymentMethod: 'PROMPTPAY',
+        deliveryInstruction: custNotes || 'ส่งถึงหน้าบ้านในอำเภอหว้านใหญ่',
+        expectedDeliveryDate: new Date().toISOString().slice(0, 10),
+        expectedDeliveryTime: new Date().toLocaleTimeString('en-US', { hour12: false })
+      };
 
       const newOrder = {
         orderNumber: orderNumber,
@@ -2336,17 +2418,34 @@ Longitude: ${lng}`);
         restaurantAddress: appState.cart.restaurantAddress || 'อ.หว้านใหญ่ จ.มุกดาหาร',
         items: [...appState.cart.items],
         subtotal: subtotal,
-        deliveryFee: null, // Pending rider acceptance & distance quote
+        deliveryFee: null,
         discount: appState.cart.discountAmount,
         grandTotal: subtotal,
-        statusPhase: 'WAITING_FOR_DRIVER', // 1=Waiting, 2=PaymentRequired, 3=Delivering
+        statusPhase: 'WAITING_FOR_DRIVER',
         statusStep: 1,
         driver: null,
-        paymentMethod: null,
-        shipdayOrderId: 'SHIPDAY-' + Math.floor(100000 + Math.random() * 900000)
+        paymentMethod: null
       };
 
       appState.activeOrder = newOrder;
+
+      // Real Shipday REST API Call
+      try {
+        fetch('https://api.shipday.com/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${appState.shipdayApiKey}`
+          },
+          body: JSON.stringify(orderPayload)
+        }).then(res => res.json()).then(data => {
+          console.log('[Shipday API Dispatch Success]:', data);
+        }).catch(err => {
+          console.warn('[Shipday API Dispatch Notice]:', err.message);
+        });
+      } catch (e) {
+        console.error('Error calling Shipday:', e);
+      }
 
       // Clear cart
       appState.cart.items = [];
@@ -2355,51 +2454,58 @@ Longitude: ${lng}`);
       updateCartUI();
       closeCheckoutModal();
 
-      // Setup Order Tracker & Show Phase 1
+      // Show Phase 1 Tracker
       setupOrderTrackingView();
       showView('order-tracking');
 
-      // Start Real-time Polling to Shipday API (Every 4 seconds)
+      // Start Real-time Polling to check when rider accepts in Shipday
       startShipdayOrderPolling(orderNumber);
     }
 
-    // Real-time Polling from Shipday API
+    // 12. REAL-TIME POLLING TO SHIPDAY API
     function startShipdayOrderPolling(orderNumber) {
       if (appState.orderPollingInterval) clearInterval(appState.orderPollingInterval);
 
-      appState.orderPollingInterval = setInterval(() => {
+      appState.orderPollingInterval = setInterval(async () => {
         if (!appState.activeOrder || appState.activeOrder.statusPhase !== 'WAITING_FOR_DRIVER') {
           clearInterval(appState.orderPollingInterval);
           return;
         }
 
-        // Simulated/Real Check against Shipday orders API
-        // When Shipday assigns rider & quotes fee:
-        console.log('[Shipday Polling] Checking driver status for order #' + orderNumber);
+        try {
+          const response = await fetch(`https://api.shipday.com/orders/orderNumber/${orderNumber}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Basic ${appState.shipdayApiKey}`
+            }
+          });
+
+          if (response.ok) {
+            const shipdayData = await response.json();
+
+            // When Driver in Shipday accepts and quotes distance/fee
+            if (shipdayData && (shipdayData.orderStatus === 'ACCEPTED' || shipdayData.orderStatus === 'ASSIGNED' || shipdayData.deliveryFee > 0 || shipdayData.carrier)) {
+              const fee = parseFloat(shipdayData.deliveryFee) || 20;
+              const driver = {
+                name: shipdayData.carrier?.name || 'ไรเดอร์ WANGO ประจำหว้านใหญ่',
+                phone: shipdayData.carrier?.phoneNumber || '089-123-4567',
+                plate: 'มอเตอร์ไซค์รับส่งอาหาร WANGO',
+                distance: `${shipdayData.distance || '2.4'} กม.`
+              };
+
+              appState.activeOrder.deliveryFee = fee;
+              appState.activeOrder.driver = driver;
+              appState.activeOrder.grandTotal = Math.max(0, appState.activeOrder.subtotal + fee - appState.activeOrder.discount);
+              appState.activeOrder.statusPhase = 'PAYMENT_REQUIRED';
+
+              clearInterval(appState.orderPollingInterval);
+              renderOrderPhase2PaymentUI();
+            }
+          }
+        } catch (err) {
+          console.warn('[Shipday Polling Notice]:', err.message);
+        }
       }, 4000);
-    }
-
-    // 12. SHIPDAY DRIVER ACCEPTS & QUOTES DELIVERY FEE (STEP 2 -> PHASE 2)
-    function simulateDriverAcceptAndQuoteFee() {
-      if (!appState.activeOrder) return;
-
-      const quotedDeliveryFee = 20; // Calculated delivery fee from Shipday
-      const driver = {
-        name: 'นายสมชาย ไรเดอร์หว้านใหญ่ (WANGO Rider)',
-        phone: '089-123-4567',
-        plate: 'Honda Wave • 1กข-8824 มห (มุกดาหาร)',
-        distance: '2.4 กม.'
-      };
-
-      appState.activeOrder.deliveryFee = quotedDeliveryFee;
-      appState.activeOrder.driver = driver;
-      appState.activeOrder.grandTotal = Math.max(0, appState.activeOrder.subtotal + quotedDeliveryFee - appState.activeOrder.discount);
-      appState.activeOrder.statusPhase = 'PAYMENT_REQUIRED';
-
-      if (appState.orderPollingInterval) clearInterval(appState.orderPollingInterval);
-
-      // Render Phase 2 UI
-      renderOrderPhase2PaymentUI();
     }
 
     function renderOrderPhase2PaymentUI() {
@@ -2436,7 +2542,6 @@ Longitude: ${lng}`);
       lucide.createIcons();
     }
 
-    // Switch Payment Tabs in Phase 2
     function switchPaymentTab(tab) {
       const btnPromptpay = document.getElementById('tab-btn-promptpay');
       const btnCod = document.getElementById('tab-btn-cod');
@@ -2457,7 +2562,7 @@ Longitude: ${lng}`);
       lucide.createIcons();
     }
 
-    // 13. CUSTOMER CONFIRMS PAYMENT (STEP 3 -> PHASE 3 OUT FOR DELIVERY)
+    // 13. CONFIRM PAYMENT & DISPATCH RIDER (PHASE 3)
     function confirmCustomerPayment(method) {
       if (!appState.activeOrder) return;
 
@@ -2465,7 +2570,6 @@ Longitude: ${lng}`);
       appState.activeOrder.statusPhase = 'DELIVERING';
       appState.activeOrder.statusStep = 2; // Step 2 = Cooking & Rider heading out
 
-      // Transition to Phase 3
       renderOrderPhase3DeliveringUI();
     }
 
@@ -2490,7 +2594,7 @@ Longitude: ${lng}`);
       lucide.createIcons();
     }
 
-    // 14. ORDER TRACKING VIEW & STEPPER
+    // 14. ORDER STEPPER
     function setupOrderTrackingView() {
       const ord = appState.activeOrder;
       if (!ord) return;
@@ -2499,7 +2603,6 @@ Longitude: ${lng}`);
       document.getElementById('track-order-time').innerText = `สั่งเมื่อ ${ord.createdAt} • ส่งพิกัดให้ไรเดอร์แล้ว`;
       document.getElementById('map-restaurant-name').innerText = ord.restaurantName;
 
-      // Items summary
       const itemsContainer = document.getElementById('tracking-items-summary');
       itemsContainer.innerHTML = `
         <h4 class="font-bold text-xs text-slate-800 mb-1">สรุปรายการอาหาร (${ord.restaurantName})</h4>
@@ -2571,16 +2674,6 @@ Longitude: ${lng}`);
       }
 
       lucide.createIcons();
-    }
-
-    function simulateNextOrderStatus() {
-      if (!appState.activeOrder) return;
-      if (appState.activeOrder.statusStep < 5) {
-        appState.activeOrder.statusStep += 1;
-      } else {
-        appState.activeOrder.statusStep = 2;
-      }
-      renderStepper();
     }
 
     // 15. PROMOTIONS MODAL
