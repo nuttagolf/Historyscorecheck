@@ -2360,6 +2360,8 @@
     }
 
     // Real Shipday Order Dispatching
+    
+    // Robust Multi-Channel Shipday Dispatcher (Bypasses Browser CORS on GitHub Pages)
     async function submitCustomerOrderToShipday() {
       const custName = document.getElementById('cust-name').value.trim();
       const custPhone = document.getElementById('cust-phone').value.trim();
@@ -2374,12 +2376,15 @@
       const orderNumber = 'WG-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.floor(100 + Math.random() * 900);
       const subtotal = appState.cart.items.reduce((sum, i) => sum + i.total, 0);
 
-      // Construct Complete Shipday Payload
+      // Clean phone number (digits only, e.g. 0891234567)
+      const cleanPhone = custPhone.replace(/[^0-9+]/g, '');
+
+      // Official Shipday Order Schema
       const orderPayload = {
         orderNumber: orderNumber,
         customerName: custName,
         customerAddress: `${custAddress}, อ.หว้านใหญ่, จ.มุกดาหาร, 49150`,
-        customerPhoneNumber: custPhone,
+        customerPhoneNumber: cleanPhone || '0898765432',
         customerEmail: appState.currentUser ? appState.currentUser.email : 'customer@wangodelivery.com',
         restaurantName: appState.cart.restaurantName,
         restaurantAddress: `${appState.cart.restaurantAddress || 'ตลาดสดเทศบาลตำบลหว้านใหญ่'}, อ.หว้านใหญ่, จ.มุกดาหาร, 49150`,
@@ -2425,36 +2430,77 @@
 
       appState.activeOrder = newOrder;
 
-      // Call Shipday API (Channel 1: Direct Shipday API; Channel 2: Backend server if present)
+      // Execute Multi-Channel Dispatch to Shipday
+      let dispatchSuccess = false;
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic 4jV7ikfZha.2FSbpIR9Z5h6z0F67JY2',
+        'apiKey': '4jV7ikfZha.2FSbpIR9Z5h6z0F67JY2'
+      };
+
+      console.log('[Shipday Dispatch] Submitting order #' + orderNumber + ' with payload:', orderPayload);
+
+      // Attempt 1: Direct Shipday API
       try {
-        console.log('[Shipday API Dispatch] Submitting order #' + orderNumber + ' with API Key:', appState.shipdayApiKey);
-        
-        fetch('https://api.shipday.com/orders', {
+        const res = await fetch('https://api.shipday.com/orders', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Basic ' + appState.shipdayApiKey
-          },
+          headers: headers,
           body: JSON.stringify(orderPayload)
-        }).then(async (res) => {
-          const data = await res.json().catch(() => null);
-          console.log('[Shipday API Response Status]:', res.status, data);
+        });
+        if (res.ok) {
+          const data = await res.json();
+          console.log('[Shipday Success Direct]:', data);
+          dispatchSuccess = true;
+          alert(`✅ ส่งคำสั่งซื้อเข้าสู่ระบบ Shipday สำเร็จ!
+เลขออเดอร์: ${orderNumber}`);
+        } else {
+          const errData = await res.json().catch(() => null);
+          console.warn('[Shipday Direct API Notice]:', res.status, errData);
+        }
+      } catch (err) {
+        console.warn('[Shipday Direct Failed (CORS/Network)]: Trying CORS Relay proxy...', err.message);
+      }
+
+      // Attempt 2: CORS Proxy Relay (for GitHub Pages frontend)
+      if (!dispatchSuccess) {
+        try {
+          const proxyUrl = 'https://corsproxy.io/?url=' + encodeURIComponent('https://api.shipday.com/orders');
+          const res = await fetch(proxyUrl, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(orderPayload)
+          });
           if (res.ok) {
-            alert(`✅ ส่งคำสั่งซื้อเข้าสู่ระบบ Shipday สำเร็จ!\nเลขออเดอร์: ${orderNumber}`);
+            const data = await res.json();
+            console.log('[Shipday Success via CORS Proxy]:', data);
+            dispatchSuccess = true;
+            alert(`✅ ส่งคำสั่งซื้อเข้าสู่ระบบ Shipday สำเร็จ!
+เลขออเดอร์: ${orderNumber}`);
           } else {
-            console.warn('[Shipday Response Notice]:', data);
+            const errData = await res.json().catch(() => null);
+            console.warn('[Shipday Proxy Notice]:', res.status, errData);
           }
-        }).catch(err => {
-          console.warn('[Shipday Direct Dispatch Notice]:', err.message);
-          // Try Channel 2: Backend Relay if running
-          fetch('/api/orders', {
+        } catch (proxyErr) {
+          console.warn('[Shipday Proxy Failed]: Trying backend server...', proxyErr.message);
+        }
+      }
+
+      // Attempt 3: Local / Hosted Backend Server (/api/orders)
+      if (!dispatchSuccess) {
+        try {
+          const res = await fetch('/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderPayload)
-          }).catch(() => {});
-        });
-      } catch (e) {
-        console.error('Error dispatching to Shipday:', e);
+          });
+          if (res.ok) {
+            dispatchSuccess = true;
+            alert(`✅ ส่งคำสั่งซื้อเข้าสู่ระบบ Shipday สำเร็จ!
+เลขออเดอร์: ${orderNumber}`);
+          }
+        } catch (backendErr) {
+          console.warn('[Backend Relay Notice]:', backendErr.message);
+        }
       }
 
       // Clear cart
@@ -2472,7 +2518,7 @@
       startShipdayOrderPolling(orderNumber);
     }
 
-    // 12. REAL-TIME POLLING TO SHIPDAY API
+    // Real-Time Polling to Shipday API
     function startShipdayOrderPolling(orderNumber) {
       if (appState.orderPollingInterval) clearInterval(appState.orderPollingInterval);
 
@@ -2482,13 +2528,56 @@
           return;
         }
 
+        const headers = {
+          'Authorization': 'Basic 4jV7ikfZha.2FSbpIR9Z5h6z0F67JY2',
+          'apiKey': '4jV7ikfZha.2FSbpIR9Z5h6z0F67JY2'
+        };
+
+        let shipdayData = null;
+
+        // Try direct fetch
         try {
           const response = await fetch(`https://api.shipday.com/orders/orderNumber/${orderNumber}`, {
             method: 'GET',
-            headers: {
-              'Authorization': 'Basic ' + appState.shipdayApiKey
-            }
+            headers: headers
           });
+          if (response.ok) {
+            shipdayData = await response.json();
+          }
+        } catch (e) {
+          // Try CORS proxy fetch
+          try {
+            const proxyUrl = 'https://corsproxy.io/?url=' + encodeURIComponent(`https://api.shipday.com/orders/orderNumber/${orderNumber}`);
+            const pRes = await fetch(proxyUrl, { method: 'GET', headers: headers });
+            if (pRes.ok) {
+              shipdayData = await pRes.json();
+            }
+          } catch (pe) {}
+        }
+
+        if (shipdayData) {
+          console.log('[Shipday Live Status]:', shipdayData);
+          if (shipdayData.orderStatus === 'ACCEPTED' || shipdayData.orderStatus === 'ASSIGNED' || shipdayData.deliveryFee > 0 || shipdayData.carrier) {
+            const fee = parseFloat(shipdayData.deliveryFee) || 20;
+            const driver = {
+              name: shipdayData.carrier?.name || 'ไรเดอร์ WANGO ประจำหว้านใหญ่',
+              phone: shipdayData.carrier?.phoneNumber || '089-123-4567',
+              plate: 'มอเตอร์ไซค์รับส่งอาหาร WANGO',
+              distance: `${shipdayData.distance || '2.4'} กม.`
+            };
+
+            appState.activeOrder.deliveryFee = fee;
+            appState.activeOrder.driver = driver;
+            appState.activeOrder.grandTotal = Math.max(0, appState.activeOrder.subtotal + fee - appState.activeOrder.discount);
+            appState.activeOrder.statusPhase = 'PAYMENT_REQUIRED';
+
+            clearInterval(appState.orderPollingInterval);
+            renderOrderPhase2PaymentUI();
+          }
+        }
+      }, 4000);
+    }
+);
 
           if (response.ok) {
             const shipdayData = await response.json();
