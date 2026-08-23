@@ -1,0 +1,2388 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WANGO - Delivery (หว้านโก เดลิเวอรี่) | แพลตฟอร์มสั่งอาหารและของกินอำเภอหว้านใหญ่ จ.มุกดาหาร</title>
+  
+  <!-- Google Fonts: Prompt & Kanit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Kanit', 'sans-serif'],
+            display: ['Kanit', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              300: '#fdba74',
+              400: '#fb923c',
+              500: '#f97316', // Primary vibrant orange
+              600: '#ea580c',
+              700: '#c2410c',
+              800: '#9a3412',
+              900: '#7c2d12',
+            },
+            accent: {
+              50: '#ecfdf5',
+              500: '#10b981',
+              600: '#059669',
+            }
+          },
+          boxShadow: {
+            'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04)',
+            'floating': '0 10px 30px -5px rgba(249, 115, 22, 0.25)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+  <!-- TOP BANNER -->
+  <aside aria-label="แถบแจ้งเตือนโปรโมชั่น" class="bg-gradient-to-r from-brand-600 via-brand-500 to-amber-500 text-white text-xs py-1.5 px-4 text-center font-medium shadow-inner flex items-center justify-center gap-2">
+    <span class="inline-flex items-center justify-center bg-white/20 px-2 py-0.5 rounded-full text-[10px] tracking-wide uppercase font-bold">Wanon Niwat Eats</span>
+    <span>🎉 ส่งฟรี 3 กม. แรกทั่วอำเภอหว้านใหญ่! ใช้โค้ด <span class="underline font-bold bg-white/20 px-1.5 py-0.5 rounded">WANGOFREE</span> ได้ทุกร้าน</span>
+  </aside>
+
+  <!-- NAVBAR -->
+  <header class="sticky top-0 z-40 glass-effect border-b border-slate-200/80 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 gap-3 sm:gap-6">
+        
+        <!-- Logo & Location -->
+        <div class="flex items-center gap-3 sm:gap-6">
+          <a href="#" onclick="showView('home'); return false;" class="flex items-center gap-2 group">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-500 to-amber-500 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+              <i data-lucide="utensils-crossed" class="w-5 h-5"></i>
+            </div>
+            <div class="hidden sm:block">
+              <span class="font-display font-bold text-xl text-slate-900 leading-tight flex items-center gap-1.5">
+                WANGO<span class="text-brand-500">-Delivery</span>
+                <span class="text-[10px] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded-md font-semibold">หว้านใหญ่</span>
+              </span>
+              <p class="text-[11px] text-slate-500">แซ่บถึงเฮือน ส่งไวทั่วอำเภอ</p>
+            </div>
+          </a>
+
+          <!-- Location Selector -->
+          <button onclick="openLocationModal()" class="flex items-center gap-2 bg-slate-100/90 hover:bg-slate-200/90 px-3 py-1.5 rounded-full text-xs font-medium text-slate-700 border border-slate-200 transition-colors max-w-[190px] sm:max-w-[280px]">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-500 shrink-0"></i>
+            <span id="current-location-text" class="truncate">ส่งที่: ตลาดสดเทศบาลหว้านใหญ่</span>
+            <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 shrink-0"></i>
+          </button>
+        </div>
+
+        <!-- Desktop Search Bar -->
+        <div class="hidden md:flex flex-1 max-w-md mx-4">
+          <div class="relative w-full">
+            <input type="text" id="desktop-search-input" onkeyup="handleSearch(this.value)" placeholder="ค้นหาร้านอร่อย ส้มตำ กะเพรา ชานม..." 
+              class="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all border border-transparent focus:border-brand-300">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5"></i>
+          </div>
+        </div>
+
+        <!-- Right Action Buttons -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          
+          <!-- Shipday Settings Button -->
+          <button onclick="openShipdayModal()" class="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors" title="ตั้งค่าเชื่อมต่อ Shipday API">
+            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+            <span class="hidden sm:inline">Shipday</span> API
+          </button>
+
+          <!-- Merchant Switcher -->
+          <button onclick="toggleMerchantView()" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors">
+            <i data-lucide="store" class="w-3.5 h-3.5 text-slate-600"></i>
+            <span class="hidden md:inline">โหมดร้านค้า</span>
+          </button>
+
+          <!-- Cart Button -->
+          <button onclick="openCartDrawer()" class="relative flex items-center gap-2 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white px-3.5 py-2 rounded-full text-xs sm:text-sm font-medium shadow-md shadow-brand-500/20 transition-all">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">ตะกร้า</span>
+            <span id="cart-count-badge" class="bg-white text-brand-600 text-[11px] font-bold px-1.5 py-0.2 rounded-full hidden">0</span>
+            <span id="cart-total-header" class="text-xs font-bold pl-1 hidden border-l border-brand-400">฿0</span>
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Search Bar -->
+    <div class="md:hidden px-4 pb-3 pt-1">
+      <div class="relative w-full">
+        <input type="text" id="mobile-search-input" onkeyup="handleSearch(this.value)" placeholder="ค้นหาร้านอร่อย เมนูเด็ดในหว้านใหญ่..." 
+          class="w-full pl-9 pr-4 py-2 bg-slate-100 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all border border-slate-200">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- VIEW 1: HOME -->
+    <div id="view-home" class="space-y-8">
+      
+      <!-- HERO PROMOTION BANNER -->
+      <section class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-xl">
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <div class="relative grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 sm:p-10 items-center">
+          <div class="lg:col-span-7 space-y-4 text-left">
+            <div class="inline-flex items-center gap-2 bg-brand-500/20 border border-brand-400/40 text-brand-300 px-3 py-1 rounded-full text-xs font-semibold">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-brand-400"></i>
+              แพลตฟอร์มสั่งอาหารของคนอำเภอหว้านใหญ่
+            </div>
+            <h1 class="text-2xl sm:text-4xl lg:text-5xl font-display font-extrabold tracking-tight leading-tight">
+              รวมร้านเด็ด <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-amber-300">หว้านใหญ่</span><br>
+              ส่งตรงถึงเฮือน สั่งง่าย ได้ไว
+            </h1>
+            <p class="text-slate-300 text-xs sm:text-sm max-w-xl leading-relaxed">
+              ส้มตำแซ่บ ก๋วยเตี๋ยวเรือรสเด็ด กะเพราหมูกรอบริมตลาดเทศบาล กาแฟสเปเชียลตี้ พร้อมระบบจัดส่งมาตรฐานไรเดอร์ชุมชน เชื่อมต่อ Shipday Dispatch ทันที
+            </p>
+            <div class="flex flex-wrap items-center gap-3 pt-2">
+              <button onclick="scrollToRestaurants()" class="bg-brand-500 hover:bg-brand-600 text-white font-medium text-xs sm:text-sm px-5 py-2.5 rounded-full shadow-lg shadow-brand-500/30 flex items-center gap-2 transition-all">
+                <span>เลือกร้านอาหารเลย</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+              <button onclick="openPromoModal()" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium text-xs sm:text-sm px-4 py-2.5 rounded-full transition-all flex items-center gap-1.5">
+                <i data-lucide="ticket-percent" class="w-4 h-4 text-amber-300"></i>
+                <span>โค้ดส่วนลดวันนี้</span>
+              </button>
+            </div>
+          </div>
+          <div class="lg:col-span-5 flex justify-center lg:justify-end">
+            <div class="relative w-full max-w-sm">
+              <div class="absolute -inset-1 bg-gradient-to-r from-brand-500 to-amber-500 rounded-2xl blur-lg opacity-40"></div>
+              <div class="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 text-slate-100 shadow-2xl space-y-3">
+                <div class="flex items-center justify-between text-xs border-b border-white/10 pb-2.5">
+                  <span class="font-bold flex items-center gap-1.5 text-amber-300">
+                    <i data-lucide="flame" class="w-4 h-4"></i> เมนูยอดฮิตประจำสัปดาห์
+                  </span>
+                  <span class="text-[10px] text-slate-300">อ.หว้านใหญ่</span>
+                </div>
+                <div class="space-y-2 text-xs">
+                  <div class="flex items-center justify-between bg-white/10 p-2 rounded-xl">
+                    <div class="flex items-center gap-2.5">
+                      <span class="text-base">🌶️</span>
+                      <div>
+                        <p class="font-semibold text-white">ส้มตำปูปลาร้าพริกแห้ง</p>
+                        <p class="text-[10px] text-slate-300">ร้านตำแซ่บสองคอนริมโขง</p>
+                      </div>
+                    </div>
+                    <span class="font-bold text-brand-300">฿45</span>
+                  </div>
+                  <div class="flex items-center justify-between bg-white/10 p-2 rounded-xl">
+                    <div class="flex items-center gap-2.5">
+                      <span class="text-base">🍳</span>
+                      <div>
+                        <p class="font-semibold text-white">กะเพราหมูกรอบไข่ดาว</p>
+                        <p class="text-[10px] text-slate-300">ครัวแม่เพ็ญ ตลาดเทศบาล</p>
+                      </div>
+                    </div>
+                    <span class="font-bold text-brand-300">฿60</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORIES -->
+      <section>
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-display font-bold text-lg text-slate-900 flex items-center gap-2">
+            <i data-lucide="layout-grid" class="w-5 h-5 text-brand-500"></i>
+            หมวดหมู่อาหารยอดนิยม
+          </h2>
+          <span class="text-xs text-slate-400">เลือกดูตามประเภท</span>
+        </div>
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
+          <button onclick="filterByCategory('all')" class="category-btn active flex flex-col items-center justify-center p-3 rounded-2xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 shadow-sm transition-all group" data-category="all">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-100 to-amber-100 flex items-center justify-center text-2xl mb-1.5 group-hover:scale-110 transition-transform">
+              🍽️
+            </div>
+            <span class="text-xs font-semibold text-slate-700 group-hover:text-brand-600">ทั้งหมด</span>
+          </button>
+          <button onclick="filterByCategory('ตามสั่ง')" class="category-btn flex flex-col items-center justify-center p-3 rounded-2xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 shadow-sm transition-all group" data-category="ตามสั่ง">
+            <div class="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center text-2xl mb-1.5 group-hover:scale-110 transition-transform">
+              🍛
+            </div>
+            <span class="text-xs font-semibold text-slate-700 group-hover:text-brand-600">ตามสั่ง & ข้าว</span>
+          </button>
+          <button onclick="filterByCategory('ส้มตำ/ยำ')" class="category-btn flex flex-col items-center justify-center p-3 rounded-2xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 shadow-sm transition-all group" data-category="ส้มตำ/ยำ">
+            <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-2xl mb-1.5 group-hover:scale-110 transition-transform">
+              🥗
+            </div>
+            <span class="text-xs font-semibold text-slate-700 group-hover:text-brand-600">ส้มตำ & ยำแซ่บ</span>
+          </button>
+          <button onclick="filterByCategory('ก๋วยเตี๋ยว')" class="category-btn flex flex-col items-center justify-center p-3 rounded-2xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 shadow-sm transition-all group" data-category="ก๋วยเตี๋ยว">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-2xl mb-1.5 group-hover:scale-110 transition-transform">
+              🍜
+            </div>
+            <span class="text-xs font-semibold text-slate-700 group-hover:text-brand-600">ก๋วยเตี๋ยว & ต้มเส้น</span>
+          </button>
+          <button onclick="filterByCategory('เครื่องดื่ม/คาเฟ่')" class="category-btn flex flex-col items-center justify-center p-3 rounded-2xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 shadow-sm transition-all group" data-category="เครื่องดื่ม/คาเฟ่">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-2xl mb-1.5 group-hover:scale-110 transition-transform">
+              🧋
+            </div>
+            <span class="text-xs font-semibold text-slate-700 group-hover:text-brand-600">ชา & กาแฟสด</span>
+          </button>
+          <button onclick="filterByCategory('สตรีทฟู้ด')" class="category-btn flex flex-col items-center justify-center p-3 rounded-2xl bg-white hover:bg-brand-50 border border-slate-200 hover:border-brand-300 shadow-sm transition-all group" data-category="สตรีทฟู้ด">
+            <div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-2xl mb-1.5 group-hover:scale-110 transition-transform">
+              🍢
+            </div>
+            <span class="text-xs font-semibold text-slate-700 group-hover:text-brand-600">สตรีทฟู้ดตลาดแลง</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- RESTAURANTS SECTION -->
+      <section id="restaurants-section" class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+          <div>
+            <h2 class="font-display font-bold text-xl text-slate-900 flex items-center gap-2">
+              <i data-lucide="store" class="w-5 h-5 text-brand-500"></i>
+              ร้านอาหารในอำเภอหว้านใหญ่
+            </h2>
+            <p class="text-xs text-slate-500" id="restaurant-count-label">พบ 6 ร้านเด็ดพร้อมเสิร์ฟ</p>
+          </div>
+
+          <!-- Quick Filters -->
+          <div class="flex items-center gap-1.5 overflow-x-auto hide-scrollbar pb-1 text-xs">
+            <button onclick="setFilterSort('recommended')" class="filter-sort-btn active px-3 py-1.5 rounded-full font-medium bg-slate-900 text-white shrink-0">แนะนำ</button>
+            <button onclick="setFilterSort('free_delivery')" class="filter-sort-btn px-3 py-1.5 rounded-full font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0">ส่งฟรี 🛵</button>
+            <button onclick="setFilterSort('fastest')" class="filter-sort-btn px-3 py-1.5 rounded-full font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0">ส่งไวที่สุด ⚡</button>
+            <button onclick="setFilterSort('top_rated')" class="filter-sort-btn px-3 py-1.5 rounded-full font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shrink-0">คะแนนดาว 4.8+ ⭐</button>
+          </div>
+        </div>
+
+        <!-- RESTAURANT GRID -->
+        <div id="restaurants-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Dynamically Injected via JS -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- VIEW 2: RESTAURANT DETAIL -->
+    <div id="view-restaurant-detail" class="hidden space-y-6">
+      
+      <!-- Back button -->
+      <button onclick="showView('home')" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-brand-600 bg-white border border-slate-200 px-3 py-1.5 rounded-full shadow-sm">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span>กลับหน้ารวมร้านค้า</span>
+      </button>
+
+      <!-- Restaurant Header -->
+      <div id="restaurant-detail-header" class="bg-white rounded-3xl border border-slate-200 shadow-soft overflow-hidden">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Menu Navigation & Items -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        
+        <!-- Left Categories -->
+        <div class="lg:col-span-1">
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm sticky top-24 space-y-1" id="menu-category-nav">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 py-1.5">หมวดหมู่เมนู</p>
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Right Menu List -->
+        <div class="lg:col-span-3 space-y-6" id="restaurant-menu-list">
+          <!-- Injected via JS -->
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- VIEW 3: ORDER TRACKING -->
+    <div id="view-order-tracking" class="hidden max-w-3xl mx-auto space-y-6">
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-soft p-6 sm:p-8 space-y-6">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+          <div>
+            <div class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full mb-1">
+              <span class="w-2 h-2 rounded-full bg-brand-500 animate-ping"></span>
+              กำลังดำเนินการจัดส่ง (Live Tracking)
+            </div>
+            <h1 class="text-xl sm:text-2xl font-display font-bold text-slate-900" id="track-order-id">ออเดอร์ #WG-20260823-001</h1>
+            <p class="text-xs text-slate-500" id="track-order-time">สั่งเมื่อ 20:44 น. • ชำระผ่าน พร้อมเพย์ (PromptPay)</p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400">ประมาณการเวลาส่งถึง</span>
+            <p class="text-xl sm:text-2xl font-bold text-brand-600" id="track-eta">15-25 นาที</p>
+          </div>
+        </div>
+
+        <!-- Visual Map Simulation in Wanon Niwat -->
+        <div class="relative h-48 sm:h-64 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
+          <div class="absolute inset-0 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:12px_12px] opacity-40"></div>
+          
+          <svg class="absolute inset-0 w-full h-full stroke-slate-300 stroke-2" fill="none">
+            <path d="M 20 50 Q 150 70 300 40 T 600 120" stroke="#cbd5e1" stroke-width="8" />
+            <path d="M 100 200 Q 250 120 400 160 T 700 80" stroke="#cbd5e1" stroke-width="6" />
+            <path id="route-path" d="M 120 70 L 260 110 L 420 80 L 520 150" stroke="#f97316" stroke-width="4" stroke-dasharray="6,6" />
+          </svg>
+
+          <!-- Restaurant Pin -->
+          <div class="absolute left-[110px] top-[55px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+            <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-lg border-2 border-white">
+              <i data-lucide="store" class="w-4 h-4"></i>
+            </div>
+            <span class="text-[10px] font-bold bg-white/90 px-1.5 py-0.5 rounded shadow mt-1 whitespace-nowrap" id="map-restaurant-name">ร้านค้า</span>
+          </div>
+
+          <!-- Rider Pin (Animated) -->
+          <div id="map-rider-pin" class="absolute left-[300px] top-[95px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all duration-1000">
+            <div class="relative">
+              <div class="absolute -inset-2 bg-brand-500 rounded-full opacity-30 animate-ping"></div>
+              <div class="w-10 h-10 rounded-full bg-brand-500 text-white flex items-center justify-center shadow-xl border-2 border-white">
+                <i data-lucide="bike" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold bg-brand-600 text-white px-2 py-0.5 rounded-full shadow mt-1 whitespace-nowrap">ไรเดอร์กำลังนำส่ง</span>
+          </div>
+
+          <!-- Customer Pin -->
+          <div class="absolute left-[520px] top-[140px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+            <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg border-2 border-white">
+              <i data-lucide="home" class="w-4 h-4"></i>
+            </div>
+            <span class="text-[10px] font-bold bg-white/90 px-1.5 py-0.5 rounded shadow mt-1 whitespace-nowrap">บ้านลูกค้า</span>
+          </div>
+
+          <!-- Location Badge -->
+          <div class="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-[10px] text-slate-600 font-medium border border-slate-200">
+            📍 พิกัด: อ.หว้านใหญ่ จ.มุกดาหาร
+          </div>
+        </div>
+
+        <!-- 5-Step Order Stepper -->
+        <div class="space-y-4">
+          <h2 class="text-sm font-bold text-slate-800">ขั้นตอนการจัดส่ง</h2>
+          <div class="grid grid-cols-5 gap-2 text-center" id="order-stepper">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Rider Profile Card -->
+        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 font-bold text-lg border-2 border-brand-300">
+              🏍️
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <p class="font-bold text-sm text-slate-900">นายสมศักดิ์ ไรเดอร์หว้านใหญ่</p>
+                <span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-semibold">ยืนยันตัวตนแล้ว</span>
+              </div>
+              <p class="text-xs text-slate-500">มอเตอร์ไซค์ Honda Wave • ทะเบียน 1กข-9923 สน</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="tel:0891234567" class="w-9 h-9 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center shadow-md transition-colors" title="โทรหาไรเดอร์">
+              <i data-lucide="phone" class="w-4 h-4"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Shipday Carrier & Dispatch Box -->
+        <div class="bg-blue-50/80 rounded-2xl p-4 border border-blue-200/80 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-blue-900 flex items-center gap-1.5">
+              <i data-lucide="truck" class="w-4 h-4 text-blue-600"></i> Shipday Delivery Network Integration
+            </span>
+            <span class="bg-blue-200/80 text-blue-800 px-2 py-0.5 rounded-full text-[10px] font-semibold">DISPATCHED</span>
+          </div>
+          <p class="text-xs text-blue-700">คำสั่งซื้อนี้ถูกส่งผ่าน Shipday API เข้าสู่ระบบกระจายงานคนขับอัตโนมัติแล้ว</p>
+          <div class="flex items-center justify-between text-xs pt-1 text-blue-800">
+            <span>Shipday Live Tracking:</span>
+            <a href="#" onclick="alert('จำลองการเปิดหน้าต่าง Shipday Tracking Portal'); return false;" class="underline font-semibold hover:text-blue-900">
+              track.shipday.com/live/wg-9923
+            </a>
+          </div>
+        </div>
+
+        <!-- Order Items Summary -->
+        <div class="border-t border-slate-100 pt-4 space-y-2" id="tracking-items-summary">
+          <!-- Injected via JS -->
+        </div>
+
+        <!-- Demo Controls -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <button onclick="simulateNextOrderStatus()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-4 py-2 rounded-xl flex items-center gap-1.5">
+            <i data-lucide="play" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>จำลองเปลี่ยนสถานะถัดไป (Demo Test)</span>
+          </button>
+          <button onclick="showView('home')" class="text-xs text-slate-500 hover:text-brand-600 font-medium">
+            สั่งอาหารเพิ่มเติม
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- VIEW 4: MERCHANT PORTAL -->
+    <div id="view-merchant" class="hidden space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-soft">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500 to-amber-500 text-white flex items-center justify-center text-2xl font-bold shadow-md">
+            🍳
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-xl font-display font-bold text-slate-900">ระบบจัดการร้านค้า (Merchant Portal)</h1>
+              <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">ร้านเปิดอยู่</span>
+            </div>
+            <p class="text-xs text-slate-500">ร้าน: ครัวแม่เพ็ญ อาหารตามสั่ง (สาขาตลาดสดเทศบาลหว้านใหญ่)</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="toggleStoreOpenStatus()" id="store-status-toggle" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded-xl font-medium shadow-sm transition-colors">
+            สถานะ: รับออเดอร์ปกติ
+          </button>
+          <button onclick="showView('home')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-2 rounded-xl font-medium">
+            กลับหน้าร้าน
+          </button>
+        </div>
+      </div>
+
+      <!-- Merchant Stats -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <span class="text-xs text-slate-400">ยอดขายวันนี้</span>
+          <p class="text-xl font-bold text-slate-900 mt-1">฿3,450</p>
+          <span class="text-[11px] text-emerald-600 font-medium">+18% จากเมื่อวาน</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <span class="text-xs text-slate-400">ออเดอร์ทั้งหมด</span>
+          <p class="text-xl font-bold text-slate-900 mt-1">28 รายการ</p>
+          <span class="text-[11px] text-slate-400">เฉลี่ย 120 บ./ออเดอร์</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <span class="text-xs text-slate-400">รอดำเนินการ</span>
+          <p class="text-xl font-bold text-brand-600 mt-1" id="merchant-pending-count">2 ออเดอร์</p>
+          <span class="text-[11px] text-brand-500 font-medium">ต้องการการยืนยัน</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <span class="text-xs text-slate-400">คะแนนรีวิวร้าน</span>
+          <p class="text-xl font-bold text-amber-500 mt-1">4.9 ⭐</p>
+          <span class="text-[11px] text-slate-400">จาก 142 รีวิว</span>
+        </div>
+      </div>
+
+      <!-- Live Incoming Orders Queue -->
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-soft p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h2 class="font-display font-bold text-lg text-slate-900 flex items-center gap-2">
+            <i data-lucide="bell-ring" class="w-5 h-5 text-brand-500"></i>
+            รายการออเดอร์เข้าสด (Real-Time Incoming Orders)
+          </h2>
+          <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">อัปเดตอัตโนมัติ</span>
+        </div>
+
+        <div class="space-y-3" id="merchant-orders-container">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MODAL: FOOD CUSTOMIZATION / ADD TO CART -->
+  <div id="food-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Image Header -->
+      <div class="relative h-44 sm:h-52 bg-slate-100 shrink-0">
+        <img id="modal-food-img" src="" alt="" class="w-full h-full object-cover">
+        <button onclick="closeFoodModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+        <div class="absolute bottom-3 left-3 bg-slate-900/80 text-white text-[11px] px-2.5 py-1 rounded-full backdrop-blur-sm font-medium">
+          <span id="modal-food-restaurant">ร้านค้า</span>
+        </div>
+      </div>
+
+      <!-- Scrollable Options -->
+      <div class="p-6 overflow-y-auto custom-scrollbar space-y-5 flex-1">
+        <div>
+          <div class="flex items-start justify-between gap-2">
+            <h2 class="text-lg font-display font-bold text-slate-900" id="modal-food-title">ชื่อเมนู</h2>
+            <span class="text-lg font-bold text-brand-600" id="modal-food-price">฿0</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1" id="modal-food-desc">รายละเอียดเมนู</p>
+        </div>
+
+        <!-- Portion Size -->
+        <div class="space-y-2 border-t border-slate-100 pt-3">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+            <span>ขนาด / ปริมาณ</span>
+            <span class="text-[10px] text-brand-500 font-normal bg-brand-50 px-1.5 py-0.5 rounded">เลือกได้ 1 อย่าง</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2" id="modal-options-portion">
+            <!-- Radio portions -->
+          </div>
+        </div>
+
+        <!-- Spiciness -->
+        <div class="space-y-2 border-t border-slate-100 pt-3" id="spiciness-section">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+            <span>ระดับความเผ็ด</span>
+            <span class="text-[10px] text-slate-400 font-normal">ตามใจคุณ</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="modal-options-spice">
+            <!-- Spice options -->
+          </div>
+        </div>
+
+        <!-- Addons -->
+        <div class="space-y-2 border-t border-slate-100 pt-3" id="addons-section">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+            <span>ท็อปปิ้ง / เพิ่มเติม</span>
+            <span class="text-[10px] text-slate-400 font-normal">เลือกได้หลายอย่าง</span>
+          </div>
+          <div class="space-y-1.5" id="modal-options-addons">
+            <!-- Checkbox toppings -->
+          </div>
+        </div>
+
+        <!-- Special Notes -->
+        <div class="space-y-1.5 border-t border-slate-100 pt-3">
+          <label class="text-xs font-bold text-slate-800 flex items-center justify-between">
+            <span>หมายเหตุถึงทางร้าน</span>
+            <span class="text-[10px] text-slate-400 font-normal">เช่น ไม่ใส่ผักชี, แยกพริกน้ำปลา</span>
+          </label>
+          <input type="text" id="modal-special-notes" placeholder="ระบุความต้องการเพิ่มเติม..." class="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white">
+        </div>
+      </div>
+
+      <!-- Footer Action -->
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-4 shrink-0">
+        <div class="flex items-center bg-white border border-slate-200 rounded-full p-1 shadow-sm">
+          <button onclick="updateModalQuantity(-1)" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-600 font-bold">-</button>
+          <span id="modal-qty" class="w-8 text-center text-xs font-bold text-slate-900">1</span>
+          <button onclick="updateModalQuantity(1)" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-600 font-bold">+</button>
+        </div>
+
+        <button onclick="confirmAddToCart()" class="flex-1 bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-white font-medium text-xs sm:text-sm py-3 px-4 rounded-2xl shadow-lg shadow-brand-500/20 flex items-center justify-between transition-all">
+          <span>ใส่ตะกร้า</span>
+          <span id="modal-final-price" class="font-bold">฿0</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- DRAWER: CART -->
+  <div id="cart-drawer" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden transition-opacity">
+    <div class="fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300">
+      
+      <!-- Cart Header -->
+      <div class="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h2 class="font-display font-bold text-base text-slate-900">ตะกร้าอาหารของคุณ</h2>
+            <p class="text-[11px] text-slate-500" id="cart-restaurant-name">ยังไม่มีรายการอาหาร</p>
+          </div>
+        </div>
+        <button onclick="closeCartDrawer()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-500 flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Items List -->
+      <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 custom-scrollbar" id="cart-items-container">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Footer & Promo -->
+      <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 space-y-3 shrink-0" id="cart-footer-section">
+        
+        <div class="flex gap-2">
+          <input type="text" id="promo-code-input" placeholder="ใส่โค้ดส่วนลด เช่น WANGOFREE" class="flex-1 uppercase text-xs px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <button onclick="applyPromoCode()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium px-4 py-2 rounded-xl transition-colors">
+            ใช้โค้ด
+          </button>
+        </div>
+        <div id="promo-status-msg" class="text-[11px] hidden"></div>
+
+        <div class="space-y-1.5 text-xs text-slate-600 border-t border-slate-200 pt-3">
+          <div class="flex justify-between">
+            <span>ค่าอาหารรวม</span>
+            <span id="cart-subtotal" class="font-medium text-slate-900">฿0</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="flex items-center gap-1">ค่าจัดส่งในหว้านใหญ่ (<span id="cart-distance-km">1.2</span> กม.)</span>
+            <span id="cart-delivery-fee" class="font-medium text-slate-900">฿15</span>
+          </div>
+          <div class="flex justify-between text-emerald-600" id="cart-discount-row" style="display:none;">
+            <span>ส่วนลดโปรโมชั่น</span>
+            <span id="cart-discount-val" class="font-medium">-฿0</span>
+          </div>
+          <div class="flex justify-between text-sm font-bold text-slate-900 border-t border-slate-200 pt-2">
+            <span>ยอดรวมสุทธิ</span>
+            <span id="cart-grand-total" class="text-brand-600 text-base">฿0</span>
+          </div>
+        </div>
+
+        <button onclick="proceedToCheckoutModal()" id="btn-proceed-checkout" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-medium text-sm py-3 rounded-2xl shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 transition-all">
+          <span>ดำเนินการสั่งอาหาร</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- MODAL: CHECKOUT & SHIPDAY INTEGRATION CONFIRMATION -->
+  <div id="checkout-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div>
+          <h2 class="font-display font-bold text-base text-slate-900">ยืนยันข้อมูลจัดส่งและชำระเงิน</h2>
+          <p class="text-[11px] text-slate-500">พื้นที่จัดส่ง: อำเภอหว้านใหญ่ จ.มุกดาหาร</p>
+        </div>
+        <button onclick="closeCheckoutModal()" class="w-8 h-8 rounded-full hover:bg-slate-200 text-slate-500 flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-5 sm:p-6 overflow-y-auto custom-scrollbar space-y-4 flex-1 text-xs">
+        
+        <!-- Recipient & Address -->
+        <div class="space-y-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+          <p class="font-bold text-slate-800 flex items-center gap-1.5">
+            <i data-lucide="map-pin" class="w-4 h-4 text-brand-500"></i> ข้อมูลผู้รับอาหาร
+          </p>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-1">ชื่อผู้รับ *</label>
+              <input type="text" id="cust-name" value="คุณสมชาย ใจดี" class="w-full p-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none font-medium">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-1">เบอร์โทรศัพท์ *</label>
+              <input type="tel" id="cust-phone" value="089-876-5432" class="w-full p-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none font-medium">
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-500 mb-1">ที่อยู่จัดส่ง / จุดสังเกตในหว้านใหญ่ *</label>
+            <input type="text" id="cust-address" value="บ้านเลขที่ 124/5 หมู่ 2 ใกล้ตลาดสดเทศบาลหว้านใหญ่" class="w-full p-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none font-medium">
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-500 mb-1">คำแนะนำเพิ่มเติมสำหรับไรเดอร์</label>
+            <input type="text" id="cust-notes" placeholder="เช่น บ้านรั้วสีขาว อยู่ตรงข้ามร้านขายยา, โทรเมื่อถึง" class="w-full p-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="space-y-2">
+          <p class="font-bold text-slate-800 flex items-center gap-1.5">
+            <i data-lucide="credit-card" class="w-4 h-4 text-brand-500"></i> เลือกช่องทางชำระเงิน
+          </p>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="payment-option cursor-pointer flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-brand-500 bg-brand-50/50 text-center transition-all">
+              <input type="radio" name="payment-method" value="promptpay" checked class="hidden" onchange="updatePaymentMethod(this.value)">
+              <span class="text-lg mb-1">📱</span>
+              <span class="font-bold text-slate-900 text-[11px]">พร้อมเพย์</span>
+              <span class="text-[9px] text-brand-600 font-semibold">สแกน QR ฟรี</span>
+            </label>
+            <label class="payment-option cursor-pointer flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-center transition-all">
+              <input type="radio" name="payment-method" value="cod" class="hidden" onchange="updatePaymentMethod(this.value)">
+              <span class="text-lg mb-1">💵</span>
+              <span class="font-bold text-slate-900 text-[11px]">เงินสดปลายทาง</span>
+              <span class="text-[9px] text-slate-400">ชำระกับไรเดอร์</span>
+            </label>
+            <label class="payment-option cursor-pointer flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-center transition-all">
+              <input type="radio" name="payment-method" value="card" class="hidden" onchange="updatePaymentMethod(this.value)">
+              <span class="text-lg mb-1">💳</span>
+              <span class="font-bold text-slate-900 text-[11px]">บัตรเดบิต/เครดิต</span>
+              <span class="text-[9px] text-slate-400">Visa/Mastercard</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- PromptPay QR -->
+        <div id="promptpay-qr-box" class="bg-slate-900 text-white p-4 rounded-2xl text-center space-y-2">
+          <div class="flex items-center justify-center gap-1.5 text-xs text-emerald-400 font-semibold">
+            <i data-lucide="qr-code" class="w-4 h-4"></i> Thai QR Payment (พร้อมเพย์)
+          </div>
+          <div class="inline-block p-2 bg-white rounded-xl shadow-lg">
+            <svg class="w-36 h-36 mx-auto text-slate-900" viewBox="0 0 100 100" fill="currentColor">
+              <rect width="100" height="100" fill="white" />
+              <rect x="10" y="10" width="25" height="25" fill="#0f172a" />
+              <rect x="15" y="15" width="15" height="15" fill="white" />
+              <rect x="18" y="18" width="9" height="9" fill="#0f172a" />
+
+              <rect x="65" y="10" width="25" height="25" fill="#0f172a" />
+              <rect x="70" y="15" width="15" height="15" fill="white" />
+              <rect x="73" y="18" width="9" height="9" fill="#0f172a" />
+
+              <rect x="10" y="65" width="25" height="25" fill="#0f172a" />
+              <rect x="15" y="70" width="15" height="15" fill="white" />
+              <rect x="18" y="73" width="9" height="9" fill="#0f172a" />
+
+              <rect x="42" y="12" width="6" height="6" fill="#0f172a" />
+              <rect x="52" y="18" width="6" height="6" fill="#0f172a" />
+              <rect x="45" y="32" width="6" height="6" fill="#0f172a" />
+              <rect x="70" y="45" width="6" height="6" fill="#0f172a" />
+              <rect x="42" y="65" width="6" height="6" fill="#0f172a" />
+              <rect x="58" y="72" width="6" height="6" fill="#0f172a" />
+              <rect x="75" y="78" width="6" height="6" fill="#0f172a" />
+            </svg>
+          </div>
+          <p class="text-[11px] text-slate-300">ยอดชำระ: <span class="text-amber-400 font-bold text-sm" id="promptpay-amount-label">฿0</span></p>
+          <p class="text-[10px] text-slate-400">สแกนชำระด้วย Mobile Banking ทุกธนาคาร (ระบบตรวจจับยอดอัตโนมัติ)</p>
+        </div>
+
+        <div class="flex items-center gap-2 text-[11px] text-slate-500 bg-blue-50/80 p-2.5 rounded-xl border border-blue-200">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-blue-600 shrink-0"></i>
+          <span>เมื่อกดยืนยัน ออเดอร์จะถูกส่งไปยังร้านค้าและยิงเข้าระบบ Shipday Dispatch เพื่อจ่ายงานไรเดอร์ทันที</span>
+        </div>
+
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3 shrink-0">
+        <div>
+          <span class="text-[10px] text-slate-400">ยอดชำระทั้งหมด</span>
+          <p class="text-base font-bold text-brand-600" id="checkout-final-total">฿0</p>
+        </div>
+        <button onclick="submitOrderAndDispatchShipday()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white font-medium text-xs sm:text-sm py-3 px-4 rounded-2xl shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 transition-all">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>ยืนยันสั่งซื้อ & จ่ายงานไรเดอร์</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- MODAL: LOCATION SELECTOR -->
+  <div id="location-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h2 class="font-display font-bold text-base text-slate-900 flex items-center gap-2">
+          <i data-lucide="map-pin" class="w-5 h-5 text-brand-500"></i>
+          เลือกจุดส่งอาหารใน อ.หว้านใหญ่
+        </h2>
+        <button onclick="closeLocationModal()" class="w-7 h-7 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2">
+        <p class="text-xs font-semibold text-slate-500">แลนด์มาร์คยอดนิยมในอำเภอ:</p>
+        <div class="space-y-1.5 text-xs max-h-60 overflow-y-auto custom-scrollbar">
+          <button onclick="selectLocation('ตลาดสดเทศบาลหว้านใหญ่')" class="w-full text-left p-2.5 rounded-xl hover:bg-brand-50 border border-slate-200 hover:border-brand-300 flex items-center justify-between group">
+            <div class="flex items-center gap-2">
+              <span class="text-base">🏬</span>
+              <div>
+                <p class="font-semibold text-slate-800 group-hover:text-brand-600">ตลาดสดเทศบาลหว้านใหญ่</p>
+                <p class="text-[10px] text-slate-400">ต.หว้านใหญ่ ศูนย์กลางของกิน</p>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-brand-500"></i>
+          </button>
+          
+          <button onclick="selectLocation('โรงพยาบาลหว้านใหญ่')" class="w-full text-left p-2.5 rounded-xl hover:bg-brand-50 border border-slate-200 hover:border-brand-300 flex items-center justify-between group">
+            <div class="flex items-center gap-2">
+              <span class="text-base">🏥</span>
+              <div>
+                <p class="font-semibold text-slate-800 group-hover:text-brand-600">โรงพยาบาลหว้านใหญ่</p>
+                <p class="text-[10px] text-slate-400">ถ.หว้านใหญ่-พังโคน</p>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-brand-500"></i>
+          </button>
+
+          <button onclick="selectLocation('โรงเรียนหว้านใหญ่')" class="w-full text-left p-2.5 rounded-xl hover:bg-brand-50 border border-slate-200 hover:border-brand-300 flex items-center justify-between group">
+            <div class="flex items-center gap-2">
+              <span class="text-base">🏫</span>
+              <div>
+                <p class="font-semibold text-slate-800 group-hover:text-brand-600">โรงเรียนหว้านใหญ่ / รร.มัธยมหว้านใหญ่</p>
+                <p class="text-[10px] text-slate-400">ต.หว้านใหญ่ โซนการศึกษา</p>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-brand-500"></i>
+          </button>
+
+          <button onclick="selectLocation('ที่ว่าการอำเภอหว้านใหญ่')" class="w-full text-left p-2.5 rounded-xl hover:bg-brand-50 border border-slate-200 hover:border-brand-300 flex items-center justify-between group">
+            <div class="flex items-center gap-2">
+              <span class="text-base">🏛️</span>
+              <div>
+                <p class="font-semibold text-slate-800 group-hover:text-brand-600">ที่ว่าการอำเภอ & สภ.หว้านใหญ่</p>
+                <p class="text-[10px] text-slate-400">ศูนย์ราชการอำเภอ</p>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-brand-500"></i>
+          </button>
+
+          <button onclick="selectLocation('สี่แยกไฟแดง / หอนาฬิกาหว้านใหญ่')" class="w-full text-left p-2.5 rounded-xl hover:bg-brand-50 border border-slate-200 hover:border-brand-300 flex items-center justify-between group">
+            <div class="flex items-center gap-2">
+              <span class="text-base">🚦</span>
+              <div>
+                <p class="font-semibold text-slate-800 group-hover:text-brand-600">สี่แยกไฟแดง / หอนาฬิกา</p>
+                <p class="text-[10px] text-slate-400">ย่านการค้าใจกลางอำเภอ</p>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-brand-500"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-100 pt-3">
+        <label class="block text-[11px] text-slate-500 mb-1">หรือระบุชื่อหมู่บ้าน/ซอยเอง:</label>
+        <div class="flex gap-2">
+          <input type="text" id="custom-location-input" placeholder="เช่น บ้านดอนแดง ม.4 ซอย 3" class="flex-1 text-xs p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <button onclick="applyCustomLocation()" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium px-4 py-2 rounded-xl">ใช้พิกัดนี้</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL: SHIPDAY API SETTINGS -->
+  <div id="shipday-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="p-5 border-b border-slate-200 bg-gradient-to-r from-blue-900 to-indigo-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-blue-500/30 border border-blue-400/40 flex items-center justify-center">
+            <i data-lucide="cpu" class="w-5 h-5 text-blue-300"></i>
+          </div>
+          <div>
+            <h2 class="font-display font-bold text-base">Shipday API Integration Center</h2>
+            <p class="text-[11px] text-blue-200">โมดูลเชื่อมต่อระบบจัดการไรเดอร์และกระจายงานส่งอาหาร</p>
+          </div>
+        </div>
+        <button onclick="closeShipdayModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto custom-scrollbar space-y-5 text-xs">
+        
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-slate-800 flex items-center gap-1.5">
+              <i data-lucide="key" class="w-4 h-4 text-amber-500"></i> Shipday API Key
+            </label>
+            <span class="text-[10px] text-slate-400">บันทึกใน LocalStorage เบราว์เซอร์</span>
+          </div>
+          <div class="flex gap-2">
+            <input type="password" id="shipday-api-key-input" value="4jV7ikfZha.2FSbpIR9Z5h6z0F67JY2" placeholder="ใส่ Shipday API Key ของคุณที่นี่" class="flex-1 p-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono text-xs">
+            <button onclick="saveShipdayApiKey()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-xl transition-colors">
+              บันทึก Key
+            </button>
+          </div>
+          <p class="text-[10px] text-slate-500">
+            * หากยังไม่มี Key ระบบจะใช้ <strong>Sandbox Simulated Mode</strong> เพื่อทดสอบ Workflow การจ่ายงานแบบสมบูรณ์ 100%
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="font-bold text-slate-800">Workflow การทำงานเมื่อลูกค้าสั่งอาหาร:</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="font-bold text-slate-900 block mb-1">1. Customer Checkout</span>
+              <p class="text-slate-500">ลูกค้ากดยืนยันออเดอร์ในหน้าเว็บ หว้านใหญ่เดลิเวอรี่</p>
+            </div>
+            <div class="p-3 bg-blue-50 rounded-xl border border-blue-200 text-blue-900">
+              <span class="font-bold block mb-1">2. POST /orders</span>
+              <p class="text-blue-700">ส่ง Payload (พิกัด, เมนู, ที่อยู่ร้าน/ลูกค้า) เข้า Shipday API</p>
+            </div>
+            <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900">
+              <span class="font-bold block mb-1">3. Rider App & Tracking</span>
+              <p class="text-emerald-700">แอป Shipday Drive แจ้งเตือนไรเดอร์หว้านใหญ่ + ส่ง Live Link</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-800">ตัวอย่าง Request Payload (Shipday Schema):</span>
+            <button onclick="testShipdayDispatchMock()" class="text-blue-600 hover:text-blue-800 font-semibold text-[11px] flex items-center gap-1">
+              <i data-lucide="play" class="w-3.5 h-3.5"></i> ทดสอบส่ง Payload จำลอง (Test Ping)
+            </button>
+          </div>
+          <pre id="shipday-payload-preview" class="p-3 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-[10px] font-mono leading-relaxed max-h-48 custom-scrollbar">
+{
+  "orderNumber": "WG-20260823-001",
+  "customerName": "คุณสมชาย ใจดี",
+  "customerAddress": "ตลาดสดเทศบาลหว้านใหญ่ อ.หว้านใหญ่ จ.มุกดาหาร 49150",
+  "customerPhoneNumber": "0898765432",
+  "restaurantName": "ครัวแม่เพ็ญ อาหารตามสั่ง",
+  "restaurantAddress": "ข้างตลาดสดเทศบาลหว้านใหญ่ อ.หว้านใหญ่ จ.มุกดาหาร 49150",
+  "orderItem": [
+    { "name": "กะเพราหมูกรอบไข่ดาว (เผ็ดกลาง)", "unitPrice": 60, "quantity": 1 }
+  ],
+  "orderTotal": 75,
+  "deliveryFee": 15,
+  "paymentMethod": "PROMPTPAY",
+  "expectedDeliveryTime": "21:15:00"
+}
+          </pre>
+        </div>
+
+        <div id="shipday-response-box" class="hidden p-3 bg-emerald-950/80 border border-emerald-800 rounded-xl text-emerald-300 space-y-1 text-[11px]">
+          <div class="flex items-center gap-1.5 font-bold">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> Shipday Response (HTTP 200 OK)
+          </div>
+          <p class="font-mono text-[10px] text-emerald-400" id="shipday-response-text">
+            {"success": true, "orderId": 892019, "trackingUrl": "https://track.shipday.com/live/wg-test"}
+          </p>
+        </div>
+
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button onclick="closeShipdayModal()" class="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-5 py-2 rounded-xl">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- MODAL: PROMOTIONS -->
+  <div id="promo-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h2 class="font-display font-bold text-base text-slate-900 flex items-center gap-2">
+          <i data-lucide="ticket-percent" class="w-5 h-5 text-brand-500"></i>
+          โค้ดส่วนลดและโปรโมชั่นหว้านใหญ่
+        </h2>
+        <button onclick="closePromoModal()" class="w-7 h-7 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2.5 text-xs">
+        
+        <div class="p-3 bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl border border-brand-200 flex items-center justify-between gap-2">
+          <div>
+            <span class="inline-block bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md mb-1">WANGOFREE</span>
+            <p class="font-bold text-slate-900">ส่งฟรี 3 กม. แรก</p>
+            <p class="text-[10px] text-slate-500">สำหรับทุกคำสั่งซื้อ ไม่มีขั้นต่ำ</p>
+          </div>
+          <button onclick="copyAndApplyPromo('WANGOFREE')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-sm">
+            ใช้โค้ดนี้
+          </button>
+        </div>
+
+        <div class="p-3 bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl border border-red-200 flex items-center justify-between gap-2">
+          <div>
+            <span class="inline-block bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md mb-1">WANGO50</span>
+            <p class="font-bold text-slate-900">ส่วนลด 50 บาท</p>
+            <p class="text-[10px] text-slate-500">เมื่อสั่งอาหารครบ 200 บาท</p>
+          </div>
+          <button onclick="copyAndApplyPromo('WANGO50')" class="bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-sm">
+            ใช้โค้ดนี้
+          </button>
+        </div>
+
+        <div class="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 flex items-center justify-between gap-2">
+          <div>
+            <span class="inline-block bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md mb-1">LOCAL10</span>
+            <p class="font-bold text-slate-900">ลด 10% เมนูส้มตำ & สตรีทฟู้ด</p>
+            <p class="text-[10px] text-slate-500">สนับสนุนร้านท้องถิ่นหว้านใหญ่</p>
+          </div>
+          <button onclick="copyAndApplyPromo('LOCAL10')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-sm">
+            ใช้โค้ดนี้
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 text-slate-400 text-xs py-10 mt-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        
+        <div class="space-y-3">
+          <div class="flex items-center gap-2 text-white">
+            <div class="w-8 h-8 rounded-xl bg-brand-500 flex items-center justify-center text-white">
+              <i data-lucide="utensils-crossed" class="w-4 h-4"></i>
+            </div>
+            <span class="font-display font-bold text-lg">Wanon Delivery</span>
+          </div>
+          <p class="text-slate-400 text-[11px] leading-relaxed">
+            แพลตฟอร์มสั่งอาหารและของกินระดับอำเภอหว้านใหญ่ จังหวัดมุกดาหาร รวมร้านอร่อยชุมชน อาหารตามสั่ง ก๋วยเตี๋ยว ส้มตำ เครื่องดื่ม ส่งตรงถึงบ้านคุณ
+          </p>
+        </div>
+
+        <div>
+          <h4 class="text-white font-bold mb-2.5">พื้นที่ให้บริการ</h4>
+          <ul class="space-y-1.5 text-[11px]">
+            <li>• เทศบาลตำบลหว้านใหญ่</li>
+            <li>• ตำบลเดื่อศรีคันไชย / ต.ขัวก่าย</li>
+            <li>• โซนโรงพยาบาลหว้านใหญ่ & รร.หว้านใหญ่</li>
+            <li>• ตลาดโต้รุ่ง / ตลาดสดเทศบาล</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-white font-bold mb-2.5">สำหรับร้านค้า & ไรเดอร์</h4>
+          <ul class="space-y-1.5 text-[11px]">
+            <li>• <a href="#" onclick="toggleMerchantView(); return false;" class="hover:text-white">เข้าสู่ระบบร้านค้า (Merchant)</a></li>
+            <li>• สมัครเป็นไรเดอร์ส่งอาหารหว้านใหญ่</li>
+            <li>• <a href="#" onclick="openShipdayModal(); return false;" class="hover:text-white">เชื่อมต่อ Shipday API Dispatch</a></li>
+            <li>• ติดต่อศูนย์บริการลูกค้าหว้านใหญ่</li>
+          </ul>
+        </div>
+
+        <div class="space-y-2">
+          <h4 class="text-white font-bold mb-2.5">ติดต่อผู้ดูแลระบบ</h4>
+          <p class="text-[11px]">อำเภอหว้านใหญ่ จังหวัดมุกดาหาร 49150</p>
+          <p class="text-[11px]">โทร: 042-xxx-xxx • Line: @wanondelivery</p>
+          <div class="flex items-center gap-2 pt-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="text-[10px] text-emerald-400">ระบบพร้อมให้บริการ 07:00 - 22:00 น.</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="border-t border-slate-800 pt-6 text-center text-[10px] text-slate-500">
+        © 2026 WANGO - Delivery (หว้านโก เดลิเวอรี่) • พัฒนาเพื่อชุมชนอำเภอหว้านใหญ่ จังหวัดมุกดาหาร • Ready for Shipday API Integration
+      </div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT APPLICATION CORE DATA & LOGIC -->
+  <script>
+    // 1. MOCK DATABASE (LOCAL RESTAURANTS IN WANON NIWAT)
+    const LOCAL_RESTAURANTS = [
+      {
+        id: 'rest-1',
+        name: 'ครัวแม่เพ็ญ อาหารตามสั่ง & ข้าวผัดโบราณ',
+        category: 'ตามสั่ง',
+        rating: 4.9,
+        reviewsCount: 184,
+        distanceKm: 1.2,
+        deliveryTimeMin: '15-25',
+        deliveryFee: 15,
+        locationName: 'ข้างตลาดสดเทศบาลหว้านใหญ่',
+        tags: ['ร้านฮิต', 'กะเพราเด็ด', 'ส่งไว'],
+        bannerImg: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
+        logoEmoji: '🍳',
+        isOpen: true,
+        phone: '089-111-2233',
+        description: 'อาหารตามสั่งรสจัดจ้าน ผัดกะเพราพริกแห้งหมูกรอบสูตรเด็ด ข้าวผัดโบราณหอมกลิ่นกระทะ ใช้วัตถุดิบสดใหม่จากตลาดเช้าหว้านใหญ่',
+        categories: ['เมนูแนะนำ', 'อาหารจานเดียว', 'ต้มยำ & แกง', 'เครื่องดื่ม'],
+        menu: [
+          {
+            id: 'm1-1',
+            name: 'ข้าวข้าวกะเพราหมูกรอบพริกแห้งสองคอน (สูตรแม่เพ็ญ)',
+            category: 'เมนูแนะนำ',
+            price: 60,
+            description: 'หมูกรอบหนังฟูกรอบ ผัดพริกแห้งใบกะเพราป่ากลิ่นหอม รสชาติเข้มข้นจัดจ้าน',
+            img: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: true,
+            hasPortion: true,
+            addons: [{ name: 'ไข่ดาวกรอบ', price: 10 }, { name: 'ไข่เจียวหมูสับ', price: 15 }, { name: 'เพิ่มหมูกรอบพิเศษ', price: 25 }]
+          },
+          {
+            id: 'm1-2',
+            name: 'ข้าวผัดโบราณรถไฟใส่ซีอิ๊วดำหมูนุ่ม',
+            category: 'เมนูแนะนำ',
+            price: 55,
+            description: 'ข้าวผัดหอมกลิ่นกระทะ ใส่คะน้า มะเขือเทศ หอมใหญ่ ปรุงรสกลมกล่อมสไตล์โบราณ',
+            img: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: false,
+            hasPortion: true,
+            addons: [{ name: 'ไข่ดาว', price: 10 }, { name: 'กุนเชียงทอด', price: 15 }]
+          },
+          {
+            id: 'm1-3',
+            name: 'ข้าวผัดพริกแกงหมูกรอบถั่วฝักยาว',
+            category: 'อาหารจานเดียว',
+            price: 60,
+            description: 'พริกแกงโขลกเอง หอมสมุนไพร ผัดคลุกเคล้าหมูกรอบและถั่วฝักยาว',
+            img: 'https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: true,
+            hasPortion: true,
+            addons: [{ name: 'ไข่ดาว', price: 10 }]
+          },
+          {
+            id: 'm1-4',
+            name: 'ต้มยำรวมมิตรทะเลน้ำข้นหม้อไฟ (ชาม)',
+            category: 'ต้มยำ & แกง',
+            price: 90,
+            description: 'กุ้ง หมึก เห็ดฟาง เครื่องต้มยำครบครัน ใส่นมสดและน้ำพริกเผาเข้มข้น',
+            img: 'https://images.unsplash.com/photo-1548943487-a2e4e43b4853?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: true,
+            hasPortion: false,
+            addons: [{ name: 'เพิ่มข้าวสวย', price: 10 }]
+          }
+        ]
+      },
+      {
+        id: 'rest-2',
+        name: 'ตำแซ่บสองคอนริมโขง',
+        category: 'ส้มตำ/ยำ',
+        rating: 4.8,
+        reviewsCount: 245,
+        distanceKm: 0.8,
+        deliveryTimeMin: '15-20',
+        deliveryFee: 10,
+        locationName: 'โซนหน้าวัดสองคอน / รพ.หว้านใหญ่',
+        tags: ['ปลาร้าต้มสุก', 'แซ่บนัว', 'คนหว้านใหญ่แนะนำ'],
+        bannerImg: 'https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=800&q=80',
+        logoEmoji: '🥗',
+        isOpen: true,
+        phone: '081-222-3344',
+        description: 'ส้มตำปลาร้าต้มสุกสูตรหนองหาน นัวลึกพริกสดพริกแห้ง ลาบเป็ดหว้านใหญ่สูตรเด็ด คอหมูย่างนุ่มฉ่ำ',
+        categories: ['เมนูแนะนำ', 'ส้มตำ & ตำแซ่บ', 'ยำ & ลาบ', 'ไก่ย่าง & เครื่องเคียง'],
+        menu: [
+          {
+            id: 'm2-1',
+            name: 'ส้มตำปูปลาร้าพริกแห้ง (นัวลึกสูตรหว้านใหญ่)',
+            category: 'เมนูแนะนำ',
+            price: 45,
+            description: 'มะละกอสับกรอบ ตำกับน้ำปลาร้าต้มสุกหอมๆ มะเขือเปราะ มะนาวแป้นสด',
+            img: 'https://images.unsplash.com/photo-1594998893017-36147cbcae05?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: true,
+            hasPortion: true,
+            addons: [{ name: 'แคบหมูไร้มัน', price: 10 }, { name: 'ขนมจีน 1 จับ', price: 10 }, { name: 'ไข่ต้มยางมะตูม', price: 10 }]
+          },
+          {
+            id: 'm2-2',
+            name: 'ตำซั่วกุ้งสดหอยแครง',
+            category: 'ส้มตำ & ตำแซ่บ',
+            price: 90,
+            description: 'กุ้งสดเด้ง หอยแครงลวกพอดี คลุกเคล้าขนมจีนและน้ำส้มตำรสแซ่บ',
+            img: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: true,
+            hasPortion: false,
+            addons: [{ name: 'เพิ่มกุ้งสด 3 ตัว', price: 30 }]
+          },
+          {
+            id: 'm2-3',
+            name: 'คอหมูย่างเตาถ่าน + น้ำจิ้มแจ่วมะขามเปียก',
+            category: 'เมนูแนะนำ',
+            price: 80,
+            description: 'คอหมูหมักเครื่องเทศย่างเตาถ่านหอมกรุ่น นุ่มฉ่ำไม่แห้ง แจ่วพริกคั่วข้าวคั่ว',
+            img: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: false,
+            hasPortion: true,
+            addons: [{ name: 'เพิ่มข้าวเหนียวเขี้ยวงู', price: 10 }]
+          },
+          {
+            id: 'm2-4',
+            name: 'ลาบเป็ดหว้านใหญ่ใส่หนังกรอบ',
+            category: 'ยำ & ลาบ',
+            price: 85,
+            description: 'เนื้อเป็ดสับละเอียด คั่วสุกหอมใบมะกรูด กระเทียมเจียว และพริกแห้งทอดกรอบ',
+            img: 'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: true,
+            hasPortion: false,
+            addons: [{ name: 'เพิ่มผักสดชุดใหญ่', price: 10 }]
+          }
+        ]
+      },
+      {
+        id: 'rest-3',
+        name: 'ก๋วยเตี๋ยวเรืออยุธยา & ต้มเส้นกระดูกหมูหว้านใหญ่',
+        category: 'ก๋วยเตี๋ยว',
+        rating: 4.9,
+        reviewsCount: 310,
+        distanceKm: 1.5,
+        deliveryTimeMin: '20-30',
+        deliveryFee: 15,
+        locationName: 'สี่แยกไฟแดงหว้านใหญ่',
+        tags: ['น้ำตกเข้มข้น', 'ต้มเส้นญวน', 'หมูตุ๋นละลาย'],
+        bannerImg: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80',
+        logoEmoji: '🍜',
+        isOpen: true,
+        phone: '086-333-4455',
+        description: 'ก๋วยเตี๋ยวเรือน้ำตกสูตรโบราณเข้มข้นไม่ต้องปรุงเพิ่ม พร้อมเมนูต้มเส้น/ก๋วยจั๊บญวนซี่โครงหมูตุ๋นน้ำซุปหอมหวาน',
+        categories: ['เมนูแนะนำ', 'ก๋วยเตี๋ยวเรือน้ำตก', 'ต้มเส้น & ก๋วยจั๊บ', 'ลวกจิ้ม & ของทานเล่น'],
+        menu: [
+          {
+            id: 'm3-1',
+            name: 'ก๋วยเตี๋ยวเรือน้ำตกหมูตุ๋น + ตับสด + ลูกชิ้น',
+            category: 'เมนูแนะนำ',
+            price: 55,
+            description: 'เลือกเส้นได้ (เล็ก/หมี่/บะหมี่/ใหญ่) น้ำตกเลือดสดเคี่ยวสมุนไพรกว่า 20 ชนิด',
+            img: 'https://images.unsplash.com/photo-1617093727343-374698b1b08d?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: true,
+            hasPortion: true,
+            addons: [{ name: 'กากหมูเจียวกรอบ', price: 15 }, { name: 'ลูกชิ้นหมูลวก 4 ลูก', price: 15 }]
+          },
+          {
+            id: 'm3-2',
+            name: 'ต้มเส้นกระดูกหมูเปื่อย + หมูยออุบล',
+            category: 'ต้มเส้น & ก๋วยจั๊บ',
+            price: 50,
+            description: 'วุ้นเส้นเหนียวนุ่มในน้ำซุปกระดูกหมูหวานธรรมชาติ โรยหอมเจียวและผักชีฝรั่ง',
+            img: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: false,
+            hasPortion: true,
+            addons: [{ name: 'ไข่ลวก 1 ฟอง', price: 10 }, { name: 'หมูยอเพิ่ม', price: 15 }]
+          },
+          {
+            id: 'm3-3',
+            name: 'ลวกจิ้มรวมมิตรหมู + น้ำจิ้มซีฟู้ดมะนาวสด',
+            category: 'ลวกจิ้ม & ของทานเล่น',
+            price: 75,
+            description: 'หมูนุ่ม ตับหวาน ลูกชิ้นหมูอย่างดี โรยกระเทียมเจียวกรอบๆ',
+            img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: false,
+            hasPortion: false,
+            addons: []
+          }
+        ]
+      },
+      {
+        id: 'rest-4',
+        name: 'WANGO Riverview Cafe & ชาชีสริมโขง & ชาชีสชุมชน',
+        category: 'เครื่องดื่ม/คาเฟ่',
+        rating: 4.9,
+        reviewsCount: 160,
+        distanceKm: 0.5,
+        deliveryTimeMin: '10-20',
+        deliveryFee: 10,
+        locationName: 'ถนนเลียบแม่น้ำโขง อ.หว้านใหญ่',
+        tags: ['กาแฟคั่วสด', 'ชาไทยการันตีชีส', 'เบเกอรี่โฮมเมด'],
+        bannerImg: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80',
+        logoEmoji: '🧋',
+        isOpen: true,
+        phone: '084-555-6677',
+        description: 'คาเฟ่สุดชิคของชาวหว้านใหญ่ เมล็ดกาแฟอราบิก้าแท้ ครีมชีสเนียนนุ่มพ่นไฟ เบเกอรี่อบสดใหม่ทุกเช้า',
+        categories: ['เมนูแนะนำ', 'ชาชีส & ชานม', 'Specialty Coffee', 'ขนมอบ & ครัวซองต์'],
+        menu: [
+          {
+            id: 'm4-1',
+            name: 'ชาไทยซิกเนเจอร์ + ครีมชีสพ่นไฟน้ำตาลไหม้',
+            category: 'เมนูแนะนำ',
+            price: 65,
+            description: 'ชาไทยใบชา 3 แหล่ง หอมเข้ม ท็อปด้วยชีสนำเข้า ตีสดพ่นไฟหอมคาราเมล',
+            img: 'https://images.unsplash.com/photo-1558857563-b37cfb91c499?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: false,
+            hasPortion: false,
+            addons: [{ name: 'ไข่มุกบราวน์ชูการ์', price: 10 }, { name: 'บุกคริสตัล', price: 10 }, { name: 'เพิ่มครีมชีส X2', price: 20 }]
+          },
+          {
+            id: 'm4-2',
+            name: 'Iced Dirty Espresso (นมเย็นจัด + ช็อตเข้ม)',
+            category: 'Specialty Coffee',
+            price: 75,
+            description: 'นมสดปรุงสูตรพิเศษแช่เย็นจัด ราดด้วยเอสเพรสโซ่ช็อตเข้มข้นหอมกลิ่นช็อกโกแลต',
+            img: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: false,
+            hasPortion: false,
+            addons: [{ name: 'เพิ่มช็อตกาแฟ', price: 15 }]
+          },
+          {
+            id: 'm4-3',
+            name: 'ครัวซองต์เนยสดฝรั่งเศส (อบร้อน)',
+            category: 'ขนมอบ & ครัวซองต์',
+            price: 65,
+            description: 'แป้งกรอบนอก นุ่มฉ่ำเนยสดแท้ข้างใน อบร้อนก่อนส่งทุกชิ้น',
+            img: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: false,
+            hasPortion: false,
+            addons: [{ name: 'ดิปสังขยาใบเตย', price: 15 }]
+          }
+        ]
+      },
+      {
+        id: 'rest-5',
+        name: 'ลูกชิ้นยืนกิน & สตรีทฟู้ดตลาดแลงหว้านใหญ่',
+        category: 'สตรีทฟู้ด',
+        rating: 4.7,
+        reviewsCount: 198,
+        distanceKm: 1.0,
+        deliveryTimeMin: '15-25',
+        deliveryFee: 10,
+        locationName: 'ลานตลาดโต้รุ่งหว้านใหญ่',
+        tags: ['น้ำจิ้มพริกเผา', 'ข้าวจี่ทาไข่', 'ราคาประหยัด'],
+        bannerImg: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
+        logoEmoji: '🍢',
+        isOpen: true,
+        phone: '087-888-9900',
+        description: 'รวมสตรีทฟู้ดขวัญใจคนหว้านใหญ่ ลูกชิ้นทอดกรอบน้ำจิ้มพริกเผาโบราณ ข้าวจี่เตาถ่าน ไส้กรอกอีสานย่าง',
+        categories: ['เมนูแนะนำ', 'ลูกชิ้นทอด', 'ข้าวจี่ & ปิ้งย่าง', 'ของทานเล่น'],
+        menu: [
+          {
+            id: 'm5-1',
+            name: 'ชุดลูกชิ้นทอดรวมมิตรจัมโบ้ + น้ำจิ้มพริกเผาโบราณ',
+            category: 'เมนูแนะนำ',
+            price: 60,
+            description: 'ลูกชิ้นหมู เนื้อ ไส้กรอกแดง เกี๊ยวทอด ผักสดแตงกวา กะหล่ำปลีฟรี',
+            img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: true,
+            hasPortion: true,
+            addons: [{ name: 'เพิ่มน้ำจิ้มขวดเล็ก', price: 15 }]
+          },
+          {
+            id: 'm5-2',
+            name: 'ข้าวจี่ทาไข่เตาถ่าน (ชุด 3 ก้อน)',
+            category: 'ข้าวจี่ & ปิ้งย่าง',
+            price: 35,
+            description: 'ข้าวเหนียวใหม่นึ่งสุก ชุบไข่ปรุงรสตีหอม ย่างไฟอ่อนจนเหลืองกรอบนอกนุ่มใน',
+            img: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: false,
+            hasPortion: false,
+            addons: []
+          }
+        ]
+      },
+      {
+        id: 'rest-6',
+        name: 'ครัวหมูหันแก่งกะเบา & อาหารริมโขง',
+        category: 'ตามสั่ง',
+        rating: 4.8,
+        reviewsCount: 112,
+        distanceKm: 1.8,
+        deliveryTimeMin: '20-30',
+        deliveryFee: 15,
+        locationName: 'จุดชมวิวแก่งกะเบา อ.หว้านใหญ่',
+        tags: ['ปลาส้มหว้านใหญ่แท้', 'กับข้าวพร้อมทาน', 'รสจัด'],
+        bannerImg: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
+        logoEmoji: '🐟',
+        isOpen: true,
+        phone: '083-444-5566',
+        description: 'ปลาส้มหว้านใหญ่ขึ้นชื่อ ทอดกรอบโรยหอมเจียวพริกขี้หนูสด พร้อมข้าวราดแกงหลากหลายเมนู',
+        categories: ['เมนูแนะนำ', 'กับข้าว', 'ข้าวราดแกง'],
+        menu: [
+          {
+            id: 'm6-1',
+            name: 'ชุดหมูหันแก่งกะเบาหนังกรอบ (ชุดเล็ก + แจ่วสูตรเด็ด)',
+            category: 'เมนูแนะนำ',
+            price: 70,
+            description: 'ปลาส้มหมักข้าวคั่วธรรมชาติ ทอดกรอบนอกนุ่มใน เปรี้ยวกำลังดี ทานกับข้าวสวยร้อนๆ',
+            img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&q=80',
+            hasSpiciness: true,
+            hasPortion: false,
+            addons: [{ name: 'ข้าวสวยหอมมะลิ', price: 10 }]
+          }
+        ]
+      }
+    ];
+
+    // 2. APP STATE
+    let appState = {
+      currentView: 'home',
+      activeCategory: 'all',
+      activeFilterSort: 'recommended',
+      searchQuery: '',
+      currentLocation: 'ตลาดสดเทศบาลหว้านใหญ่',
+      activeRestaurant: null,
+      modalItem: null,
+      modalQuantity: 1,
+      modalSelectedPortion: { type: 'normal', extra: 0 },
+      modalSelectedSpice: 'medium',
+      modalSelectedAddons: [],
+      cart: {
+        restaurantId: null,
+        restaurantName: '',
+        restaurantAddress: '',
+        items: [],
+        appliedPromo: null,
+        discountAmount: 0
+      },
+      activeOrder: null,
+      shipdayApiKey: localStorage.getItem('shipday_api_key') || '4jV7ikfZha.2FSbpIR9Z5h6z0F67JY2',
+      merchantStoreOpen: true,
+      merchantOrders: [
+        {
+          orderId: 'WG-20260823-771',
+          customerName: 'คุณกรรณิการ์ (โซน รพ.หว้านใหญ่)',
+          itemsSummary: 'กะเพราหมูกรอบ (เผ็ดมาก) x 2, ต้มยำรวมมิตร x 1',
+          total: 210,
+          status: 'กำลังปรุงอาหาร (COOKING)',
+          time: '20:30 น.',
+          payment: 'PromptPay (ชำระแล้ว)'
+        },
+        {
+          orderId: 'WG-20260823-769',
+          customerName: 'ครูสมปอง (รร.หว้านใหญ่)',
+          itemsSummary: 'ข้าวผัดโบราณ x 1 + ไข่ดาว',
+          total: 65,
+          status: 'ไรเดอร์กำลังมารับ (RIDER_ASSIGNED)',
+          time: '20:15 น.',
+          payment: 'เก็บเงินปลายทาง (COD)'
+        }
+      ]
+    };
+
+    // 3. INITIALIZATION
+    document.addEventListener('DOMContentLoaded', () => {
+      renderRestaurants();
+      updateCartUI();
+      renderMerchantOrders();
+      lucide.createIcons();
+
+      if (appState.shipdayApiKey) {
+        document.getElementById('shipday-api-key-input').value = appState.shipdayApiKey;
+      }
+    });
+
+    // 4. ROUTING
+    function showView(viewName) {
+      appState.currentView = viewName;
+      document.getElementById('view-home').classList.add('hidden');
+      document.getElementById('view-restaurant-detail').classList.add('hidden');
+      document.getElementById('view-order-tracking').classList.add('hidden');
+      document.getElementById('view-merchant').classList.add('hidden');
+
+      if (viewName === 'home') {
+        document.getElementById('view-home').classList.remove('hidden');
+      } else if (viewName === 'restaurant-detail') {
+        document.getElementById('view-restaurant-detail').classList.remove('hidden');
+      } else if (viewName === 'order-tracking') {
+        document.getElementById('view-order-tracking').classList.remove('hidden');
+      } else if (viewName === 'merchant') {
+        document.getElementById('view-merchant').classList.remove('hidden');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      lucide.createIcons();
+    }
+
+    function toggleMerchantView() {
+      if (appState.currentView === 'merchant') {
+        showView('home');
+      } else {
+        showView('merchant');
+      }
+    }
+
+    function scrollToRestaurants() {
+      const el = document.getElementById('restaurants-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 5. RESTAURANTS RENDERING
+    function renderRestaurants() {
+      const grid = document.getElementById('restaurants-grid');
+      grid.innerHTML = '';
+
+      let list = [...LOCAL_RESTAURANTS];
+
+      if (appState.activeCategory !== 'all') {
+        list = list.filter(r => r.category === appState.activeCategory);
+      }
+
+      if (appState.searchQuery.trim() !== '') {
+        const q = appState.searchQuery.toLowerCase();
+        list = list.filter(r => 
+          r.name.toLowerCase().includes(q) || 
+          r.category.toLowerCase().includes(q) ||
+          r.tags.some(t => t.toLowerCase().includes(q)) ||
+          r.menu.some(m => m.name.toLowerCase().includes(q))
+        );
+      }
+
+      if (appState.activeFilterSort === 'free_delivery') {
+        list = list.filter(r => r.deliveryFee <= 10);
+      } else if (appState.activeFilterSort === 'fastest') {
+        list.sort((a, b) => parseFloat(a.distanceKm) - parseFloat(b.distanceKm));
+      } else if (appState.activeFilterSort === 'top_rated') {
+        list = list.filter(r => r.rating >= 4.8).sort((a, b) => b.rating - a.rating);
+      }
+
+      document.getElementById('restaurant-count-label').innerText = `พบ ${list.length} ร้านเด็ดพร้อมเสิร์ฟในหว้านใหญ่`;
+
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 text-center text-slate-400">
+            <i data-lucide="utensils" class="w-12 h-12 mx-auto mb-3 text-slate-300"></i>
+            <p class="text-sm font-semibold text-slate-600">ไม่พบร้านอาหารที่ตรงกับคำค้นหา</p>
+            <p class="text-xs text-slate-400 mt-1">ลองเปลี่ยนคำค้นหา หรือเลือกหมวดหมู่อื่นดูนะครับ</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      list.forEach(rest => {
+        const card = document.createElement('div');
+        card.className = 'group bg-white rounded-3xl border border-slate-200/90 shadow-soft hover:shadow-xl hover:border-brand-300 transition-all duration-200 overflow-hidden cursor-pointer flex flex-col';
+        card.onclick = () => openRestaurantDetail(rest.id);
+
+        card.innerHTML = `
+          <div class="relative h-44 sm:h-48 overflow-hidden bg-slate-100">
+            <img src="${rest.bannerImg}" alt="${rest.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent"></div>
+            
+            <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
+              ${rest.tags.map(t => `<span class="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">${t}</span>`).join('')}
+            </div>
+
+            <div class="absolute bottom-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full text-slate-800 text-[11px] font-bold shadow-sm flex items-center gap-1.5">
+              <i data-lucide="clock" class="w-3 h-3 text-brand-500"></i>
+              <span>${rest.deliveryTimeMin} นาที</span>
+              <span class="text-slate-300">•</span>
+              <span class="text-slate-500 font-normal">${rest.distanceKm} กม.</span>
+            </div>
+
+            <div class="absolute bottom-3 right-3 bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full text-xs font-extrabold shadow-sm flex items-center gap-1">
+              <span>⭐ ${rest.rating}</span>
+            </div>
+          </div>
+
+          <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-lg">${rest.logoEmoji}</span>
+                <h3 class="font-display font-bold text-base text-slate-900 group-hover:text-brand-600 transition-colors line-clamp-1">${rest.name}</h3>
+              </div>
+              <p class="text-xs text-slate-500 line-clamp-1 mt-1">${rest.description}</p>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
+              <span class="flex items-center gap-1">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+                <span class="truncate max-w-[160px]">${rest.locationName}</span>
+              </span>
+              <span class="font-semibold text-brand-600">ค่าส่ง ฿${rest.deliveryFee}</span>
+            </div>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    function filterByCategory(cat) {
+      appState.activeCategory = cat;
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        if (btn.getAttribute('data-category') === cat) {
+          btn.classList.add('active', 'border-brand-500', 'bg-brand-50');
+        } else {
+          btn.classList.remove('active', 'border-brand-500', 'bg-brand-50');
+        }
+      });
+      renderRestaurants();
+    }
+
+    function setFilterSort(filterType) {
+      appState.activeFilterSort = filterType;
+      document.querySelectorAll('.filter-sort-btn').forEach(b => {
+        b.classList.remove('bg-slate-900', 'text-white', 'active');
+        b.classList.add('bg-white', 'text-slate-600');
+      });
+      event.currentTarget.classList.add('bg-slate-900', 'text-white', 'active');
+      event.currentTarget.classList.remove('bg-white', 'text-slate-600');
+      renderRestaurants();
+    }
+
+    function handleSearch(val) {
+      appState.searchQuery = val;
+      const d = document.getElementById('desktop-search-input');
+      const m = document.getElementById('mobile-search-input');
+      if (d && d.value !== val) d.value = val;
+      if (m && m.value !== val) m.value = val;
+      renderRestaurants();
+    }
+
+    // 6. RESTAURANT DETAIL & MENU
+    function openRestaurantDetail(restId) {
+      const rest = LOCAL_RESTAURANTS.find(r => r.id === restId);
+      if (!rest) return;
+
+      appState.activeRestaurant = rest;
+
+      const header = document.getElementById('restaurant-detail-header');
+      header.innerHTML = `
+        <div class="relative h-48 sm:h-64 bg-slate-900">
+          <img src="${rest.bannerImg}" class="w-full h-full object-cover opacity-80" alt="${rest.name}">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent"></div>
+          <div class="absolute bottom-4 left-4 right-4 text-white flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">${rest.logoEmoji}</span>
+                <h1 class="text-xl sm:text-3xl font-display font-extrabold text-white">${rest.name}</h1>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-300 max-w-xl">${rest.description}</p>
+              <div class="flex flex-wrap items-center gap-3 text-xs text-slate-300 pt-1">
+                <span class="flex items-center gap-1 font-bold text-amber-400">⭐ ${rest.rating} (${rest.reviewsCount} รีวิว)</span>
+                <span>•</span>
+                <span class="flex items-center gap-1">📍 ${rest.locationName}</span>
+                <span>•</span>
+                <span class="flex items-center gap-1">🛵 ค่าส่ง ฿${rest.deliveryFee} (${rest.distanceKm} กม.)</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <a href="tel:${rest.phone}" class="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-2 rounded-xl backdrop-blur-md flex items-center gap-1.5 transition-colors">
+                <i data-lucide="phone" class="w-3.5 h-3.5"></i> ${rest.phone}
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const nav = document.getElementById('menu-category-nav');
+      nav.innerHTML = `<p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 py-1.5">หมวดหมู่เมนู</p>`;
+      rest.categories.forEach((cat, index) => {
+        const btn = document.createElement('a');
+        btn.href = `#menu-section-${index}`;
+        btn.className = `block text-xs font-medium px-3 py-2 rounded-xl text-slate-700 hover:bg-brand-50 hover:text-brand-600 transition-colors ${index === 0 ? 'bg-brand-50 text-brand-600 font-bold' : ''}`;
+        btn.innerText = cat;
+        nav.appendChild(btn);
+      });
+
+      const menuList = document.getElementById('restaurant-menu-list');
+      menuList.innerHTML = '';
+
+      rest.categories.forEach((cat, index) => {
+        const items = rest.menu.filter(m => m.category === cat);
+        if (items.length === 0) return;
+
+        const section = document.createElement('div');
+        section.id = `menu-section-${index}`;
+        section.className = 'space-y-3';
+
+        section.innerHTML = `
+          <h3 class="font-display font-bold text-base text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-2">
+            <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+            ${cat}
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            ${items.map(item => `
+              <div onclick="openFoodModal('${item.id}')" class="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md hover:border-brand-300 transition-all cursor-pointer flex gap-3 group">
+                <img src="${item.img}" alt="${item.name}" class="w-24 h-24 rounded-xl object-cover shrink-0 group-hover:scale-105 transition-transform">
+                <div class="flex-1 flex flex-col justify-between">
+                  <div>
+                    <h4 class="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-brand-600 line-clamp-1">${item.name}</h4>
+                    <p class="text-[11px] text-slate-500 line-clamp-2 mt-1">${item.description}</p>
+                  </div>
+                  <div class="flex items-center justify-between pt-2">
+                    <span class="font-bold text-sm text-brand-600">฿${item.price}</span>
+                    <button class="w-7 h-7 rounded-full bg-brand-50 group-hover:bg-brand-500 text-brand-600 group-hover:text-white flex items-center justify-center transition-colors">
+                      <i data-lucide="plus" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+
+        menuList.appendChild(section);
+      });
+
+      showView('restaurant-detail');
+    }
+
+    // 7. FOOD MODAL
+    function openFoodModal(menuId) {
+      if (!appState.activeRestaurant) return;
+      const item = appState.activeRestaurant.menu.find(m => m.id === menuId);
+      if (!item) return;
+
+      appState.modalItem = item;
+      appState.modalQuantity = 1;
+      appState.modalSelectedPortion = { type: 'normal', extra: 0 };
+      appState.modalSelectedSpice = 'medium';
+      appState.modalSelectedAddons = [];
+
+      document.getElementById('modal-food-img').src = item.img;
+      document.getElementById('modal-food-title').innerText = item.name;
+      document.getElementById('modal-food-desc').innerText = item.description;
+      document.getElementById('modal-food-price').innerText = `฿${item.price}`;
+      document.getElementById('modal-food-restaurant').innerText = appState.activeRestaurant.name;
+      document.getElementById('modal-special-notes').value = '';
+      document.getElementById('modal-qty').innerText = '1';
+
+      const portionBox = document.getElementById('modal-options-portion');
+      if (item.hasPortion) {
+        portionBox.parentElement.style.display = 'block';
+        portionBox.innerHTML = `
+          <label class="cursor-pointer text-center p-2 rounded-xl border border-brand-500 bg-brand-50 text-xs font-semibold text-slate-800">
+            <input type="radio" name="portion" value="normal" checked onchange="updatePortion('normal', 0)" class="hidden">
+            ธรรมดา (฿0)
+          </label>
+          <label class="cursor-pointer text-center p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs text-slate-600">
+            <input type="radio" name="portion" value="special" onchange="updatePortion('special', 10)" class="hidden">
+            พิเศษ (+฿10)
+          </label>
+          <label class="cursor-pointer text-center p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs text-slate-600">
+            <input type="radio" name="portion" value="jumbo" onchange="updatePortion('jumbo', 20)" class="hidden">
+            จัมโบ้ (+฿20)
+          </label>
+        `;
+      } else {
+        portionBox.parentElement.style.display = 'none';
+      }
+
+      const spiceBox = document.getElementById('modal-options-spice');
+      const spiceSection = document.getElementById('spiciness-section');
+      if (item.hasSpiciness) {
+        spiceSection.style.display = 'block';
+        spiceBox.innerHTML = `
+          <label class="cursor-pointer text-center p-2 rounded-xl border border-slate-200 text-xs text-slate-600">
+            <input type="radio" name="spice" value="none" onchange="updateSpice('none')" class="hidden">
+            ไม่เผ็ด 🌶️0
+          </label>
+          <label class="cursor-pointer text-center p-2 rounded-xl border border-slate-200 text-xs text-slate-600">
+            <input type="radio" name="spice" value="mild" onchange="updateSpice('mild')" class="hidden">
+            เผ็ดน้อย 🌶️1
+          </label>
+          <label class="cursor-pointer text-center p-2 rounded-xl border border-brand-500 bg-brand-50 text-xs font-semibold text-slate-800">
+            <input type="radio" name="spice" value="medium" checked onchange="updateSpice('medium')" class="hidden">
+            เผ็ดกลาง 🌶️2
+          </label>
+          <label class="cursor-pointer text-center p-2 rounded-xl border border-slate-200 text-xs text-slate-600">
+            <input type="radio" name="spice" value="isan" onchange="updateSpice('isan')" class="hidden">
+            เผ็ดอีสาน 🌶️3
+          </label>
+        `;
+      } else {
+        spiceSection.style.display = 'none';
+      }
+
+      const addonsBox = document.getElementById('modal-options-addons');
+      const addonsSection = document.getElementById('addons-section');
+      if (item.addons && item.addons.length > 0) {
+        addonsSection.style.display = 'block';
+        addonsBox.innerHTML = item.addons.map(add => `
+          <label class="flex items-center justify-between p-2 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" value="${add.name}" data-price="${add.price}" onchange="toggleAddon('${add.name}', ${add.price}, this.checked)" class="rounded text-brand-500 focus:ring-brand-500">
+              <span class="text-slate-800">${add.name}</span>
+            </div>
+            <span class="font-bold text-slate-700">+฿${add.price}</span>
+          </label>
+        `).join('');
+      } else {
+        addonsSection.style.display = 'none';
+      }
+
+      calculateModalTotal();
+      document.getElementById('food-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeFoodModal() {
+      document.getElementById('food-modal').classList.add('hidden');
+    }
+
+    function updatePortion(type, extra) {
+      appState.modalSelectedPortion = { type, extra };
+      calculateModalTotal();
+    }
+
+    function updateSpice(spice) {
+      appState.modalSelectedSpice = spice;
+    }
+
+    function toggleAddon(name, price, checked) {
+      if (checked) {
+        appState.modalSelectedAddons.push({ name, price });
+      } else {
+        appState.modalSelectedAddons = appState.modalSelectedAddons.filter(a => a.name !== name);
+      }
+      calculateModalTotal();
+    }
+
+    function updateModalQuantity(delta) {
+      appState.modalQuantity = Math.max(1, appState.modalQuantity + delta);
+      document.getElementById('modal-qty').innerText = appState.modalQuantity;
+      calculateModalTotal();
+    }
+
+    function calculateModalTotal() {
+      if (!appState.modalItem) return 0;
+      let unitPrice = appState.modalItem.price;
+      if (appState.modalSelectedPortion && appState.modalSelectedPortion.extra) {
+        unitPrice += appState.modalSelectedPortion.extra;
+      }
+      const addonsTotal = appState.modalSelectedAddons.reduce((sum, a) => sum + a.price, 0);
+      const total = (unitPrice + addonsTotal) * appState.modalQuantity;
+      document.getElementById('modal-final-price').innerText = `฿${total}`;
+      return total;
+    }
+
+    function confirmAddToCart() {
+      if (!appState.modalItem || !appState.activeRestaurant) return;
+
+      if (appState.cart.items.length > 0 && appState.cart.restaurantId !== appState.activeRestaurant.id) {
+        if (!confirm(`คุณมีรายการอาหารจากร้าน "${appState.cart.restaurantName}" ในตะกร้าอยู่แล้ว ต้องการล้างตะกร้าและสั่งจากร้าน "${appState.activeRestaurant.name}" แทนหรือไม่?`)) {
+          return;
+        }
+        appState.cart.items = [];
+      }
+
+      appState.cart.restaurantId = appState.activeRestaurant.id;
+      appState.cart.restaurantName = appState.activeRestaurant.name;
+      appState.cart.restaurantAddress = appState.activeRestaurant.locationName;
+
+      let portionExtra = 0;
+      let portionLabel = 'ธรรมดา';
+      if (appState.modalSelectedPortion) {
+        portionExtra = appState.modalSelectedPortion.extra || 0;
+        portionLabel = appState.modalSelectedPortion.type === 'special' ? 'พิเศษ' : (appState.modalSelectedPortion.type === 'jumbo' ? 'จัมโบ้' : 'ธรรมดา');
+      }
+
+      const addonsTotal = appState.modalSelectedAddons.reduce((sum, a) => sum + a.price, 0);
+      const unitPrice = appState.modalItem.price + portionExtra + addonsTotal;
+      const notes = document.getElementById('modal-special-notes').value.trim();
+
+      const cartItem = {
+        id: 'cart-' + Date.now(),
+        menuId: appState.modalItem.id,
+        name: appState.modalItem.name,
+        basePrice: appState.modalItem.price,
+        portion: portionLabel,
+        spice: appState.modalSelectedSpice,
+        addons: [...appState.modalSelectedAddons],
+        notes: notes,
+        unitPrice: unitPrice,
+        quantity: appState.modalQuantity,
+        total: unitPrice * appState.modalQuantity,
+        img: appState.modalItem.img
+      };
+
+      appState.cart.items.push(cartItem);
+      closeFoodModal();
+      updateCartUI();
+      openCartDrawer();
+    }
+
+    // 8. CART DRAWER & CALCULATIONS
+    function updateCartUI() {
+      const totalCount = appState.cart.items.reduce((sum, i) => sum + i.quantity, 0);
+      const badge = document.getElementById('cart-count-badge');
+      const headerTotal = document.getElementById('cart-total-header');
+
+      if (totalCount > 0) {
+        badge.innerText = totalCount;
+        badge.classList.remove('hidden');
+
+        const subtotal = appState.cart.items.reduce((sum, i) => sum + i.total, 0);
+        headerTotal.innerText = `฿${subtotal}`;
+        headerTotal.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+        headerTotal.classList.add('hidden');
+      }
+
+      renderCartDrawerItems();
+    }
+
+    function renderCartDrawerItems() {
+      const container = document.getElementById('cart-items-container');
+      const restNameLabel = document.getElementById('cart-restaurant-name');
+      const footer = document.getElementById('cart-footer-section');
+
+      if (appState.cart.items.length === 0) {
+        restNameLabel.innerText = 'ยังไม่มีรายการอาหาร';
+        container.innerHTML = `
+          <div class="py-12 text-center text-slate-400 space-y-3">
+            <i data-lucide="shopping-bag" class="w-12 h-12 mx-auto text-slate-300"></i>
+            <p class="text-sm font-semibold text-slate-600">ตะกร้าของคุณว่างเปล่า</p>
+            <p class="text-xs text-slate-400">เลือกอาหารอร่อยๆ จากร้านในหว้านใหญ่ได้เลยครับ</p>
+            <button onclick="closeCartDrawer(); showView('home');" class="bg-brand-500 text-white text-xs px-4 py-2 rounded-full font-medium">ไปเลือกร้านอาหาร</button>
+          </div>
+        `;
+        footer.style.display = 'none';
+        lucide.createIcons();
+        return;
+      }
+
+      footer.style.display = 'block';
+      restNameLabel.innerText = `ร้าน: ${appState.cart.restaurantName}`;
+
+      container.innerHTML = appState.cart.items.map(item => `
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 flex gap-3 text-xs">
+          <img src="${item.img}" class="w-14 h-14 rounded-xl object-cover shrink-0">
+          <div class="flex-1 flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-1">
+              <h4 class="font-bold text-slate-900">${item.name}</h4>
+              <button onclick="removeCartItem('${item.id}')" class="text-slate-400 hover:text-red-500">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+            <div class="text-[10px] text-slate-500 space-y-0.5 mt-0.5">
+              <span>ขนาด: ${item.portion}</span>
+              ${item.spice ? `<span> • เผ็ด: ${item.spice}</span>` : ''}
+              ${item.addons.length > 0 ? `<span> • เพิ่ม: ${item.addons.map(a => a.name).join(', ')}</span>` : ''}
+              ${item.notes ? `<p class="italic text-brand-600">"${item.notes}"</p>` : ''}
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-200/60 mt-1">
+              <div class="flex items-center bg-white border border-slate-200 rounded-full px-1 py-0.5">
+                <button onclick="changeCartQty('${item.id}', -1)" class="w-5 h-5 flex items-center justify-center font-bold text-slate-600">-</button>
+                <span class="w-6 text-center font-bold text-slate-800 text-xs">${item.quantity}</span>
+                <button onclick="changeCartQty('${item.id}', 1)" class="w-5 h-5 flex items-center justify-center font-bold text-slate-600">+</button>
+              </div>
+              <span class="font-bold text-slate-900 text-sm">฿${item.total}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      const subtotal = appState.cart.items.reduce((sum, i) => sum + i.total, 0);
+      const deliveryFee = 15;
+      let discount = appState.cart.discountAmount;
+
+      document.getElementById('cart-subtotal').innerText = `฿${subtotal}`;
+      document.getElementById('cart-delivery-fee').innerText = `฿${deliveryFee}`;
+
+      if (discount > 0) {
+        document.getElementById('cart-discount-row').style.display = 'flex';
+        document.getElementById('cart-discount-val').innerText = `-฿${discount}`;
+      } else {
+        document.getElementById('cart-discount-row').style.display = 'none';
+      }
+
+      const grandTotal = Math.max(0, subtotal + deliveryFee - discount);
+      document.getElementById('cart-grand-total').innerText = `฿${grandTotal}`;
+
+      lucide.createIcons();
+    }
+
+    function openCartDrawer() {
+      document.getElementById('cart-drawer').classList.remove('hidden');
+    }
+
+    function closeCartDrawer() {
+      document.getElementById('cart-drawer').classList.add('hidden');
+    }
+
+    function changeCartQty(cartId, delta) {
+      const item = appState.cart.items.find(i => i.id === cartId);
+      if (!item) return;
+      item.quantity += delta;
+      if (item.quantity <= 0) {
+        appState.cart.items = appState.cart.items.filter(i => i.id !== cartId);
+      } else {
+        item.total = item.unitPrice * item.quantity;
+      }
+      updateCartUI();
+    }
+
+    function removeCartItem(cartId) {
+      appState.cart.items = appState.cart.items.filter(i => i.id !== cartId);
+      updateCartUI();
+    }
+
+    function applyPromoCode() {
+      const code = document.getElementById('promo-code-input').value.trim().toUpperCase();
+      const msg = document.getElementById('promo-status-msg');
+      msg.classList.remove('hidden');
+
+      const subtotal = appState.cart.items.reduce((sum, i) => sum + i.total, 0);
+
+      if (code === 'WANGOFREE') {
+        appState.cart.appliedPromo = code;
+        appState.cart.discountAmount = 15;
+        msg.className = 'text-[11px] text-emerald-600 font-semibold';
+        msg.innerText = '✅ ใช้โค้ด WANGOFREE ส่งฟรี 3 กม. แรกสำเร็จ (-15 บ.)';
+      } else if (code === 'WANGO50') {
+        if (subtotal >= 200) {
+          appState.cart.appliedPromo = code;
+          appState.cart.discountAmount = 50;
+          msg.className = 'text-[11px] text-emerald-600 font-semibold';
+          msg.innerText = '✅ ใช้โค้ด WANGO50 รับส่วนลด 50 บาทสำเร็จ!';
+        } else {
+          msg.className = 'text-[11px] text-red-500 font-semibold';
+          msg.innerText = '❌ โค้ดนี้ใช้ได้เมื่อสั่งอาหารครบ 200 บาทขึ้นไป';
+          return;
+        }
+      } else if (code === 'LOCAL10') {
+        appState.cart.appliedPromo = code;
+        appState.cart.discountAmount = Math.round(subtotal * 0.1);
+        msg.className = 'text-[11px] text-emerald-600 font-semibold';
+        msg.innerText = `✅ ใช้โค้ด LOCAL10 ลด 10% สำเร็จ (-${appState.cart.discountAmount} บ.)`;
+      } else {
+        msg.className = 'text-[11px] text-red-500 font-semibold';
+        msg.innerText = '❌ โค้ดส่วนลดไม่ถูกต้องหรือหมดอายุแล้ว';
+        return;
+      }
+
+      updateCartUI();
+    }
+
+    function copyAndApplyPromo(code) {
+      closePromoModal();
+      openCartDrawer();
+      document.getElementById('promo-code-input').value = code;
+      applyPromoCode();
+    }
+
+    // 9. CHECKOUT & SUBMIT
+    function proceedToCheckoutModal() {
+      if (appState.cart.items.length === 0) return;
+      closeCartDrawer();
+
+      const subtotal = appState.cart.items.reduce((sum, i) => sum + i.total, 0);
+      const deliveryFee = 15;
+      const discount = appState.cart.discountAmount;
+      const grandTotal = Math.max(0, subtotal + deliveryFee - discount);
+
+      document.getElementById('checkout-final-total').innerText = `฿${grandTotal}`;
+      document.getElementById('promptpay-amount-label').innerText = `฿${grandTotal}`;
+
+      document.getElementById('checkout-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeCheckoutModal() {
+      document.getElementById('checkout-modal').classList.add('hidden');
+    }
+
+    function updatePaymentMethod(method) {
+      const qrBox = document.getElementById('promptpay-qr-box');
+      if (method === 'promptpay') {
+        qrBox.style.display = 'block';
+      } else {
+        qrBox.style.display = 'none';
+      }
+    }
+
+    function submitOrderAndDispatchShipday() {
+      const custName = document.getElementById('cust-name').value.trim();
+      const custPhone = document.getElementById('cust-phone').value.trim();
+      const custAddress = document.getElementById('cust-address').value.trim();
+      const custNotes = document.getElementById('cust-notes').value.trim();
+
+      if (!custName || !custPhone || !custAddress) {
+        alert('กรุณากรอกชื่อ เบอร์โทร และที่อยู่จัดส่งให้ครบถ้วนครับ');
+        return;
+      }
+
+      const orderNumber = 'WG-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.floor(100 + Math.random() * 900);
+      const subtotal = appState.cart.items.reduce((sum, i) => sum + i.total, 0);
+      const deliveryFee = 15;
+      const grandTotal = Math.max(0, subtotal + deliveryFee - appState.cart.discountAmount);
+
+      const newOrder = {
+        orderNumber: orderNumber,
+        createdAt: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.',
+        customerName: custName,
+        customerPhone: custPhone,
+        customerAddress: custAddress,
+        customerNotes: custNotes,
+        restaurantName: appState.cart.restaurantName,
+        restaurantAddress: appState.cart.restaurantAddress || 'อ.หว้านใหญ่ จ.มุกดาหาร',
+        items: [...appState.cart.items],
+        subtotal: subtotal,
+        deliveryFee: deliveryFee,
+        discount: appState.cart.discountAmount,
+        grandTotal: grandTotal,
+        statusStep: 1,
+        shipdayOrderId: 'SHIPDAY-' + Math.floor(100000 + Math.random() * 900000),
+        shipdayTrackingUrl: `https://track.shipday.com/live/${orderNumber.toLowerCase()}`
+      };
+
+      appState.activeOrder = newOrder;
+
+      appState.merchantOrders.unshift({
+        orderId: orderNumber,
+        customerName: `${custName} (${custAddress.slice(0, 20)}...)`,
+        itemsSummary: newOrder.items.map(i => `${i.name} x${i.quantity}`).join(', '),
+        total: grandTotal,
+        status: 'ออเดอร์ใหม่ (NEW)',
+        time: newOrder.createdAt,
+        payment: 'พร้อมเพย์ (PromptPay)'
+      });
+      renderMerchantOrders();
+
+      appState.cart.items = [];
+      appState.cart.appliedPromo = null;
+      appState.cart.discountAmount = 0;
+      updateCartUI();
+      closeCheckoutModal();
+
+      setupOrderTrackingView();
+      showView('order-tracking');
+    }
+
+    // 10. ORDER TRACKING VIEW
+    function setupOrderTrackingView() {
+      const ord = appState.activeOrder;
+      if (!ord) return;
+
+      document.getElementById('track-order-id').innerText = `ออเดอร์ #${ord.orderNumber}`;
+      document.getElementById('track-order-time').innerText = `สั่งเมื่อ ${ord.createdAt} • ชำระเรียบร้อย`;
+      document.getElementById('map-restaurant-name').innerText = ord.restaurantName;
+
+      renderStepper();
+
+      const itemsContainer = document.getElementById('tracking-items-summary');
+      itemsContainer.innerHTML = `
+        <h4 class="font-bold text-xs text-slate-800 mb-1">สรุปรายการอาหาร (${ord.restaurantName})</h4>
+        <div class="space-y-1 text-xs text-slate-600">
+          ${ord.items.map(i => `
+            <div class="flex justify-between">
+              <span>${i.name} x ${i.quantity} ${i.portion !== 'ธรรมดา' ? `(${i.portion})` : ''}</span>
+              <span class="font-semibold text-slate-900">฿${i.total}</span>
+            </div>
+          `).join('')}
+          <div class="flex justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
+            <span>ค่าจัดส่ง</span>
+            <span>฿${ord.deliveryFee}</span>
+          </div>
+          ${ord.discount > 0 ? `
+            <div class="flex justify-between text-xs text-emerald-600">
+              <span>ส่วนลด</span>
+              <span>-฿${ord.discount}</span>
+            </div>
+          ` : ''}
+          <div class="flex justify-between text-sm font-bold text-slate-900 pt-1 border-t border-slate-200">
+            <span>ยอดชำระสุทธิ</span>
+            <span class="text-brand-600">฿${ord.grandTotal}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderStepper() {
+      const step = appState.activeOrder ? appState.activeOrder.statusStep : 1;
+      const stepper = document.getElementById('order-stepper');
+
+      const steps = [
+        { label: 'รับออเดอร์', icon: 'check-circle-2', stepNum: 1 },
+        { label: 'กำลังปรุง', icon: 'flame', stepNum: 2 },
+        { label: 'ไรเดอร์รับแล้ว', icon: 'package-check', stepNum: 3 },
+        { label: 'กำลังนำส่ง', icon: 'bike', stepNum: 4 },
+        { label: 'ส่งสำเร็จ', icon: 'party-popper', stepNum: 5 }
+      ];
+
+      stepper.innerHTML = steps.map(s => {
+        const isCurrent = s.stepNum === step;
+        const isDone = s.stepNum <= step;
+        return `
+          <div class="flex flex-col items-center">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${isDone ? 'bg-brand-500 text-white shadow-md' : 'bg-slate-100 text-slate-400'} ${isCurrent ? 'ring-4 ring-brand-100 scale-110' : ''}">
+              <i data-lucide="${s.icon}" class="w-4 h-4"></i>
+            </div>
+            <span class="text-[10px] mt-1.5 font-medium ${isDone ? 'text-slate-900 font-bold' : 'text-slate-400'}">${s.label}</span>
+          </div>
+        `;
+      }).join('');
+
+      const eta = document.getElementById('track-eta');
+      const riderPin = document.getElementById('map-rider-pin');
+
+      if (step === 1) {
+        eta.innerText = '25-30 นาที';
+        if (riderPin) riderPin.style.left = '140px';
+      } else if (step === 2) {
+        eta.innerText = '20-25 นาที';
+        if (riderPin) riderPin.style.left = '200px';
+      } else if (step === 3) {
+        eta.innerText = '15-20 นาที';
+        if (riderPin) riderPin.style.left = '320px';
+      } else if (step === 4) {
+        eta.innerText = '5-10 นาที';
+        if (riderPin) riderPin.style.left = '460px';
+      } else {
+        eta.innerText = 'จัดส่งเรียบร้อย 🎉';
+        if (riderPin) riderPin.style.left = '520px';
+      }
+
+      lucide.createIcons();
+    }
+
+    function simulateNextOrderStatus() {
+      if (!appState.activeOrder) return;
+      if (appState.activeOrder.statusStep < 5) {
+        appState.activeOrder.statusStep += 1;
+      } else {
+        appState.activeOrder.statusStep = 1;
+      }
+      renderStepper();
+    }
+
+    // 11. MERCHANT PORTAL
+    function renderMerchantOrders() {
+      const container = document.getElementById('merchant-orders-container');
+      const pendingCount = document.getElementById('merchant-pending-count');
+
+      pendingCount.innerText = `${appState.merchantOrders.length} ออเดอร์`;
+
+      if (appState.merchantOrders.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">ไม่มีออเดอร์ค้างในขณะนี้</p>`;
+        return;
+      }
+
+      container.innerHTML = appState.merchantOrders.map((ord, idx) => `
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-900 text-sm">${ord.orderId}</span>
+              <span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-semibold">${ord.status}</span>
+              <span class="text-slate-400 text-[10px]">${ord.time}</span>
+            </div>
+            <p class="text-slate-700 font-medium">${ord.customerName}</p>
+            <p class="text-slate-500">${ord.itemsSummary}</p>
+            <p class="text-slate-400 text-[11px]">การชำระเงิน: <span class="text-slate-700 font-semibold">${ord.payment}</span></p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="merchantAction(${idx}, 'ACCEPT')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-3 py-1.5 rounded-xl shadow-sm">
+              รับออเดอร์ & ปรุง
+            </button>
+            <button onclick="merchantAction(${idx}, 'CALL_RIDER')" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-xl shadow-sm">
+              เรียกไรเดอร์ Shipday
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function merchantAction(idx, action) {
+      if (action === 'ACCEPT') {
+        appState.merchantOrders[idx].status = 'กำลังปรุงอาหาร (COOKING)';
+        alert('รับออเดอร์แล้ว! แจ้งเตือนห้องครัวเริ่มทำอาหารทันที');
+      } else if (action === 'CALL_RIDER') {
+        appState.merchantOrders[idx].status = 'ไรเดอร์กำลังมารับ (RIDER_ASSIGNED)';
+        alert('ส่งสัญญาณเรียกรถไรเดอร์หว้านใหญ่ผ่านระบบ Shipday สำเร็จ!');
+      }
+      renderMerchantOrders();
+    }
+
+    function toggleStoreOpenStatus() {
+      appState.merchantStoreOpen = !appState.merchantStoreOpen;
+      const btn = document.getElementById('store-status-toggle');
+      if (appState.merchantStoreOpen) {
+        btn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded-xl font-medium shadow-sm transition-colors';
+        btn.innerText = 'สถานะ: รับออเดอร์ปกติ';
+      } else {
+        btn.className = 'bg-red-600 hover:bg-red-700 text-white text-xs px-4 py-2 rounded-xl font-medium shadow-sm transition-colors';
+        btn.innerText = 'สถานะ: ปิดรับออเดอร์ชั่วคราว';
+      }
+    }
+
+    // 12. SHIPDAY MODAL & SETTINGS
+    function openShipdayModal() {
+      document.getElementById('shipday-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeShipdayModal() {
+      document.getElementById('shipday-modal').classList.add('hidden');
+    }
+
+    function saveShipdayApiKey() {
+      const key = document.getElementById('shipday-api-key-input').value.trim();
+      appState.shipdayApiKey = key;
+      localStorage.setItem('shipday_api_key', key);
+      alert('บันทึก Shipday API Key สำเร็จ! ระบบพร้อมเชื่อมต่อการกระจายงานไรเดอร์');
+    }
+
+    function testShipdayDispatchMock() {
+      const respBox = document.getElementById('shipday-response-box');
+      const respText = document.getElementById('shipday-response-text');
+      respBox.classList.remove('hidden');
+
+      const mockOrderId = Math.floor(800000 + Math.random() * 100000);
+      const mockResult = {
+        success: true,
+        orderId: mockOrderId,
+        status: "ALREADY_ASSIGNED",
+        carrier: "Wanon Local Fleet #1",
+        trackingUrl: `https://track.shipday.com/live/wg-${mockOrderId}`,
+        message: "Order successfully dispatched to Shipday Wanon Niwat Fleet"
+      };
+
+      respText.innerText = JSON.stringify(mockResult, null, 2);
+      lucide.createIcons();
+    }
+
+    // 13. LOCATION MODAL
+    function openLocationModal() {
+      document.getElementById('location-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeLocationModal() {
+      document.getElementById('location-modal').classList.add('hidden');
+    }
+
+    function selectLocation(locName) {
+      appState.currentLocation = locName;
+      document.getElementById('current-location-text').innerText = `ส่งที่: ${locName}`;
+      closeLocationModal();
+    }
+
+    function applyCustomLocation() {
+      const custom = document.getElementById('custom-location-input').value.trim();
+      if (custom) {
+        selectLocation(custom);
+      }
+    }
+
+    // 14. PROMO MODAL
+    function openPromoModal() {
+      document.getElementById('promo-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closePromoModal() {
+      document.getElementById('promo-modal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
