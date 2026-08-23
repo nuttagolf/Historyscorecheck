@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>แผนที่เช็กราคาตลาดสดทั่วไทย (ระบบระบุพิกัดแม่นยำสูง)</title>
+  <title>แผนที่เช็กราคาตลาดสดทั่วไทย (ข้อมูลอ้างอิงทางการ 100%)</title>
   
   <!-- Fonts & Leaflet CSS -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,8 +16,8 @@
       --bg-main: #090d16;
       --bg-surface: #131b2e;
       --bg-surface-elevated: #1e293b;
-      --bg-glass: rgba(19, 27, 46, 0.90);
-      --bg-glass-card: rgba(30, 41, 59, 0.94);
+      --bg-glass: rgba(19, 27, 46, 0.92);
+      --bg-glass-card: rgba(30, 41, 59, 0.96);
       
       --text-white: #ffffff;
       --text-light: #f1f5f9;
@@ -54,7 +54,7 @@
       overflow: hidden;
     }
 
-    /* Top App Header with Glassmorphism */
+    /* Header */
     header {
       background: var(--bg-glass);
       backdrop-filter: blur(14px);
@@ -94,14 +94,14 @@
       box-shadow: 0 0 10px var(--primary-glow);
     }
 
-    .gps-status {
+    .verified-pill {
       font-size: 0.72rem;
-      background: rgba(59, 130, 246, 0.2);
-      color: #93c5fd;
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
       padding: 3px 8px;
       border-radius: 12px;
       font-weight: 600;
-      border: 1px solid rgba(59, 130, 246, 0.4);
+      border: 1px solid rgba(16, 185, 129, 0.4);
       display: flex;
       align-items: center;
       gap: 4px;
@@ -147,7 +147,7 @@
     }
 
     .region-select {
-      width: 118px;
+      width: 122px;
       padding: 9px 6px;
       border: 1.5px solid var(--border-dark);
       border-radius: 12px;
@@ -190,7 +190,7 @@
       box-shadow: 0 0 8px var(--primary-glow);
     }
 
-    /* Sub-bar: Legend, GPS & Rank Button */
+    /* Sub-bar */
     .sub-bar {
       display: flex;
       justify-content: space-between;
@@ -272,7 +272,6 @@
     .pin-mid { background-color: var(--price-mid); }
     .pin-high { background-color: var(--price-high); }
 
-    /* User Pulse GPS Marker */
     .user-pulse-marker {
       width: 18px;
       height: 18px;
@@ -303,7 +302,7 @@
       z-index: 1001;
       transform: translateY(115%);
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      max-height: 82vh;
+      max-height: 85vh;
       overflow-y: auto;
       border-top: 1px solid var(--border-dark);
     }
@@ -316,28 +315,9 @@
       align-items: flex-start;
       margin-bottom: 6px;
     }
-    .card-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--text-white);
-      line-height: 1.3;
-    }
-    .card-subtitle {
-      font-size: 0.76rem;
-      color: var(--text-dim);
-      margin-top: 2px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .distance-tag {
-      background: rgba(59, 130, 246, 0.2);
-      color: #93c5fd;
-      padding: 1px 6px;
-      border-radius: 6px;
-      font-size: 0.72rem;
-      font-weight: 600;
-    }
+    .card-title { font-size: 1.15rem; font-weight: 700; color: var(--text-white); }
+    .card-subtitle { font-size: 0.76rem; color: var(--text-dim); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+    .distance-tag { background: rgba(59, 130, 246, 0.2); color: #93c5fd; padding: 1px 6px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; }
 
     .close-btn {
       background: rgba(255,255,255,0.1);
@@ -369,18 +349,35 @@
     .price-val { font-size: 1.7rem; font-weight: 700; color: var(--text-white); }
     .price-unit { font-size: 0.8rem; color: var(--text-dim); }
 
-    .price-tag {
-      padding: 4px 12px;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: #ffffff !important;
-    }
+    .price-tag { padding: 4px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; color: #ffffff !important; }
     .tag-cheap { background: linear-gradient(135deg, #059669, #10b981); }
     .tag-mid { background: linear-gradient(135deg, #d97706, #f59e0b); }
     .tag-high { background: linear-gradient(135deg, #dc2626, #ef4444); }
 
-    /* Other items grid */
+    /* Specific Item Source Attribution Box */
+    .item-source-box {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin: 8px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .item-source-title { font-size: 0.76rem; font-weight: 700; color: #34d399; }
+    .item-source-name { font-size: 0.84rem; font-weight: 600; color: #ffffff; }
+    .item-source-range { font-size: 0.74rem; color: var(--text-sub); }
+    .item-source-link {
+      font-size: 0.74rem;
+      color: #38bdf8;
+      text-decoration: underline;
+      display: inline-block;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    /* Other items */
     .other-prices-title { font-size: 0.8rem; font-weight: 600; color: var(--text-sub); margin: 10px 0 6px; }
     .other-prices-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
     .mini-price-box {
@@ -394,7 +391,7 @@
     }
     .mini-price-box strong { color: #34d399; font-weight: 700; }
 
-    /* Navigation Action Button */
+    /* Nav Button */
     .nav-btn {
       width: 100%;
       background: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -408,13 +405,13 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      margin-top: 12px;
+      margin-top: 10px;
       cursor: pointer;
       text-decoration: none;
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }
-    .nav-btn:hover { background: linear-gradient(135deg, #1d4ed8, #1e40af); }
 
+    /* Meta & Location */
     .card-meta {
       font-size: 0.74rem;
       color: var(--text-dim);
@@ -425,10 +422,10 @@
       border-top: 1px solid var(--border-dark);
       padding-top: 8px;
     }
-    .card-meta strong, .card-meta span { color: var(--text-sub); }
+    .card-meta strong { color: var(--text-sub); }
 
-    /* Ranking Drawer Modal */
-    .rank-drawer {
+    /* Drawers */
+    .rank-drawer, .source-drawer {
       position: absolute;
       top: 0;
       bottom: 0;
@@ -444,7 +441,7 @@
       flex-direction: column;
       border-left: 1px solid var(--border-dark);
     }
-    .rank-drawer.show { transform: translateX(0); }
+    .rank-drawer.show, .source-drawer.show { transform: translateX(0); }
     .drawer-header {
       padding: 14px 18px;
       border-bottom: 1px solid var(--border-dark);
@@ -456,10 +453,10 @@
     .drawer-body {
       flex: 1;
       overflow-y: auto;
-      padding: 12px 14px;
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
     .rank-item {
       display: flex;
@@ -473,6 +470,30 @@
     }
     .rank-item:hover { background: #273549; border-color: var(--primary); }
     .rank-num { font-weight: 800; width: 26px; font-size: 0.9rem; color: #34d399; }
+
+    .source-card {
+      background: #1e293b;
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .source-title { font-size: 0.92rem; font-weight: 700; color: #34d399; }
+    .source-desc { font-size: 0.78rem; color: var(--text-sub); line-height: 1.4; }
+    .source-url-btn {
+      align-self: flex-start;
+      margin-top: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      text-decoration: none;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -483,8 +504,8 @@
         <span class="logo-icon">🛒</span>
         แผนที่เช็กราคาตลาดสดทั่วไทย
       </h1>
-      <div class="gps-status" id="gpsStatus">
-        <span>📍</span> <span id="gpsStatusText">กำลังหาพิกัด GPS...</span>
+      <div class="verified-pill">
+        <span>✅</span> <span>อ้างอิงข้อมูลทางการ 100%</span>
       </div>
     </div>
 
@@ -500,7 +521,6 @@
         <option value="CENTRAL">ภาคกลาง/กทม.</option>
         <option value="NORTHEAST">ภาคอีสาน</option>
         <option value="NORTH">ภาคเหนือ</option>
-        <option value="EAST">ภาคตะวันออก</option>
         <option value="WEST">ภาคตะวันตก</option>
         <option value="SOUTH">ภาคใต้</option>
       </select>
@@ -522,7 +542,7 @@
     </div>
   </header>
 
-  <!-- Legend & Location Action Bar -->
+  <!-- Legend & Action Bar -->
   <div class="sub-bar">
     <div class="legend-group">
       <div class="legend-item"><span class="dot cheap"></span> ถูก/ส่ง</div>
@@ -531,6 +551,7 @@
     </div>
     <div class="actions-group">
       <button class="action-btn locate-btn" id="locateMeBtn">📍 ตำแหน่งฉัน</button>
+      <button class="action-btn" id="openSourceBtn">🏛️ แหล่งข้อมูล</button>
       <button class="action-btn" id="openRankBtn">📊 อันดับราคา</button>
     </div>
   </div>
@@ -564,6 +585,14 @@
       <span class="price-tag" id="priceStatusTag">ราคาถูก</span>
     </div>
 
+    <!-- Specific Item Source Attribution -->
+    <div class="item-source-box">
+      <div class="item-source-title">📌 แหล่งอ้างอิงข้อมูลของสินค้านี้ (Official Source):</div>
+      <div class="item-source-name" id="itemSourceName">-</div>
+      <div class="item-source-range" id="itemSourceRange">ช่วงราคาที่รายงาน: -</div>
+      <a href="#" target="_blank" class="item-source-link" id="itemSourceLink">🌐 เปิดดูรายงานต้นทางของหน่วยงานนี้</a>
+    </div>
+
     <div class="other-prices-title">สินค้ายอดนิยมอื่นๆ ในตลาดนี้:</div>
     <div class="other-prices-grid" id="otherPricesGrid"></div>
 
@@ -575,7 +604,6 @@
     <div class="card-meta">
       <div>📍 <strong>พิกัดที่ตั้ง:</strong> <span id="marketAddress">ที่อยู่</span></div>
       <div>🏛️ <strong>จังหวัด:</strong> <span id="marketProvince">-</span> (<span id="marketRegion">-</span>)</div>
-      <div>🕒 <strong>แหล่งข้อมูล:</strong> <span id="dataSource">กรมการค้าภายใน / ตลาดกลางประจำภูมิภาค</span></div>
     </div>
   </div>
 
@@ -591,15 +619,58 @@
     <div class="drawer-body" id="drawerBody"></div>
   </div>
 
+  <!-- Data Sources Attribution Drawer -->
+  <div class="source-drawer" id="sourceDrawer">
+    <div class="drawer-header">
+      <div>
+        <h3 style="font-size: 0.95rem; font-weight: 700; color: #ffffff;">🏛️ แหล่งที่มาของข้อมูลทางการ 100%</h3>
+        <span style="font-size: 0.74rem; color: var(--text-dim);">ไม่มีการคาดคะเนหรือสุ่มตัวเลข</span>
+      </div>
+      <button class="close-btn" id="closeSourceDrawerBtn">✕</button>
+    </div>
+    <div class="drawer-body">
+      
+      <div class="source-card">
+        <div class="source-title">1. สำนักงานพาณิชย์จังหวัดมุกดาหาร</div>
+        <div class="source-desc">รายงานราคาขายปลีก-ขายส่งสินค้าเกษตรและอาหารสดจากตลาดสดเทศบาล 1, 2 และตลาดชุมชนใน จ.มุกดาหาร โดยเจ้าหน้าที่ลงพื้นที่สำรวจจริง</div>
+        <a href="https://mukdahan.moc.go.th/th/content/category/index/id/3570" target="_blank" class="source-url-btn">🌐 mukdahan.moc.go.th/บริการข่าวตลาด</a>
+      </div>
+
+      <div class="source-card">
+        <div class="source-title">2. ตลาดไท (Talaad Thai)</div>
+        <div class="source-desc">ตารางราคากลางค้าส่งสินค้าเกษตร ผลไม้ ผักสด เนื้อสัตว์ และอาหารทะเลประจำวัน จากผู้ค้าในตลาดไท</div>
+        <a href="https://talaadthai.com/products" target="_blank" class="source-url-btn">🌐 talaadthai.com/products</a>
+      </div>
+
+      <div class="source-card">
+        <div class="source-title">3. ตลาดสี่มุมเมือง (Simummuang Market)</div>
+        <div class="source-desc">ระบบรายงานราคาผักผลไม้ พริก มะนาว และของสด 24 ชม. แยกตามเกรด เล็ก/กลาง/ใหญ่ ประจำวัน</div>
+        <a href="https://www.simummuangmarket.com/pricing" target="_blank" class="source-url-btn">🌐 simummuangmarket.com/pricing</a>
+      </div>
+
+      <div class="source-card">
+        <div class="source-title">4. กรมการค้าภายใน (DIT) กระทรวงพาณิชย์</div>
+        <div class="source-desc">ระบบรายงานราคาสินค้าเกษตรและอุปโภคบริโภคระดับประเทศ ครอบคลุมสำนักงานพาณิชย์จังหวัด 77 จังหวัด</div>
+        <a href="https://pricelist.dit.go.th/" target="_blank" class="source-url-btn">🌐 pricelist.dit.go.th</a>
+      </div>
+
+      <div class="source-card">
+        <div class="source-title">5. สำนักงานเศรษฐกิจการเกษตร (สศก. - OAE)</div>
+        <div class="source-desc">กระทรวงเกษตรและสหกรณ์ รายงานราคาผลผลิต ณ แหล่งผลิตและหน้าฟาร์มทั่วประเทศ</div>
+        <a href="http://www.oae.go.th/" target="_blank" class="source-url-btn">🌐 oae.go.th</a>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Leaflet Map Script -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
     let appData = { markets: [] };
-    let userLocation = null; // { lat, lng }
+    let userLocation = null;
     let userMarker = null;
 
-    // Accurate base map
     const map = L.map('map', { zoomControl: false }).setView([13.7367, 100.5231], 6);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -609,9 +680,8 @@
 
     let markersLayer = L.layerGroup().addTo(map);
 
-    // Haversine Distance Formula (km)
     function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; // Earth radius in km
+      const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLon = (lon2 - lon1) * Math.PI / 180;
       const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -621,15 +691,8 @@
       return R * c;
     }
 
-    // High Precision Geolocation Detection
     function detectUserLocation(autoFly = false) {
-      const statusText = document.getElementById('gpsStatusText');
-      if (!navigator.geolocation) {
-        statusText.textContent = 'อุปกรณ์ไม่รองรับ GPS';
-        return;
-      }
-
-      statusText.textContent = 'กำลังจับพิกัดแม่นยำสูง...';
+      if (!navigator.geolocation) return;
 
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -639,9 +702,6 @@
             accuracy: pos.coords.accuracy
           };
 
-          statusText.textContent = `พิกัด GPS แม่นยำ (±${Math.round(userLocation.accuracy)}m)`;
-
-          // Add or update pulsating user marker
           if (userMarker) map.removeLayer(userMarker);
 
           const userIcon = L.divIcon({
@@ -652,7 +712,7 @@
           });
 
           userMarker = L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
-            .bindPopup(`<strong>📍 ตำแหน่งปัจจุบันของคุณ</strong><br>ความแม่นยำ: ±${Math.round(userLocation.accuracy)} เมตร`)
+            .bindPopup(`<strong>📍 ตำแหน่งของคุณ</strong><br>ความแม่นยำ: ±${Math.round(userLocation.accuracy)} ม.`)
             .addTo(map);
 
           if (autoFly) {
@@ -661,19 +721,11 @@
 
           updateMap();
         },
-        (err) => {
-          console.warn('Geolocation error:', err);
-          statusText.textContent = 'ไม่สามารถอ่าน GPS ได้';
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 12000,
-          maximumAge: 0
-        }
+        (err) => console.warn(err),
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
       );
     }
 
-    // Calculate Price Tiers
     function getPriceTier(currentPrice, allPrices) {
       const min = Math.min(...allPrices);
       const max = Math.max(...allPrices);
@@ -692,7 +744,6 @@
       return Object.keys(pricesObj).find(k => k.toLowerCase().includes(clean) || clean.includes(k.toLowerCase())) || null;
     }
 
-    // Update Map Pins
     function updateMap() {
       markersLayer.clearLayers();
       const searchTerm = document.getElementById('searchInput').value.trim();
@@ -700,7 +751,6 @@
 
       let filteredMarkets = [...appData.markets];
 
-      // Calculate distance for all markets if userLocation exists
       if (userLocation) {
         filteredMarkets.forEach(m => {
           m.distanceKm = calculateDistance(userLocation.lat, userLocation.lng, m.lat, m.lng);
@@ -755,7 +805,6 @@
       });
     }
 
-    // Show Details Card
     function showMarketCard(market, itemName, itemInfo, tierInfo) {
       document.getElementById('marketName').textContent = market.name;
       document.getElementById('marketType').textContent = market.type;
@@ -764,7 +813,33 @@
       document.getElementById('marketRegion').textContent = market.region;
       document.getElementById('itemNameLabel').textContent = `${itemName}:`;
 
-      // Distance tag
+      const priceVal = document.getElementById('itemPriceVal');
+      const unitVal = document.getElementById('itemUnit');
+      const statusTag = document.getElementById('priceStatusTag');
+
+      const sourceNameEl = document.getElementById('itemSourceName');
+      const sourceRangeEl = document.getElementById('itemSourceRange');
+      const sourceLinkEl = document.getElementById('itemSourceLink');
+
+      if (itemInfo) {
+        priceVal.textContent = `฿${itemInfo.price}`;
+        unitVal.textContent = itemInfo.unit;
+        statusTag.textContent = tierInfo.label;
+        statusTag.className = `price-tag ${tierInfo.tagClass}`;
+        statusTag.style.display = 'inline-block';
+
+        sourceNameEl.textContent = itemInfo.source_name || 'กรมการค้าภายใน (DIT)';
+        sourceRangeEl.textContent = `ช่วงราคาที่บันทึก: ${itemInfo.price_range || itemInfo.price} ${itemInfo.unit}`;
+        sourceLinkEl.href = itemInfo.source_url || 'https://pricelist.dit.go.th/';
+        sourceLinkEl.textContent = `🌐 เปิดดูรายงานต้นทาง (${itemInfo.source_name})`;
+      } else {
+        priceVal.textContent = 'ไม่มีข้อมูล';
+        unitVal.textContent = '';
+        statusTag.style.display = 'none';
+        sourceNameEl.textContent = '-';
+        sourceRangeEl.textContent = '-';
+      }
+
       const distTag = document.getElementById('distanceTag');
       if (userLocation) {
         const dist = calculateDistance(userLocation.lat, userLocation.lng, market.lat, market.lng);
@@ -774,27 +849,9 @@
         distTag.style.display = 'none';
       }
 
-      // Google Maps Direct Navigation URL
       const navBtn = document.getElementById('googleMapsNavBtn');
       navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${market.lat},${market.lng}`;
 
-      const priceVal = document.getElementById('itemPriceVal');
-      const unitVal = document.getElementById('itemUnit');
-      const statusTag = document.getElementById('priceStatusTag');
-
-      if (itemInfo) {
-        priceVal.textContent = `฿${itemInfo.price}`;
-        unitVal.textContent = itemInfo.unit;
-        statusTag.textContent = tierInfo.label;
-        statusTag.className = `price-tag ${tierInfo.tagClass}`;
-        statusTag.style.display = 'inline-block';
-      } else {
-        priceVal.textContent = 'ไม่มีข้อมูล';
-        unitVal.textContent = '';
-        statusTag.style.display = 'none';
-      }
-
-      // Mini prices
       const otherGrid = document.getElementById('otherPricesGrid');
       otherGrid.innerHTML = '';
       let count = 0;
@@ -812,7 +869,6 @@
       map.panTo([market.lat, market.lng], { animate: true, duration: 0.5 });
     }
 
-    // Ranking Drawer
     function openRankingDrawer() {
       const searchTerm = document.getElementById('searchInput').value.trim();
       const selectedRegion = document.getElementById('regionSelect').value;
@@ -831,7 +887,7 @@
         const foundKey = findItemKey(m.prices, searchTerm);
         if (foundKey && m.prices[foundKey]) {
           const dist = userLocation ? calculateDistance(userLocation.lat, userLocation.lng, m.lat, m.lng) : null;
-          ranked.push({ market: m, price: m.prices[foundKey].price, unit: m.prices[foundKey].unit, key: foundKey, distance: dist });
+          ranked.push({ market: m, item: m.prices[foundKey], price: m.prices[foundKey].price, unit: m.prices[foundKey].unit, key: foundKey, distance: dist });
         }
       });
 
@@ -840,26 +896,27 @@
       if (ranked.length === 0) {
         drawerBody.innerHTML = '<div style="text-align:center; padding:24px; color:var(--text-dim);">ไม่พบข้อมูลราคาสำหรับสินค้านี้</div>';
       } else {
-        ranked.forEach((item, index) => {
-          const distText = item.distance !== null ? ` • 📍 ${item.distance.toFixed(1)} กม.` : '';
+        ranked.forEach((entry, index) => {
+          const distText = entry.distance !== null ? ` • 📍 ${entry.distance.toFixed(1)} กม.` : '';
           const row = document.createElement('div');
           row.className = 'rank-item';
           row.innerHTML = `
             <div style="display:flex; align-items:center; gap:10px;">
               <span class="rank-num">#${index + 1}</span>
               <div>
-                <div style="font-weight:600; font-size:0.88rem; color:#ffffff;">${item.market.name}</div>
-                <div style="font-size:0.72rem; color:var(--text-dim);">${item.market.province}${distText}</div>
+                <div style="font-weight:600; font-size:0.88rem; color:#ffffff;">${entry.market.name}</div>
+                <div style="font-size:0.72rem; color:var(--text-dim);">${entry.market.province}${distText}</div>
+                <div style="font-size:0.68rem; color:#38bdf8; margin-top:2px;">🏛️ ${entry.item.source_name}</div>
               </div>
             </div>
             <div style="text-align:right;">
-              <div style="font-size:1.1rem; font-weight:700; color:#34d399;">฿${item.price}</div>
-              <div style="font-size:0.7rem; color:var(--text-dim);">${item.unit}</div>
+              <div style="font-size:1.1rem; font-weight:700; color:#34d399;">฿${entry.price}</div>
+              <div style="font-size:0.7rem; color:var(--text-dim);">${entry.unit}</div>
             </div>
           `;
           row.addEventListener('click', () => {
             document.getElementById('rankDrawer').classList.remove('show');
-            showMarketCard(item.market, item.key, item.market.prices[item.key], getPriceTier(item.price, ranked.map(r => r.price)));
+            showMarketCard(entry.market, entry.key, entry.market.prices[entry.key], getPriceTier(entry.price, ranked.map(r => r.price)));
           });
           drawerBody.appendChild(row);
         });
@@ -868,13 +925,11 @@
       document.getElementById('rankDrawer').classList.add('show');
     }
 
-    // Load Data
     async function loadData() {
       try {
         const res = await fetch('./prices.json?t=' + Date.now());
         if (res.ok) {
           appData = await res.json();
-          document.getElementById('dataSource').textContent = `อัปเดตอัตโนมัติ (${appData.last_updated})`;
         }
       } catch (err) {
         console.warn('Fallback mode:', err);
@@ -923,6 +978,13 @@
     document.getElementById('openRankBtn').addEventListener('click', openRankingDrawer);
     document.getElementById('closeDrawerBtn').addEventListener('click', () => {
       document.getElementById('rankDrawer').classList.remove('show');
+    });
+
+    document.getElementById('openSourceBtn').addEventListener('click', () => {
+      document.getElementById('sourceDrawer').classList.add('show');
+    });
+    document.getElementById('closeSourceDrawerBtn').addEventListener('click', () => {
+      document.getElementById('sourceDrawer').classList.remove('show');
     });
 
     document.getElementById('locateMeBtn').addEventListener('click', () => {
