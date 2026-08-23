@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>แผนที่เช็กราคาตลาดสดทั่วไทย</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --price-cheap: #10b981;
+      --price-mid: #f59e0b;
+      --price-high: #ef4444;
+      --border: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Prompt', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+    header {
+      background: var(--surface);
+      padding: 12px 16px 8px;
+      box-shadow: var(--shadow);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .brand { display: flex; align-items: center; justify-content: space-between; }
+    .brand h1 { font-size: 1.1rem; font-weight: 600; color: var(--primary-dark); }
+    .live-badge { font-size: 0.7rem; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
+
+    .search-box { position: relative; }
+    .search-box input {
+      width: 100%;
+      padding: 9px 14px 9px 36px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      outline: none;
+      background-color: #f1f5f9;
+    }
+    .search-box input:focus { border-color: var(--primary); background: #fff; }
+    .search-icon { position: absolute; left: 10px; top: 9px; }
+
+    .filter-row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+    .filter-row::-webkit-scrollbar { display: none; }
+    
+    .chip {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 16px;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .region-select {
+      padding: 3px 8px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+      background: #fff;
+      outline: none;
+    }
+
+    .legend-bar {
+      display: flex;
+      justify-content: space-around;
+      background: var(--surface);
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.75rem;
+      font-weight: 500;
+      z-index: 999;
+    }
+    .legend-item { display: flex; align-items: center; gap: 4px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.cheap { background-color: var(--price-cheap); }
+    .dot.mid { background-color: var(--price-mid); }
+    .dot.high { background-color: var(--price-high); }
+
+    #map { flex: 1; width: 100%; height: 100%; z-index: 10; }
+
+    .custom-marker { display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -100%); }
+    .marker-badge {
+      background: white;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+      white-space: nowrap;
+      border: 2px solid;
+      margin-bottom: 2px;
+    }
+    .marker-pin {
+      width: 18px;
+      height: 18px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .price-cheap { background-color: var(--price-cheap); border-color: var(--price-cheap); color: var(--price-cheap); }
+    .price-mid { background-color: var(--price-mid); border-color: var(--price-mid); color: #b45309; }
+    .price-high { background-color: var(--price-high); border-color: var(--price-high); color: var(--price-high); }
+
+    .info-card {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      padding: 16px 20px 24px;
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.15);
+      z-index: 1001;
+      transform: translateY(110%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .info-card.show { transform: translateY(0); }
+    .card-handle { width: 40px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 0 auto 10px; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .card-title { font-size: 1.05rem; font-weight: 600; }
+    .close-btn { background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; }
+    .price-highlight {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      background: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 6px;
+    }
+    .price-val { font-size: 1.4rem; font-weight: 700; }
+    .price-tag { padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 500; margin-left: auto; }
+    .tag-cheap { background: #d1fae5; color: #065f46; }
+    .tag-mid { background: #fef3c7; color: #92400e; }
+    .tag-high { background: #fee2e2; color: #991b1b; }
+    .card-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 3px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <h1>🛒 เช็กราคาตลาดสดทั่วไทย</h1>
+      <span class="live-badge" id="statusBadge">ทุกภูมิภาค</span>
+    </div>
+
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="พิมพ์ค้นหา เช่น ผักชี, หมูสามชั้น, มะนาว..." value="ผักชี">
+    </div>
+
+    <div class="filter-row">
+      <select class="region-select" id="regionSelect">
+        <option value="ALL">📍 ทุกภาคทั่วไทย</option>
+        <option value="CENTRAL">ภาคกลาง & กทม.</option>
+        <option value="NORTH">ภาคเหนือ</option>
+        <option value="NORTHEAST">ภาคอีสาน</option>
+        <option value="EAST">ภาคตะวันออก</option>
+        <option value="WEST">ภาคตะวันตก</option>
+        <option value="SOUTH">ภาคใต้</option>
+      </select>
+      <button class="chip active" data-query="ผักชี">ผักชี</button>
+      <button class="chip" data-query="หมูสามชั้น">หมูสามชั้น</button>
+      <button class="chip" data-query="มะนาว">มะนาว</button>
+      <button class="chip" data-query="ไข่ไก่">ไข่ไก่</button>
+      <button class="chip" data-query="พริกขี้หนู">พริกขี้หนู</button>
+    </div>
+  </header>
+
+  <div class="legend-bar">
+    <div class="legend-item"><span class="dot cheap"></span> ราคาถูก/ส่ง</div>
+    <div class="legend-item"><span class="dot mid"></span> ราคาปานกลาง</div>
+    <div class="legend-item"><span class="dot high"></span> ราคาสูง</div>
+  </div>
+
+  <div id="map"></div>
+
+  <div class="info-card" id="infoCard">
+    <div class="card-handle"></div>
+    <div class="card-header">
+      <div>
+        <h2 class="card-title" id="marketName">ชื่อตลาด</h2>
+        <span style="font-size: 0.75rem; color: var(--text-muted);" id="marketType">ประเภทตลาด</span>
+      </div>
+      <button class="close-btn" id="closeCardBtn">✕</button>
+    </div>
+
+    <div class="price-highlight">
+      <span style="font-size: 0.85rem; color: var(--text-muted);" id="itemNameLabel">ผักชี:</span>
+      <span class="price-val" id="itemPriceVal">0</span>
+      <span style="font-size: 0.8rem; color: var(--text-muted);" id="itemUnit">บาท/กก.</span>
+      <span class="price-tag" id="priceStatusTag">ราคาถูก</span>
+    </div>
+
+    <div class="card-meta">
+      <div>📍 <span id="marketAddress">ที่อยู่</span></div>
+      <div>🕒 ข้อมูลราคา: <span id="dataSource">กำลังโหลด...</span></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // ฐานข้อมูลเริ่มต้น (Fallback Data)
+    let allThailandMarkets = [
+      {
+        id: "talad_thai", name: "ตลาดไท", region: "CENTRAL", type: "ตลาดกลางค้าส่งสินค้าเกษตร",
+        lat: 14.0792, lng: 100.6171, address: "อ.คลองหลวง จ.ปทุมธานี",
+        prices: { "ผักชี": 70, "หมูสามชั้น": 150, "มะนาว": 2.0, "ไข่ไก่": 110, "พริกขี้หนู": 65 }
+      },
+      {
+        id: "si_mum_mueang", name: "ตลาดสี่มุมเมือง", region: "CENTRAL", type: "ตลาดกลางค้าส่งผักผลไม้",
+        lat: 13.9634, lng: 100.6209, address: "อ.ลำลูกกา จ.ปทุมธานี",
+        prices: { "ผักชี": 75, "หมูสามชั้น": 155, "มะนาว": 2.2, "ไข่ไก่": 112, "พริกขี้หนู": 70 }
+      },
+      {
+        id: "khlong_toei", name: "ตลาดคลองเตย", region: "CENTRAL", type: "ตลาดสดค้าส่ง-ปลีก กทม.",
+        lat: 13.7202, lng: 100.5574, address: "เขตคลองเตย กรุงเทพฯ",
+        prices: { "ผักชี": 95, "หมูสามชั้น": 175, "มะนาว": 3.0, "ไข่ไก่": 120, "พริกขี้หนู": 85 }
+      },
+      {
+        id: "muang_mai_cm", name: "ตลาดเมืองใหม่ เชียงใหม่", region: "NORTH", type: "ตลาดกลางค้าส่งภาคเหนือ",
+        lat: 18.7963, lng: 99.0004, address: "อ.เมือง จ.เชียงใหม่",
+        prices: { "ผักชี": 65, "หมูสามชั้น": 160, "มะนาว": 2.8, "ไข่ไก่": 115, "พริกขี้หนู": 60 }
+      },
+      {
+        id: "phitsanulok_1", name: "ตลาดสดเทศบาล 1 พิษณุโลก", region: "NORTH", type: "ตลาดสดศูนย์กลางภาคเหนือตอนล่าง",
+        lat: 16.8188, lng: 100.2605, address: "อ.เมือง จ.พิษณุโลก",
+        prices: { "ผักชี": 85, "หมูสามชั้น": 165, "มะนาว": 2.5, "ไข่ไก่": 118, "พริกขี้หนู": 75 }
+      },
+      {
+        id: "suranaree_korat", name: "ตลาดสุรนารี โคราช", region: "NORTHEAST", type: "ตลาดกลางสินค้าเกษตรภาคอีสาน",
+        lat: 14.9799, lng: 102.0978, address: "อ.เมือง จ.นครราชสีมา",
+        prices: { "ผักชี": 80, "หมูสามชั้น": 160, "มะนาว": 2.3, "ไข่ไก่": 114, "พริกขี้หนู": 65 }
+      },
+      {
+        id: "khon_kaen_market", name: "ตลาดสดเทศบาล 1 ขอนแก่น", region: "NORTHEAST", type: "ตลาดสดเทศบาลศูนย์กลางอีสานกลาง",
+        lat: 16.4322, lng: 102.8330, address: "อ.เมือง จ.ขอนแก่น",
+        prices: { "ผักชี": 90, "หมูสามชั้น": 170, "มะนาว": 2.7, "ไข่ไก่": 118, "พริกขี้หนู": 70 }
+      },
+      {
+        id: "ubon_market", name: "ตลาดสดเทศบาล 3 อุบลราชธานี", region: "NORTHEAST", type: "ตลาดสดศูนย์กลางอีสานใต้",
+        lat: 15.2287, lng: 104.8584, address: "อ.เมือง จ.อุบลราชธานี",
+        prices: { "ผักชี": 95, "หมูสามชั้น": 175, "มะนาว": 3.0, "ไข่ไก่": 120, "พริกขี้หนู": 78 }
+      },
+      {
+        id: "mukdahan_market", name: "ตลาดสดเทศบาล 2 มุกดาหาร", region: "NORTHEAST", type: "ตลาดสดชายแดนแม่น้ำโขง",
+        lat: 16.5434, lng: 104.7235, address: "อ.เมือง จ.มุกดาหาร",
+        prices: { "ผักชี": 100, "หมูสามชั้น": 175, "มะนาว": 3.2, "ไข่ไก่": 122, "พริกขี้หนู": 80 }
+      },
+      {
+        id: "sri_muang_ratchaburi", name: "ตลาดกลางผักและผลไม้ศรีเมือง", region: "WEST", type: "ตลาดกลางสินค้าเกษตรภาคตะวันตก",
+        lat: 13.5244, lng: 99.8164, address: "อ.เมือง จ.ราชบุรี",
+        prices: { "ผักชี": 68, "หมูสามชั้น": 155, "มะนาว": 1.8, "ไข่ไก่": 110, "พริกขี้หนู": 60 }
+      },
+      {
+        id: "rattanakorn_pattaya", name: "ตลาดสดรัตนากร ชลบุรี", region: "EAST", type: "ตลาดสดค้าส่ง-ปลีกภาคตะวันออก",
+        lat: 12.9236, lng: 100.8924, address: "พัทยาใต้ จ.ชลบุรี",
+        prices: { "ผักชี": 105, "หมูสามชั้น": 180, "มะนาว": 3.2, "ไข่ไก่": 122, "พริกขี้หนู": 85 }
+      },
+      {
+        id: "hua_it_nakhon", name: "ตลาดหัวอิฐ นครศรีธรรมราช", region: "SOUTH", type: "ตลาดกลางค้าส่งผักผลไม้ภาคใต้",
+        lat: 8.4304, lng: 99.9631, address: "อ.เมือง จ.นครศรีธรรมราช",
+        prices: { "ผักชี": 110, "หมูสามชั้น": 185, "มะนาว": 3.5, "ไข่ไก่": 124, "พริกขี้หนู": 90 }
+      },
+      {
+        id: "plaza_hatyai", name: "ตลาดสดพลาซ่า หาดใหญ่", region: "SOUTH", type: "ตลาดสดศูนย์กลางการค้าภาคใต้ตอนล่าง",
+        lat: 7.0084, lng: 100.4682, address: "อ.หาดใหญ่ จ.สงขลา",
+        prices: { "ผักชี": 120, "หมูสามชั้น": 190, "มะนาว": 4.0, "ไข่ไก่": 128, "พริกขี้หนู": 95 }
+      }
+    ];
+
+    const itemUnits = {
+      "ผักชี": "บาท/กก.",
+      "หมูสามชั้น": "บาท/กก.",
+      "มะนาว": "บาท/ลูก",
+      "ไข่ไก่": "บาท/แผง (30 ฟอง)",
+      "พริกขี้หนู": "บาท/กก."
+    };
+
+    const map = L.map('map', { zoomControl: false }).setView([13.736717, 100.523186], 6);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let markersLayer = L.layerGroup().addTo(map);
+
+    function getPriceTier(currentPrice, allPrices) {
+      const min = Math.min(...allPrices);
+      const max = Math.max(...allPrices);
+      const range = max - min;
+      if (range === 0) return { label: 'ราคาถูก', colorClass: 'price-cheap', tagClass: 'tag-cheap' };
+
+      const ratio = (currentPrice - min) / range;
+      if (ratio <= 0.33) return { label: 'ราคาถูก', colorClass: 'price-cheap', tagClass: 'tag-cheap' };
+      if (ratio <= 0.66) return { label: 'ปานกลาง', colorClass: 'price-mid', tagClass: 'tag-mid' };
+      return { label: 'ราคาสูง', colorClass: 'price-high', tagClass: 'tag-high' };
+    }
+
+    function updateMap() {
+      markersLayer.clearLayers();
+      const searchTerm = document.getElementById('searchInput').value.trim();
+      const selectedRegion = document.getElementById('regionSelect').value;
+
+      const filteredMarkets = allThailandMarkets.filter(m => selectedRegion === 'ALL' || m.region === selectedRegion);
+
+      const validPrices = [];
+      filteredMarkets.forEach(m => {
+        const foundKey = Object.keys(m.prices).find(k => k.includes(searchTerm) || searchTerm.includes(k));
+        if (foundKey) validPrices.push(m.prices[foundKey]);
+      });
+
+      filteredMarkets.forEach(market => {
+        const foundKey = Object.keys(market.prices).find(k => k.includes(searchTerm) || searchTerm.includes(k));
+        const price = foundKey ? market.prices[foundKey] : null;
+
+        let tierInfo = { label: 'ไม่มีข้อมูล', colorClass: 'price-mid', tagClass: 'tag-mid' };
+        let badgeText = market.name.split(' ')[0];
+
+        if (price !== null && validPrices.length > 0) {
+          tierInfo = getPriceTier(price, validPrices);
+          badgeText = `฿${price}`;
+        }
+
+        const customIcon = L.divIcon({
+          className: 'custom-div-icon',
+          html: `
+            <div class="custom-marker">
+              <div class="marker-badge ${tierInfo.colorClass}">${badgeText}</div>
+              <div class="marker-pin ${tierInfo.colorClass}"></div>
+            </div>
+          `,
+          iconSize: [60, 50],
+          iconAnchor: [30, 48]
+        });
+
+        const marker = L.marker([market.lat, market.lng], { icon: customIcon });
+
+        marker.on('click', () => {
+          document.getElementById('marketName').textContent = market.name;
+          document.getElementById('marketType').textContent = market.type;
+          document.getElementById('marketAddress').textContent = market.address;
+          document.getElementById('itemNameLabel').textContent = `${foundKey || searchTerm}:`;
+
+          const priceVal = document.getElementById('itemPriceVal');
+          const unitVal = document.getElementById('itemUnit');
+          const statusTag = document.getElementById('priceStatusTag');
+
+          if (price !== null) {
+            priceVal.textContent = `฿${price}`;
+            priceVal.style.color = `var(--${tierInfo.colorClass})`;
+            unitVal.textContent = itemUnits[foundKey] || 'บาท/หน่วย';
+            statusTag.textContent = tierInfo.label;
+            statusTag.className = `price-tag ${tierInfo.tagClass}`;
+            statusTag.style.display = 'inline-block';
+          } else {
+            priceVal.textContent = 'ไม่มีข้อมูล';
+            unitVal.textContent = '';
+            statusTag.style.display = 'none';
+          }
+
+          document.getElementById('infoCard').classList.add('show');
+          map.panTo([market.lat, market.lng], { animate: true, duration: 0.5 });
+        });
+
+        markersLayer.addLayer(marker);
+      });
+    }
+
+    // Auto-load Live Data if available
+    async function loadLiveData() {
+      try {
+        const res = await fetch('./prices.json?t=' + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          if (data.markets && data.markets.length > 0) {
+            allThailandMarkets = data.markets;
+            document.getElementById('dataSource').textContent = `อัปเดตอัตโนมัติ (${data.last_updated})`;
+            updateMap();
+          }
+        } else {
+          document.getElementById('dataSource').textContent = 'ข้อมูลมาตรฐานประจำวัน';
+        }
+      } catch (err) {
+        document.getElementById('dataSource').textContent = 'ข้อมูลมาตรฐานประจำวัน';
+      }
+    }
+
+    // Event Listeners
+    document.getElementById('searchInput').addEventListener('input', updateMap);
+    
+    document.getElementById('regionSelect').addEventListener('change', (e) => {
+      const reg = e.target.value;
+      const zoomMap = {
+        'ALL': { center: [13.7367, 100.5231], zoom: 6 },
+        'CENTRAL': { center: [13.9, 100.6], zoom: 9 },
+        'NORTH': { center: [18.2, 99.5], zoom: 8 },
+        'NORTHEAST': { center: [15.8, 103.5], zoom: 7 },
+        'EAST': { center: [13.0, 101.5], zoom: 8 },
+        'WEST': { center: [13.8, 99.5], zoom: 8 },
+        'SOUTH': { center: [8.0, 99.8], zoom: 7 }
+      };
+      if (zoomMap[reg]) {
+        map.flyTo(zoomMap[reg].center, zoomMap[reg].zoom, { duration: 1 });
+      }
+      updateMap();
+    });
+
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        document.getElementById('searchInput').value = chip.dataset.query;
+        updateMap();
+      });
+    });
+
+    document.getElementById('closeCardBtn').addEventListener('click', () => {
+      document.getElementById('infoCard').classList.remove('show');
+    });
+
+    map.on('click', () => {
+      document.getElementById('infoCard').classList.remove('show');
+    });
+
+    updateMap();
+    loadLiveData();
+  </script>
+</body>
+</html>
