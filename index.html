@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>แผนที่เช็กราคาตลาดสดทั่วไทย</title>
+  <title>แผนที่เช็กราคาตลาดสดทั่วไทย (ระบบระบุพิกัดแม่นยำสูง)</title>
+  
+  <!-- Fonts & Leaflet CSS -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -11,98 +13,244 @@
 
   <style>
     :root {
+      --bg-main: #090d16;
+      --bg-surface: #131b2e;
+      --bg-surface-elevated: #1e293b;
+      --bg-glass: rgba(19, 27, 46, 0.90);
+      --bg-glass-card: rgba(30, 41, 59, 0.94);
+      
+      --text-white: #ffffff;
+      --text-light: #f1f5f9;
+      --text-sub: #cbd5e1;
+      --text-dim: #94a3b8;
+
       --primary: #10b981;
-      --primary-dark: #059669;
-      --bg: #f8fafc;
-      --surface: #ffffff;
-      --text-main: #1e293b;
-      --text-muted: #64748b;
+      --primary-hover: #059669;
+      --primary-glow: rgba(16, 185, 129, 0.35);
+
       --price-cheap: #10b981;
       --price-mid: #f59e0b;
       --price-high: #ef4444;
-      --border: #e2e8f0;
-      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      
+      --border-dark: rgba(255, 255, 255, 0.12);
+      --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Prompt', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Prompt', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      color: var(--text-white);
+    }
 
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-white);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Top App Header with Glassmorphism */
     header {
-      background: var(--surface);
-      padding: 12px 16px 8px;
-      box-shadow: var(--shadow);
+      background: var(--bg-glass);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      padding: 10px 14px 8px;
+      box-shadow: var(--shadow-premium);
       z-index: 1000;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
+      border-bottom: 1px solid var(--border-dark);
     }
 
-    .brand { display: flex; align-items: center; justify-content: space-between; }
-    .brand h1 { font-size: 1.1rem; font-weight: 600; color: var(--primary-dark); }
-    .live-badge { font-size: 0.7rem; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-    .search-box { position: relative; }
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-white);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .brand-title span.logo-icon {
+      background: linear-gradient(135deg, #10b981, #059669);
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .gps-status {
+      font-size: 0.72rem;
+      background: rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Search & Region Select */
+    .search-wrapper {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
     .search-box input {
       width: 100%;
-      padding: 9px 14px 9px 36px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
+      padding: 9px 12px 9px 36px;
+      border: 1.5px solid var(--border-dark);
+      border-radius: 12px;
       font-size: 0.9rem;
       outline: none;
-      background-color: #f1f5f9;
+      background: rgba(30, 41, 59, 0.75);
+      color: var(--text-white);
+      transition: all 0.25s ease;
     }
-    .search-box input:focus { border-color: var(--primary); background: #fff; }
-    .search-icon { position: absolute; left: 10px; top: 9px; }
-
-    .filter-row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
-    .filter-row::-webkit-scrollbar { display: none; }
-    
-    .chip {
-      background: #f1f5f9;
-      border: 1px solid var(--border);
-      padding: 3px 10px;
-      border-radius: 16px;
-      font-size: 0.75rem;
-      white-space: nowrap;
-      cursor: pointer;
+    .search-box input::placeholder { color: var(--text-dim); }
+    .search-box input:focus {
+      border-color: var(--primary);
+      background: rgba(30, 41, 59, 0.95);
+      box-shadow: 0 0 12px var(--primary-glow);
     }
-    .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      pointer-events: none;
+    }
 
     .region-select {
-      padding: 3px 8px;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      font-size: 0.75rem;
-      background: #fff;
+      width: 118px;
+      padding: 9px 6px;
+      border: 1.5px solid var(--border-dark);
+      border-radius: 12px;
+      font-size: 0.78rem;
+      background: #1e293b;
+      color: var(--text-white);
+      font-weight: 600;
       outline: none;
+      cursor: pointer;
+    }
+    .region-select option { background: #0f172a; color: #ffffff; }
+
+    /* Quick Suggestion Chips */
+    .chips-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 1px 0 3px;
+    }
+    .chips-bar::-webkit-scrollbar { display: none; }
+
+    .chip {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid var(--border-dark);
+      padding: 4px 11px;
+      border-radius: 16px;
+      font-size: 0.76rem;
+      white-space: nowrap;
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text-light);
+      transition: all 0.2s;
+    }
+    .chip.active {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      font-weight: 600;
+      border-color: #34d399;
+      box-shadow: 0 0 8px var(--primary-glow);
     }
 
-    .legend-bar {
+    /* Sub-bar: Legend, GPS & Rank Button */
+    .sub-bar {
       display: flex;
-      justify-content: space-around;
-      background: var(--surface);
-      padding: 6px 12px;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.75rem;
+      justify-content: space-between;
+      align-items: center;
+      background: #0d1322;
+      padding: 6px 14px;
+      border-bottom: 1px solid var(--border-dark);
+      font-size: 0.74rem;
       font-weight: 500;
       z-index: 999;
     }
-    .legend-item { display: flex; align-items: center; gap: 4px; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot.cheap { background-color: var(--price-cheap); }
-    .dot.mid { background-color: var(--price-mid); }
-    .dot.high { background-color: var(--price-high); }
+    .legend-group { display: flex; gap: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 4px; color: var(--text-sub); }
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .dot.cheap { background-color: var(--price-cheap); color: var(--price-cheap); }
+    .dot.mid { background-color: var(--price-mid); color: var(--price-mid); }
+    .dot.high { background-color: var(--price-high); color: var(--price-high); }
 
-    #map { flex: 1; width: 100%; height: 100%; z-index: 10; }
+    .actions-group { display: flex; gap: 6px; }
 
-    .custom-marker { display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -100%); }
-    .marker-badge {
-      background: white;
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-size: 0.7rem;
+    .action-btn {
+      background: rgba(30, 41, 59, 0.9);
+      color: var(--text-white);
+      border: 1px solid var(--border-dark);
+      padding: 4px 9px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      cursor: pointer;
       font-weight: 600;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .action-btn:hover { background: #334155; }
+    .action-btn.locate-btn {
+      background: rgba(59, 130, 246, 0.25);
+      border-color: rgba(59, 130, 246, 0.5);
+      color: #93c5fd;
+    }
+
+    /* Map Layout */
+    #map { flex: 1; width: 100%; height: 100%; z-index: 10; background: #0f172a; }
+
+    /* Custom Leaflet Markers */
+    .custom-marker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform: translate(-50%, -100%);
+      cursor: pointer;
+    }
+    .marker-badge {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
       white-space: nowrap;
       border: 2px solid;
       margin-bottom: 2px;
@@ -112,299 +260,627 @@
       height: 18px;
       border-radius: 50% 50% 50% 0;
       transform: rotate(-45deg);
-      border: 2px solid white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      border: 2px solid #ffffff;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.5);
     }
-    .price-cheap { background-color: var(--price-cheap); border-color: var(--price-cheap); color: var(--price-cheap); }
-    .price-mid { background-color: var(--price-mid); border-color: var(--price-mid); color: #b45309; }
-    .price-high { background-color: var(--price-high); border-color: var(--price-high); color: var(--price-high); }
+    
+    .badge-cheap { border-color: var(--price-cheap); color: #34d399; }
+    .badge-mid { border-color: var(--price-mid); color: #fbbf24; }
+    .badge-high { border-color: var(--price-high); color: #f87171; }
 
+    .pin-cheap { background-color: var(--price-cheap); }
+    .pin-mid { background-color: var(--price-mid); }
+    .pin-high { background-color: var(--price-high); }
+
+    /* User Pulse GPS Marker */
+    .user-pulse-marker {
+      width: 18px;
+      height: 18px;
+      background: #3b82f6;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 15px #3b82f6;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+      70% { box-shadow: 0 0 0 14px rgba(59, 130, 246, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+
+    /* Bottom Info Card */
     .info-card {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      background: var(--surface);
+      background: var(--bg-glass-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       padding: 16px 20px 24px;
-      border-radius: 20px 20px 0 0;
-      box-shadow: 0 -4px 16px rgba(0,0,0,0.15);
+      border-radius: 22px 22px 0 0;
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.6);
       z-index: 1001;
-      transform: translateY(110%);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(115%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      max-height: 82vh;
+      overflow-y: auto;
+      border-top: 1px solid var(--border-dark);
     }
     .info-card.show { transform: translateY(0); }
-    .card-handle { width: 40px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 0 auto 10px; }
-    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-    .card-title { font-size: 1.05rem; font-weight: 600; }
-    .close-btn { background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; }
-    .price-highlight {
+    .card-handle { width: 40px; height: 5px; background: rgba(255,255,255,0.25); border-radius: 3px; margin: 0 auto 12px; }
+    
+    .card-header {
       display: flex;
-      align-items: baseline;
-      gap: 6px;
-      background: #f8fafc;
-      padding: 8px 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
+      justify-content: space-between;
+      align-items: flex-start;
       margin-bottom: 6px;
     }
-    .price-val { font-size: 1.4rem; font-weight: 700; }
-    .price-tag { padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 500; margin-left: auto; }
-    .tag-cheap { background: #d1fae5; color: #065f46; }
-    .tag-mid { background: #fef3c7; color: #92400e; }
-    .tag-high { background: #fee2e2; color: #991b1b; }
-    .card-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 3px; }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-white);
+      line-height: 1.3;
+    }
+    .card-subtitle {
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .distance-tag {
+      background: rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+      padding: 1px 6px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: var(--text-white);
+      cursor: pointer;
+    }
+
+    /* Price Hero Box */
+    .price-hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 1.5px solid var(--border-dark);
+      margin: 10px 0;
+    }
+    .price-hero-label { font-size: 0.86rem; color: var(--text-sub); }
+    .price-val-group { display: flex; align-items: baseline; gap: 6px; }
+    .price-val { font-size: 1.7rem; font-weight: 700; color: var(--text-white); }
+    .price-unit { font-size: 0.8rem; color: var(--text-dim); }
+
+    .price-tag {
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #ffffff !important;
+    }
+    .tag-cheap { background: linear-gradient(135deg, #059669, #10b981); }
+    .tag-mid { background: linear-gradient(135deg, #d97706, #f59e0b); }
+    .tag-high { background: linear-gradient(135deg, #dc2626, #ef4444); }
+
+    /* Other items grid */
+    .other-prices-title { font-size: 0.8rem; font-weight: 600; color: var(--text-sub); margin: 10px 0 6px; }
+    .other-prices-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .mini-price-box {
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid var(--border-dark);
+      padding: 7px 9px;
+      border-radius: 9px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.76rem;
+    }
+    .mini-price-box strong { color: #34d399; font-weight: 700; }
+
+    /* Navigation Action Button */
+    .nav-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      border: 1px solid #60a5fa;
+      padding: 10px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    .nav-btn:hover { background: linear-gradient(135deg, #1d4ed8, #1e40af); }
+
+    .card-meta {
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-top: 12px;
+      border-top: 1px solid var(--border-dark);
+      padding-top: 8px;
+    }
+    .card-meta strong, .card-meta span { color: var(--text-sub); }
+
+    /* Ranking Drawer Modal */
+    .rank-drawer {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: 100%;
+      max-width: 420px;
+      background: var(--bg-surface);
+      box-shadow: -6px 0 25px rgba(0,0,0,0.6);
+      z-index: 1002;
+      transform: translateX(105%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--border-dark);
+    }
+    .rank-drawer.show { transform: translateX(0); }
+    .drawer-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0d1322;
+    }
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .rank-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: #1e293b;
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .rank-item:hover { background: #273549; border-color: var(--primary); }
+    .rank-num { font-weight: 800; width: 26px; font-size: 0.9rem; color: #34d399; }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="brand">
-      <h1>🛒 เช็กราคาตลาดสดทั่วไทย</h1>
-      <span class="live-badge" id="statusBadge">ทุกภูมิภาค</span>
+    <div class="brand-row">
+      <h1 class="brand-title">
+        <span class="logo-icon">🛒</span>
+        แผนที่เช็กราคาตลาดสดทั่วไทย
+      </h1>
+      <div class="gps-status" id="gpsStatus">
+        <span>📍</span> <span id="gpsStatusText">กำลังหาพิกัด GPS...</span>
+      </div>
     </div>
 
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="พิมพ์ค้นหา เช่น ผักชี, หมูสามชั้น, มะนาว..." value="ผักชี">
-    </div>
-
-    <div class="filter-row">
+    <!-- Search & Region Filters -->
+    <div class="search-wrapper">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="พิมพ์ชื่อวัตถุดิบ เช่น ผักชี, หมูสามชั้น, มะนาว..." value="ผักชี" autocomplete="off">
+      </div>
       <select class="region-select" id="regionSelect">
         <option value="ALL">📍 ทุกภาคทั่วไทย</option>
-        <option value="CENTRAL">ภาคกลาง & กทม.</option>
-        <option value="NORTH">ภาคเหนือ</option>
+        <option value="NEAREST">⚡ เรียงจากใกล้ฉัน</option>
+        <option value="CENTRAL">ภาคกลาง/กทม.</option>
         <option value="NORTHEAST">ภาคอีสาน</option>
+        <option value="NORTH">ภาคเหนือ</option>
         <option value="EAST">ภาคตะวันออก</option>
         <option value="WEST">ภาคตะวันตก</option>
         <option value="SOUTH">ภาคใต้</option>
       </select>
+    </div>
+
+    <!-- Quick Item Chips -->
+    <div class="chips-bar" id="chipsBar">
       <button class="chip active" data-query="ผักชี">ผักชี</button>
       <button class="chip" data-query="หมูสามชั้น">หมูสามชั้น</button>
       <button class="chip" data-query="มะนาว">มะนาว</button>
-      <button class="chip" data-query="ไข่ไก่">ไข่ไก่</button>
-      <button class="chip" data-query="พริกขี้หนู">พริกขี้หนู</button>
+      <button class="chip" data-query="ไข่ไก่ เบอร์ 3">ไข่ไก่ เบอร์ 3</button>
+      <button class="chip" data-query="อกไก่">อกไก่</button>
+      <button class="chip" data-query="พริกขี้หนูจินดา">พริกขี้หนูจินดา</button>
+      <button class="chip" data-query="ต้นหอม">ต้นหอม</button>
+      <button class="chip" data-query="กุ้งขาว (50 ตัว/กก.)">กุ้งขาว</button>
+      <button class="chip" data-query="ปลานิลสด">ปลานิล</button>
+      <button class="chip" data-query="ส้มสายน้ำผึ้ง">ส้มสายน้ำผึ้ง</button>
+      <button class="chip" data-query="กระเทียมไทย">กระเทียมไทย</button>
     </div>
   </header>
 
-  <div class="legend-bar">
-    <div class="legend-item"><span class="dot cheap"></span> ราคาถูก/ส่ง</div>
-    <div class="legend-item"><span class="dot mid"></span> ราคาปานกลาง</div>
-    <div class="legend-item"><span class="dot high"></span> ราคาสูง</div>
+  <!-- Legend & Location Action Bar -->
+  <div class="sub-bar">
+    <div class="legend-group">
+      <div class="legend-item"><span class="dot cheap"></span> ถูก/ส่ง</div>
+      <div class="legend-item"><span class="dot mid"></span> ปานกลาง</div>
+      <div class="legend-item"><span class="dot high"></span> ราคาสูง</div>
+    </div>
+    <div class="actions-group">
+      <button class="action-btn locate-btn" id="locateMeBtn">📍 ตำแหน่งฉัน</button>
+      <button class="action-btn" id="openRankBtn">📊 อันดับราคา</button>
+    </div>
   </div>
 
+  <!-- Leaflet Map Area -->
   <div id="map"></div>
 
+  <!-- Bottom Market Info Card -->
   <div class="info-card" id="infoCard">
     <div class="card-handle"></div>
     <div class="card-header">
       <div>
         <h2 class="card-title" id="marketName">ชื่อตลาด</h2>
-        <span style="font-size: 0.75rem; color: var(--text-muted);" id="marketType">ประเภทตลาด</span>
+        <div class="card-subtitle">
+          <span id="marketType">ประเภทตลาด</span>
+          <span class="distance-tag" id="distanceTag" style="display:none;">📍 ห่าง 0 กม.</span>
+        </div>
       </div>
       <button class="close-btn" id="closeCardBtn">✕</button>
     </div>
 
-    <div class="price-highlight">
-      <span style="font-size: 0.85rem; color: var(--text-muted);" id="itemNameLabel">ผักชี:</span>
-      <span class="price-val" id="itemPriceVal">0</span>
-      <span style="font-size: 0.8rem; color: var(--text-muted);" id="itemUnit">บาท/กก.</span>
+    <!-- Price Hero Box -->
+    <div class="price-hero">
+      <div>
+        <div class="price-hero-label" id="itemNameLabel">ผักชี:</div>
+        <div class="price-val-group">
+          <span class="price-val" id="itemPriceVal">฿0</span>
+          <span class="price-unit" id="itemUnit">บาท/กก.</span>
+        </div>
+      </div>
       <span class="price-tag" id="priceStatusTag">ราคาถูก</span>
     </div>
 
+    <div class="other-prices-title">สินค้ายอดนิยมอื่นๆ ในตลาดนี้:</div>
+    <div class="other-prices-grid" id="otherPricesGrid"></div>
+
+    <!-- Direct Navigation Button -->
+    <a href="#" target="_blank" class="nav-btn" id="googleMapsNavBtn">
+      🗺️ นำทางด้วย Google Maps (พิกัดตรงจุด)
+    </a>
+
     <div class="card-meta">
-      <div>📍 <span id="marketAddress">ที่อยู่</span></div>
-      <div>🕒 ข้อมูลราคา: <span id="dataSource">กำลังโหลด...</span></div>
+      <div>📍 <strong>พิกัดที่ตั้ง:</strong> <span id="marketAddress">ที่อยู่</span></div>
+      <div>🏛️ <strong>จังหวัด:</strong> <span id="marketProvince">-</span> (<span id="marketRegion">-</span>)</div>
+      <div>🕒 <strong>แหล่งข้อมูล:</strong> <span id="dataSource">กรมการค้าภายใน / ตลาดกลางประจำภูมิภาค</span></div>
     </div>
   </div>
 
+  <!-- Ranking Drawer Modal -->
+  <div class="rank-drawer" id="rankDrawer">
+    <div class="drawer-header">
+      <div>
+        <h3 style="font-size: 0.95rem; font-weight: 700; color: #ffffff;">📊 เปรียบเทียบราคาทุกตลาด</h3>
+        <span style="font-size: 0.74rem; color: var(--text-dim);" id="drawerItemName">ผักชี</span>
+      </div>
+      <button class="close-btn" id="closeDrawerBtn">✕</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </div>
+
+  <!-- Leaflet Map Script -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // ฐานข้อมูลเริ่มต้น (Fallback Data)
-    let allThailandMarkets = [
-      {
-        id: "talad_thai", name: "ตลาดไท", region: "CENTRAL", type: "ตลาดกลางค้าส่งสินค้าเกษตร",
-        lat: 14.0792, lng: 100.6171, address: "อ.คลองหลวง จ.ปทุมธานี",
-        prices: { "ผักชี": 70, "หมูสามชั้น": 150, "มะนาว": 2.0, "ไข่ไก่": 110, "พริกขี้หนู": 65 }
-      },
-      {
-        id: "si_mum_mueang", name: "ตลาดสี่มุมเมือง", region: "CENTRAL", type: "ตลาดกลางค้าส่งผักผลไม้",
-        lat: 13.9634, lng: 100.6209, address: "อ.ลำลูกกา จ.ปทุมธานี",
-        prices: { "ผักชี": 75, "หมูสามชั้น": 155, "มะนาว": 2.2, "ไข่ไก่": 112, "พริกขี้หนู": 70 }
-      },
-      {
-        id: "khlong_toei", name: "ตลาดคลองเตย", region: "CENTRAL", type: "ตลาดสดค้าส่ง-ปลีก กทม.",
-        lat: 13.7202, lng: 100.5574, address: "เขตคลองเตย กรุงเทพฯ",
-        prices: { "ผักชี": 95, "หมูสามชั้น": 175, "มะนาว": 3.0, "ไข่ไก่": 120, "พริกขี้หนู": 85 }
-      },
-      {
-        id: "muang_mai_cm", name: "ตลาดเมืองใหม่ เชียงใหม่", region: "NORTH", type: "ตลาดกลางค้าส่งภาคเหนือ",
-        lat: 18.7963, lng: 99.0004, address: "อ.เมือง จ.เชียงใหม่",
-        prices: { "ผักชี": 65, "หมูสามชั้น": 160, "มะนาว": 2.8, "ไข่ไก่": 115, "พริกขี้หนู": 60 }
-      },
-      {
-        id: "phitsanulok_1", name: "ตลาดสดเทศบาล 1 พิษณุโลก", region: "NORTH", type: "ตลาดสดศูนย์กลางภาคเหนือตอนล่าง",
-        lat: 16.8188, lng: 100.2605, address: "อ.เมือง จ.พิษณุโลก",
-        prices: { "ผักชี": 85, "หมูสามชั้น": 165, "มะนาว": 2.5, "ไข่ไก่": 118, "พริกขี้หนู": 75 }
-      },
-      {
-        id: "suranaree_korat", name: "ตลาดสุรนารี โคราช", region: "NORTHEAST", type: "ตลาดกลางสินค้าเกษตรภาคอีสาน",
-        lat: 14.9799, lng: 102.0978, address: "อ.เมือง จ.นครราชสีมา",
-        prices: { "ผักชี": 80, "หมูสามชั้น": 160, "มะนาว": 2.3, "ไข่ไก่": 114, "พริกขี้หนู": 65 }
-      },
-      {
-        id: "khon_kaen_market", name: "ตลาดสดเทศบาล 1 ขอนแก่น", region: "NORTHEAST", type: "ตลาดสดเทศบาลศูนย์กลางอีสานกลาง",
-        lat: 16.4322, lng: 102.8330, address: "อ.เมือง จ.ขอนแก่น",
-        prices: { "ผักชี": 90, "หมูสามชั้น": 170, "มะนาว": 2.7, "ไข่ไก่": 118, "พริกขี้หนู": 70 }
-      },
-      {
-        id: "ubon_market", name: "ตลาดสดเทศบาล 3 อุบลราชธานี", region: "NORTHEAST", type: "ตลาดสดศูนย์กลางอีสานใต้",
-        lat: 15.2287, lng: 104.8584, address: "อ.เมือง จ.อุบลราชธานี",
-        prices: { "ผักชี": 95, "หมูสามชั้น": 175, "มะนาว": 3.0, "ไข่ไก่": 120, "พริกขี้หนู": 78 }
-      },
-      {
-        id: "mukdahan_market", name: "ตลาดสดเทศบาล 2 มุกดาหาร", region: "NORTHEAST", type: "ตลาดสดชายแดนแม่น้ำโขง",
-        lat: 16.5434, lng: 104.7235, address: "อ.เมือง จ.มุกดาหาร",
-        prices: { "ผักชี": 100, "หมูสามชั้น": 175, "มะนาว": 3.2, "ไข่ไก่": 122, "พริกขี้หนู": 80 }
-      },
-      {
-        id: "sri_muang_ratchaburi", name: "ตลาดกลางผักและผลไม้ศรีเมือง", region: "WEST", type: "ตลาดกลางสินค้าเกษตรภาคตะวันตก",
-        lat: 13.5244, lng: 99.8164, address: "อ.เมือง จ.ราชบุรี",
-        prices: { "ผักชี": 68, "หมูสามชั้น": 155, "มะนาว": 1.8, "ไข่ไก่": 110, "พริกขี้หนู": 60 }
-      },
-      {
-        id: "rattanakorn_pattaya", name: "ตลาดสดรัตนากร ชลบุรี", region: "EAST", type: "ตลาดสดค้าส่ง-ปลีกภาคตะวันออก",
-        lat: 12.9236, lng: 100.8924, address: "พัทยาใต้ จ.ชลบุรี",
-        prices: { "ผักชี": 105, "หมูสามชั้น": 180, "มะนาว": 3.2, "ไข่ไก่": 122, "พริกขี้หนู": 85 }
-      },
-      {
-        id: "hua_it_nakhon", name: "ตลาดหัวอิฐ นครศรีธรรมราช", region: "SOUTH", type: "ตลาดกลางค้าส่งผักผลไม้ภาคใต้",
-        lat: 8.4304, lng: 99.9631, address: "อ.เมือง จ.นครศรีธรรมราช",
-        prices: { "ผักชี": 110, "หมูสามชั้น": 185, "มะนาว": 3.5, "ไข่ไก่": 124, "พริกขี้หนู": 90 }
-      },
-      {
-        id: "plaza_hatyai", name: "ตลาดสดพลาซ่า หาดใหญ่", region: "SOUTH", type: "ตลาดสดศูนย์กลางการค้าภาคใต้ตอนล่าง",
-        lat: 7.0084, lng: 100.4682, address: "อ.หาดใหญ่ จ.สงขลา",
-        prices: { "ผักชี": 120, "หมูสามชั้น": 190, "มะนาว": 4.0, "ไข่ไก่": 128, "พริกขี้หนู": 95 }
-      }
-    ];
+    let appData = { markets: [] };
+    let userLocation = null; // { lat, lng }
+    let userMarker = null;
 
-    const itemUnits = {
-      "ผักชี": "บาท/กก.",
-      "หมูสามชั้น": "บาท/กก.",
-      "มะนาว": "บาท/ลูก",
-      "ไข่ไก่": "บาท/แผง (30 ฟอง)",
-      "พริกขี้หนู": "บาท/กก."
-    };
-
-    const map = L.map('map', { zoomControl: false }).setView([13.736717, 100.523186], 6);
+    // Accurate base map
+    const map = L.map('map', { zoomControl: false }).setView([13.7367, 100.5231], 6);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
+      maxZoom: 19,
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
     let markersLayer = L.layerGroup().addTo(map);
 
+    // Haversine Distance Formula (km)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Earth radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    // High Precision Geolocation Detection
+    function detectUserLocation(autoFly = false) {
+      const statusText = document.getElementById('gpsStatusText');
+      if (!navigator.geolocation) {
+        statusText.textContent = 'อุปกรณ์ไม่รองรับ GPS';
+        return;
+      }
+
+      statusText.textContent = 'กำลังจับพิกัดแม่นยำสูง...';
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          userLocation = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            accuracy: pos.coords.accuracy
+          };
+
+          statusText.textContent = `พิกัด GPS แม่นยำ (±${Math.round(userLocation.accuracy)}m)`;
+
+          // Add or update pulsating user marker
+          if (userMarker) map.removeLayer(userMarker);
+
+          const userIcon = L.divIcon({
+            className: 'custom-user-icon',
+            html: '<div class="user-pulse-marker"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+          });
+
+          userMarker = L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
+            .bindPopup(`<strong>📍 ตำแหน่งปัจจุบันของคุณ</strong><br>ความแม่นยำ: ±${Math.round(userLocation.accuracy)} เมตร`)
+            .addTo(map);
+
+          if (autoFly) {
+            map.flyTo([userLocation.lat, userLocation.lng], 12, { duration: 1.2 });
+          }
+
+          updateMap();
+        },
+        (err) => {
+          console.warn('Geolocation error:', err);
+          statusText.textContent = 'ไม่สามารถอ่าน GPS ได้';
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 12000,
+          maximumAge: 0
+        }
+      );
+    }
+
+    // Calculate Price Tiers
     function getPriceTier(currentPrice, allPrices) {
       const min = Math.min(...allPrices);
       const max = Math.max(...allPrices);
       const range = max - min;
-      if (range === 0) return { label: 'ราคาถูก', colorClass: 'price-cheap', tagClass: 'tag-cheap' };
+      if (range === 0) return { label: 'ราคาถูก', badgeClass: 'badge-cheap', pinClass: 'pin-cheap', tagClass: 'tag-cheap' };
 
       const ratio = (currentPrice - min) / range;
-      if (ratio <= 0.33) return { label: 'ราคาถูก', colorClass: 'price-cheap', tagClass: 'tag-cheap' };
-      if (ratio <= 0.66) return { label: 'ปานกลาง', colorClass: 'price-mid', tagClass: 'tag-mid' };
-      return { label: 'ราคาสูง', colorClass: 'price-high', tagClass: 'tag-high' };
+      if (ratio <= 0.33) return { label: 'ราคาถูกที่สุด', badgeClass: 'badge-cheap', pinClass: 'pin-cheap', tagClass: 'tag-cheap' };
+      if (ratio <= 0.66) return { label: 'ราคาปานกลาง', badgeClass: 'badge-mid', pinClass: 'pin-mid', tagClass: 'tag-mid' };
+      return { label: 'ราคาสูงกว่าเฉลี่ย', badgeClass: 'badge-high', pinClass: 'pin-high', tagClass: 'tag-high' };
     }
 
+    function findItemKey(pricesObj, searchTerm) {
+      const clean = searchTerm.trim().toLowerCase();
+      if (!clean) return Object.keys(pricesObj)[0];
+      return Object.keys(pricesObj).find(k => k.toLowerCase().includes(clean) || clean.includes(k.toLowerCase())) || null;
+    }
+
+    // Update Map Pins
     function updateMap() {
       markersLayer.clearLayers();
       const searchTerm = document.getElementById('searchInput').value.trim();
       const selectedRegion = document.getElementById('regionSelect').value;
 
-      const filteredMarkets = allThailandMarkets.filter(m => selectedRegion === 'ALL' || m.region === selectedRegion);
+      let filteredMarkets = [...appData.markets];
+
+      // Calculate distance for all markets if userLocation exists
+      if (userLocation) {
+        filteredMarkets.forEach(m => {
+          m.distanceKm = calculateDistance(userLocation.lat, userLocation.lng, m.lat, m.lng);
+        });
+      }
+
+      if (selectedRegion === 'NEAREST' && userLocation) {
+        filteredMarkets.sort((a, b) => (a.distanceKm || 9999) - (b.distanceKm || 9999));
+      } else if (selectedRegion !== 'ALL' && selectedRegion !== 'NEAREST') {
+        filteredMarkets = filteredMarkets.filter(m => m.region === selectedRegion);
+      }
 
       const validPrices = [];
       filteredMarkets.forEach(m => {
-        const foundKey = Object.keys(m.prices).find(k => k.includes(searchTerm) || searchTerm.includes(k));
-        if (foundKey) validPrices.push(m.prices[foundKey]);
+        const foundKey = findItemKey(m.prices, searchTerm);
+        if (foundKey && m.prices[foundKey]) {
+          validPrices.push(m.prices[foundKey].price);
+        }
       });
 
       filteredMarkets.forEach(market => {
-        const foundKey = Object.keys(market.prices).find(k => k.includes(searchTerm) || searchTerm.includes(k));
-        const price = foundKey ? market.prices[foundKey] : null;
+        const foundKey = findItemKey(market.prices, searchTerm);
+        const itemInfo = foundKey ? market.prices[foundKey] : null;
 
-        let tierInfo = { label: 'ไม่มีข้อมูล', colorClass: 'price-mid', tagClass: 'tag-mid' };
-        let badgeText = market.name.split(' ')[0];
+        let tierInfo = { label: 'ไม่มีข้อมูล', badgeClass: 'badge-mid', pinClass: 'pin-mid', tagClass: 'tag-mid' };
+        let badgeText = market.name.split(' ')[0].substring(0, 10);
 
-        if (price !== null && validPrices.length > 0) {
-          tierInfo = getPriceTier(price, validPrices);
-          badgeText = `฿${price}`;
+        if (itemInfo && validPrices.length > 0) {
+          tierInfo = getPriceTier(itemInfo.price, validPrices);
+          badgeText = `฿${itemInfo.price}`;
         }
 
         const customIcon = L.divIcon({
           className: 'custom-div-icon',
           html: `
             <div class="custom-marker">
-              <div class="marker-badge ${tierInfo.colorClass}">${badgeText}</div>
-              <div class="marker-pin ${tierInfo.colorClass}"></div>
+              <div class="marker-badge ${tierInfo.badgeClass}">${badgeText}</div>
+              <div class="marker-pin ${tierInfo.pinClass}"></div>
             </div>
           `,
-          iconSize: [60, 50],
-          iconAnchor: [30, 48]
+          iconSize: [64, 52],
+          iconAnchor: [32, 50]
         });
 
         const marker = L.marker([market.lat, market.lng], { icon: customIcon });
 
         marker.on('click', () => {
-          document.getElementById('marketName').textContent = market.name;
-          document.getElementById('marketType').textContent = market.type;
-          document.getElementById('marketAddress').textContent = market.address;
-          document.getElementById('itemNameLabel').textContent = `${foundKey || searchTerm}:`;
-
-          const priceVal = document.getElementById('itemPriceVal');
-          const unitVal = document.getElementById('itemUnit');
-          const statusTag = document.getElementById('priceStatusTag');
-
-          if (price !== null) {
-            priceVal.textContent = `฿${price}`;
-            priceVal.style.color = `var(--${tierInfo.colorClass})`;
-            unitVal.textContent = itemUnits[foundKey] || 'บาท/หน่วย';
-            statusTag.textContent = tierInfo.label;
-            statusTag.className = `price-tag ${tierInfo.tagClass}`;
-            statusTag.style.display = 'inline-block';
-          } else {
-            priceVal.textContent = 'ไม่มีข้อมูล';
-            unitVal.textContent = '';
-            statusTag.style.display = 'none';
-          }
-
-          document.getElementById('infoCard').classList.add('show');
-          map.panTo([market.lat, market.lng], { animate: true, duration: 0.5 });
+          showMarketCard(market, foundKey || searchTerm, itemInfo, tierInfo);
         });
 
         markersLayer.addLayer(marker);
       });
     }
 
-    // Auto-load Live Data if available
-    async function loadLiveData() {
+    // Show Details Card
+    function showMarketCard(market, itemName, itemInfo, tierInfo) {
+      document.getElementById('marketName').textContent = market.name;
+      document.getElementById('marketType').textContent = market.type;
+      document.getElementById('marketAddress').textContent = market.address;
+      document.getElementById('marketProvince').textContent = market.province;
+      document.getElementById('marketRegion').textContent = market.region;
+      document.getElementById('itemNameLabel').textContent = `${itemName}:`;
+
+      // Distance tag
+      const distTag = document.getElementById('distanceTag');
+      if (userLocation) {
+        const dist = calculateDistance(userLocation.lat, userLocation.lng, market.lat, market.lng);
+        distTag.textContent = dist < 1 ? `📍 ห่าง ${Math.round(dist * 1000)} ม.` : `📍 ห่าง ${dist.toFixed(1)} กม.`;
+        distTag.style.display = 'inline-block';
+      } else {
+        distTag.style.display = 'none';
+      }
+
+      // Google Maps Direct Navigation URL
+      const navBtn = document.getElementById('googleMapsNavBtn');
+      navBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${market.lat},${market.lng}`;
+
+      const priceVal = document.getElementById('itemPriceVal');
+      const unitVal = document.getElementById('itemUnit');
+      const statusTag = document.getElementById('priceStatusTag');
+
+      if (itemInfo) {
+        priceVal.textContent = `฿${itemInfo.price}`;
+        unitVal.textContent = itemInfo.unit;
+        statusTag.textContent = tierInfo.label;
+        statusTag.className = `price-tag ${tierInfo.tagClass}`;
+        statusTag.style.display = 'inline-block';
+      } else {
+        priceVal.textContent = 'ไม่มีข้อมูล';
+        unitVal.textContent = '';
+        statusTag.style.display = 'none';
+      }
+
+      // Mini prices
+      const otherGrid = document.getElementById('otherPricesGrid');
+      otherGrid.innerHTML = '';
+      let count = 0;
+      for (const [name, info] of Object.entries(market.prices)) {
+        if (name !== itemName && count < 4) {
+          const mini = document.createElement('div');
+          mini.className = 'mini-price-box';
+          mini.innerHTML = `<span>${name}</span><strong>฿${info.price}</strong>`;
+          otherGrid.appendChild(mini);
+          count++;
+        }
+      }
+
+      document.getElementById('infoCard').classList.add('show');
+      map.panTo([market.lat, market.lng], { animate: true, duration: 0.5 });
+    }
+
+    // Ranking Drawer
+    function openRankingDrawer() {
+      const searchTerm = document.getElementById('searchInput').value.trim();
+      const selectedRegion = document.getElementById('regionSelect').value;
+      let filteredMarkets = [...appData.markets];
+
+      if (selectedRegion !== 'ALL' && selectedRegion !== 'NEAREST') {
+        filteredMarkets = filteredMarkets.filter(m => m.region === selectedRegion);
+      }
+
+      document.getElementById('drawerItemName').textContent = `เรียงราคา: ${searchTerm}`;
+      const drawerBody = document.getElementById('drawerBody');
+      drawerBody.innerHTML = '';
+
+      const ranked = [];
+      filteredMarkets.forEach(m => {
+        const foundKey = findItemKey(m.prices, searchTerm);
+        if (foundKey && m.prices[foundKey]) {
+          const dist = userLocation ? calculateDistance(userLocation.lat, userLocation.lng, m.lat, m.lng) : null;
+          ranked.push({ market: m, price: m.prices[foundKey].price, unit: m.prices[foundKey].unit, key: foundKey, distance: dist });
+        }
+      });
+
+      ranked.sort((a, b) => a.price - b.price);
+
+      if (ranked.length === 0) {
+        drawerBody.innerHTML = '<div style="text-align:center; padding:24px; color:var(--text-dim);">ไม่พบข้อมูลราคาสำหรับสินค้านี้</div>';
+      } else {
+        ranked.forEach((item, index) => {
+          const distText = item.distance !== null ? ` • 📍 ${item.distance.toFixed(1)} กม.` : '';
+          const row = document.createElement('div');
+          row.className = 'rank-item';
+          row.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="rank-num">#${index + 1}</span>
+              <div>
+                <div style="font-weight:600; font-size:0.88rem; color:#ffffff;">${item.market.name}</div>
+                <div style="font-size:0.72rem; color:var(--text-dim);">${item.market.province}${distText}</div>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:1.1rem; font-weight:700; color:#34d399;">฿${item.price}</div>
+              <div style="font-size:0.7rem; color:var(--text-dim);">${item.unit}</div>
+            </div>
+          `;
+          row.addEventListener('click', () => {
+            document.getElementById('rankDrawer').classList.remove('show');
+            showMarketCard(item.market, item.key, item.market.prices[item.key], getPriceTier(item.price, ranked.map(r => r.price)));
+          });
+          drawerBody.appendChild(row);
+        });
+      }
+
+      document.getElementById('rankDrawer').classList.add('show');
+    }
+
+    // Load Data
+    async function loadData() {
       try {
         const res = await fetch('./prices.json?t=' + Date.now());
         if (res.ok) {
-          const data = await res.json();
-          if (data.markets && data.markets.length > 0) {
-            allThailandMarkets = data.markets;
-            document.getElementById('dataSource').textContent = `อัปเดตอัตโนมัติ (${data.last_updated})`;
-            updateMap();
-          }
-        } else {
-          document.getElementById('dataSource').textContent = 'ข้อมูลมาตรฐานประจำวัน';
+          appData = await res.json();
+          document.getElementById('dataSource').textContent = `อัปเดตอัตโนมัติ (${appData.last_updated})`;
         }
       } catch (err) {
-        document.getElementById('dataSource').textContent = 'ข้อมูลมาตรฐานประจำวัน';
+        console.warn('Fallback mode:', err);
       }
+      updateMap();
+      detectUserLocation(false);
     }
 
     // Event Listeners
@@ -412,17 +888,21 @@
     
     document.getElementById('regionSelect').addEventListener('change', (e) => {
       const reg = e.target.value;
-      const zoomMap = {
-        'ALL': { center: [13.7367, 100.5231], zoom: 6 },
-        'CENTRAL': { center: [13.9, 100.6], zoom: 9 },
-        'NORTH': { center: [18.2, 99.5], zoom: 8 },
-        'NORTHEAST': { center: [15.8, 103.5], zoom: 7 },
-        'EAST': { center: [13.0, 101.5], zoom: 8 },
-        'WEST': { center: [13.8, 99.5], zoom: 8 },
-        'SOUTH': { center: [8.0, 99.8], zoom: 7 }
-      };
-      if (zoomMap[reg]) {
-        map.flyTo(zoomMap[reg].center, zoomMap[reg].zoom, { duration: 1 });
+      if (reg === 'NEAREST' && userLocation) {
+        map.flyTo([userLocation.lat, userLocation.lng], 11, { duration: 1 });
+      } else {
+        const zoomConfig = {
+          'ALL': { center: [13.7367, 100.5231], zoom: 6 },
+          'CENTRAL': { center: [13.9, 100.6], zoom: 9 },
+          'NORTHEAST': { center: [16.0, 103.5], zoom: 7 },
+          'NORTH': { center: [18.2, 99.5], zoom: 7 },
+          'EAST': { center: [13.0, 101.5], zoom: 8 },
+          'WEST': { center: [13.8, 99.5], zoom: 8 },
+          'SOUTH': { center: [8.0, 99.8], zoom: 7 }
+        };
+        if (zoomConfig[reg]) {
+          map.flyTo(zoomConfig[reg].center, zoomConfig[reg].zoom, { duration: 1 });
+        }
       }
       updateMap();
     });
@@ -440,12 +920,20 @@
       document.getElementById('infoCard').classList.remove('show');
     });
 
+    document.getElementById('openRankBtn').addEventListener('click', openRankingDrawer);
+    document.getElementById('closeDrawerBtn').addEventListener('click', () => {
+      document.getElementById('rankDrawer').classList.remove('show');
+    });
+
+    document.getElementById('locateMeBtn').addEventListener('click', () => {
+      detectUserLocation(true);
+    });
+
     map.on('click', () => {
       document.getElementById('infoCard').classList.remove('show');
     });
 
-    updateMap();
-    loadLiveData();
+    loadData();
   </script>
 </body>
 </html>
