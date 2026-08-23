@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>WANGO - Delivery (หว้านโก เดลิเวอรี่) | รวมร้านอร่อย สั่งง่าย ส่งไว ทั่วอำเภอหว้านใหญ่ มุกดาหาร</title>
+  <title>WANGO - Delivery (หว้านโก เดลิเวอรี่) | แพลตฟอร์มสั่งอาหารอำเภอหว้านใหญ่ จ.มุกดาหาร</title>
   
   <!-- Google Fonts: Prompt & Kanit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
+  <!-- Google Identity Services (GSI) SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -77,17 +79,24 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
+    @keyframes radar-pulse {
+      0% { transform: scale(0.8); opacity: 0.9; }
+      50% { transform: scale(1.4); opacity: 0.3; }
+      100% { transform: scale(0.8); opacity: 0.9; }
+    }
+    .radar-animation {
+      animation: radar-pulse 2s infinite ease-in-out;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen pb-16 md:pb-0">
 
   <!-- ========================================== -->
-  <!-- 1. MANDATORY GOOGLE LOGIN GATEKEEPER (FULLSCREEN MODAL IF NOT LOGGED IN) -->
+  <!-- 1. MANDATORY GOOGLE LOGIN GATEKEEPER -->
   <!-- ========================================== -->
   <div id="gatekeeper-login-screen" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 sm:p-8 space-y-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-center">
       
-      <!-- Brand Logo -->
       <div class="flex justify-center">
         <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-brand-500 via-orange-500 to-amber-500 flex items-center justify-center text-white shadow-xl shadow-brand-500/30">
           <i data-lucide="utensils-crossed" class="w-10 h-10"></i>
@@ -98,14 +107,12 @@
         <span class="inline-block bg-orange-100 text-orange-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">อ.หว้านใหญ่ จ.มุกดาหาร</span>
         <h1 class="text-2xl font-display font-black text-slate-900 tracking-tight">WANGO<span class="text-brand-500">-Delivery</span></h1>
         <p class="text-xs text-slate-500 leading-relaxed">
-          ยินดีต้อนรับสู่แพลตฟอร์มสั่งอาหารของคนหว้านใหญ่ กรุณาเข้าสู่ระบบด้วย Google ก่อนเริ่มสั่งอาหาร
+          ยินดีต้อนรับสู่แพลตฟอร์มสั่งอาหารของคนหว้านใหญ่ กรุณาเข้าสู่ระบบด้วยบัญชี Google เพื่อเริ่มสั่งอาหาร
         </p>
       </div>
 
-      <!-- 100% Real Google OAuth Sign-In -->
-      <div class="space-y-4 pt-2 flex flex-col items-center w-full">
-        
-        <!-- Google GSI Standard Direct Render -->
+            <!-- 100% Real Google Identity Services (GSI) -->
+      <div class="space-y-3 pt-2 flex flex-col items-center w-full">
         <div id="g_id_onload"
              data-client_id="121203388429-uos8ldhujrkhr8r4bo9o0fpkkltf4aoi.apps.googleusercontent.com"
              data-context="signin"
@@ -115,10 +122,18 @@
              data-itp_support="true">
         </div>
 
-        <!-- Rendered Google Button Container -->
-        <div id="google-official-btn" class="flex justify-center w-full min-h-[44px]">
-          <!-- Fallback Real Google Button triggering Google OAuth -->
-          <button onclick="triggerRealGoogleLogin()" class="w-full py-3 px-4 rounded-full border border-slate-300 hover:bg-slate-50 bg-white text-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-3 shadow-sm active:scale-98 transition-all">
+        <div class="g_id_signin flex justify-center w-full"
+             data-type="standard"
+             data-shape="pill"
+             data-theme="outline"
+             data-text="signin_with"
+             data-size="large"
+             data-logo_alignment="left"
+             data-width="280">
+        </div>
+        
+        <div id="google-fallback-btn" class="w-full flex justify-center">
+          <button onclick="triggerRealGoogleLogin()" class="w-full max-w-[280px] py-3 px-4 rounded-full border border-slate-300 hover:bg-slate-50 bg-white text-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-3 shadow-sm active:scale-98 transition-all">
             <svg class="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -128,151 +143,7 @@
             <span>ลงชื่อเข้าใช้ด้วย Google</span>
           </button>
         </div>
-
       </div>
-
-      <p class="text-[10px] text-slate-400">
-        🔒 ระบบจะใช้บัญชี Google เพื่อระบุตัวตนและบันทึกประวัติการสั่งซื้ออาหาร
-      </p>
-
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- 2. MANDATORY LOCATION & GPS SETUP SCREEN -->
-  <!-- ========================================== -->
-  <div id="gatekeeper-location-screen" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-      
-      <div class="text-center space-y-1">
-        <div class="w-12 h-12 rounded-2xl bg-orange-100 text-brand-600 mx-auto flex items-center justify-center mb-2">
-          <i data-lucide="map-pin" class="w-6 h-6"></i>
-        </div>
-        <h2 class="text-lg font-display font-bold text-slate-900">กำหนดตำแหน่งจัดส่งใน อ.หว้านใหญ่</h2>
-        <p class="text-xs text-slate-500">โปรดเลือกพิกัดจริงเพื่อคำนวณระยะทางและส่งอาหารได้แม่นยำ</p>
-      </div>
-
-      <!-- GPS Button -->
-      <button onclick="requestRealGPSLocation()" id="btn-request-gps" class="w-full p-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2.5 shadow-md active:scale-98 transition-all">
-        <i data-lucide="crosshair" class="w-4 h-4 text-cyan-300 animate-spin" id="gps-loading-icon" style="display:none;"></i>
-        <i data-lucide="navigation" class="w-4 h-4 text-cyan-300" id="gps-static-icon"></i>
-        <span>📍 ดึงพิกัด GPS ปัจจุบันของฉัน (ตรวจจับอัตโนมัติ)</span>
-      </button>
-
-      <!-- GPS Status Box -->
-      <div id="gps-detected-box" class="hidden bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-xs space-y-1">
-        <div class="flex items-center justify-between text-emerald-800 font-bold">
-          <span class="flex items-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i> ตรวจพบพิกัด GPS จริง</span>
-          <span class="text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full">พิกัดแม่นยำ</span>
-        </div>
-        <p class="text-[11px] text-emerald-700 font-mono" id="gps-coordinates-text">Lat: 16.6852, Lng: 104.7431</p>
-      </div>
-
-      <!-- Landmark Presets -->
-      <div class="space-y-2">
-        <span class="text-[11px] font-bold text-slate-600 block">หรือเลือกจุดแลนด์มาร์คสำคัญในอำเภอหว้านใหญ่:</span>
-        <div class="grid grid-cols-2 gap-2 text-xs">
-          <button onclick="setQuickLocation('ตลาดสดเทศบาลตำบลหว้านใหญ่', 16.7325, 104.7510)" class="p-2.5 rounded-xl border border-slate-200 hover:border-brand-400 hover:bg-brand-50 text-left transition-colors">
-            <span class="font-bold text-slate-800 block truncate">🏬 ตลาดเทศบาลหว้านใหญ่</span>
-            <span class="text-[10px] text-slate-400">ต.หว้านใหญ่</span>
-          </button>
-          <button onclick="setQuickLocation('แก่งกะเบา (จุดชมวิวหมูหันริมโขง)', 16.6041, 104.7422)" class="p-2.5 rounded-xl border border-slate-200 hover:border-brand-400 hover:bg-brand-50 text-left transition-colors">
-            <span class="font-bold text-slate-800 block truncate">🌊 แก่งกะเบา ริมโขง</span>
-            <span class="text-[10px] text-slate-400">ต.ป่งขาม</span>
-          </button>
-          <button onclick="setQuickLocation('วัดสองคอน (โบสถ์แม่พระประจักษ์)', 16.6883, 104.7562)" class="p-2.5 rounded-xl border border-slate-200 hover:border-brand-400 hover:bg-brand-50 text-left transition-colors">
-            <span class="font-bold text-slate-800 block truncate">⛪ วัดสองคอน</span>
-            <span class="text-[10px] text-slate-400">ต.สองคอน</span>
-          </button>
-          <button onclick="setQuickLocation('โรงพยาบาลหว้านใหญ่', 16.7290, 104.7485)" class="p-2.5 rounded-xl border border-slate-200 hover:border-brand-400 hover:bg-brand-50 text-left transition-colors">
-            <span class="font-bold text-slate-800 block truncate">🏥 รพ.หว้านใหญ่</span>
-            <span class="text-[10px] text-slate-400">ศูนย์การแพทย์</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Address Input -->
-      <div class="space-y-1">
-        <label class="text-[11px] font-bold text-slate-700">ที่อยู่จัดส่ง / บ้านเลขที่ / จุดสังเกต:</label>
-        <input type="text" id="setup-address-input" value="ตลาดสดเทศบาลตำบลหว้านใหญ่" placeholder="ระบุบ้านเลขที่ ซอย หรือจุดสังเกต..." class="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none font-medium">
-      </div>
-
-      <!-- Save Button -->
-      <button onclick="confirmInitialLocationSetup()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs sm:text-sm py-3 rounded-2xl shadow-lg shadow-brand-500/25 transition-all">
-        บันทึกพิกัดและเริ่มสั่งอาหาร 🚀
-      </button>
-
-    </div>
-  </div>
-
-  <!-- TOP BANNER -->
-  <aside aria-label="แถบแจ้งเตือนโปรโมชั่น" class="bg-gradient-to-r from-brand-600 via-brand-500 to-amber-500 text-white text-xs py-1.5 px-4 text-center font-medium shadow-inner flex items-center justify-center gap-2">
-    <span class="inline-flex items-center justify-center bg-white/20 px-2 py-0.5 rounded-full text-[10px] tracking-wide uppercase font-bold">WANGO • หว้านใหญ่</span>
-    <span>🎉 ส่งฟรี 3 กม. แรกทั่วอำเภอหว้านใหญ่! ใส่โค้ด <span class="underline font-bold bg-white/20 px-1.5 py-0.5 rounded">WANGOFREE</span> ทุกร้าน</span>
-  </aside>
-
-  <!-- DISCLAIMER BAR (PRICE NOTICE) -->
-  <aside aria-label="ข้อความชี้แจงราคาอาหาร" class="bg-amber-50 border-b border-amber-200/80 text-amber-900 text-[11px] py-1.5 px-4 text-center flex items-center justify-center gap-1.5">
-    <i data-lucide="info" class="w-3.5 h-3.5 text-amber-600 shrink-0"></i>
-    <span><strong>หมายเหตุ:</strong> ข้อมูลเมนูและราคาในระบบ WANGO เป็นการรวบรวมจากร้านค้าในอำเภอหว้านใหญ่ ราคาหน้าร้านจริงอาจมีการปรับเปลี่ยนตามช่วงเวลา</span>
-  </aside>
-
-  <!-- NAVBAR (DESKTOP & MOBILE) -->
-  <header class="sticky top-0 z-40 glass-effect border-b border-slate-200/80 transition-all">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16 gap-3 sm:gap-6">
-        
-        <!-- Logo & Location -->
-        <div class="flex items-center gap-3 sm:gap-6">
-          <a href="#" onclick="showView('home'); return false;" class="flex items-center gap-2 group">
-            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-500 via-orange-500 to-amber-500 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform font-bold">
-              <i data-lucide="utensils-crossed" class="w-5 h-5"></i>
-            </div>
-            <div class="hidden sm:block">
-              <span class="font-display font-black text-xl text-slate-900 leading-tight flex items-center gap-1.5 tracking-wide">
-                WANGO<span class="text-brand-500">-Delivery</span>
-                <span class="text-[10px] bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full font-bold">อ.หว้านใหญ่</span>
-              </span>
-              <p class="text-[11px] text-slate-500">แซ่บถึงเฮือน ส่งไวริมโขง มุกดาหาร</p>
-            </div>
-          </a>
-
-          <!-- Location Selector Button -->
-          <button onclick="openLocationModal()" class="flex items-center gap-2 bg-slate-100/90 hover:bg-slate-200/90 px-3 py-1.5 rounded-full text-xs font-medium text-slate-700 border border-slate-200 transition-colors max-w-[190px] sm:max-w-[280px]">
-            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-500 shrink-0"></i>
-            <span id="current-location-text" class="truncate">ส่งที่: ตลาดสดเทศบาลตำบลหว้านใหญ่</span>
-            <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 shrink-0"></i>
-          </button>
-        </div>
-
-        <!-- Desktop Search Bar -->
-        <div class="hidden md:flex flex-1 max-w-md mx-4">
-          <div class="relative w-full">
-            <input type="text" id="desktop-search-input" onkeyup="handleSearch(this.value)" placeholder="ค้นหาร้านอร่อย หมูหันแก่งกะเบา ส้มตำสองคอน กะเพรา..." 
-              class="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-full text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all border border-transparent focus:border-brand-300">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5"></i>
-          </div>
-        </div>
-
-        <!-- Right Actions: Google Profile & Cart -->
-        <div class="flex items-center gap-2 sm:gap-3">
-          
-          <!-- Google Auth Container -->
-          <div id="google-auth-container">
-          </div>
-
-          <!-- Cart Button (Desktop) -->
-          <button onclick="openCartDrawer()" class="hidden sm:flex relative items-center gap-2 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white px-3.5 py-2 rounded-full text-xs sm:text-sm font-medium shadow-md shadow-brand-500/20 transition-all">
-            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-            <span>ตะกร้า</span>
-            <span id="cart-count-badge" class="bg-white text-brand-600 text-[11px] font-bold px-1.5 py-0.2 rounded-full hidden">0</span>
-            <span id="cart-total-header" class="text-xs font-bold pl-1 hidden border-l border-brand-400">฿0</span>
-          </button>
-
-        </div>
-
-      </div>
-    </div>
 
     <!-- Mobile Search Bar -->
     <div class="md:hidden px-4 pb-3 pt-1">
@@ -287,7 +158,9 @@
   <!-- MAIN APP CONTAINER -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
 
+    <!-- ========================================== -->
     <!-- VIEW 1: HOME (BROWSE LOCAL FOOD) -->
+    <!-- ========================================== -->
     <div id="view-home" class="space-y-6 sm:space-y-8">
       
       <!-- HERO BANNER -->
@@ -431,7 +304,9 @@
 
     </div>
 
+    <!-- ========================================== -->
     <!-- VIEW 2: RESTAURANT DETAIL & MENU -->
+    <!-- ========================================== -->
     <div id="view-restaurant-detail" class="hidden space-y-4 sm:space-y-6">
       <button onclick="showView('home')" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-brand-600 bg-white border border-slate-200 px-3 py-1.5 rounded-full shadow-sm">
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
@@ -454,116 +329,314 @@
       </div>
     </div>
 
-    <!-- VIEW 3: ORDER TRACKING -->
+    <!-- ========================================== -->
+    <!-- VIEW 3: COMPLETE 4-PHASE ORDER LIFECYCLE TRACKER -->
+    <!-- ========================================== -->
     <div id="view-order-tracking" class="hidden max-w-3xl mx-auto space-y-6">
+      
+      <!-- MAIN ORDER STATUS CONTAINER -->
       <div class="bg-white rounded-3xl border border-slate-200 shadow-soft p-5 sm:p-8 space-y-6">
         
+        <!-- Header Info -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
           <div>
-            <div class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full mb-1">
-              <span class="w-2 h-2 rounded-full bg-brand-500 animate-ping"></span>
-              กำลังดำเนินการจัดส่ง (Live Tracking)
+            <div id="order-header-status-badge" class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full mb-1">
+              <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+              <span id="order-header-status-text">กำลังค้นหาและส่งงานให้ไรเดอร์...</span>
             </div>
             <h1 class="text-xl sm:text-2xl font-display font-bold text-slate-900" id="track-order-id">ออเดอร์ #WG-20260823-001</h1>
-            <p class="text-xs text-slate-500" id="track-order-time">สั่งเมื่อ 21:08 น. • ชำระผ่าน พร้อมเพย์</p>
+            <p class="text-xs text-slate-500" id="track-order-time">ส่งเข้าสู่ระบบ Shipday แล้ว • รอไรเดอร์คำนวณค่าส่ง</p>
           </div>
           <div class="sm:text-right">
-            <span class="text-xs text-slate-400">ประมาณการเวลาส่งถึง</span>
-            <p class="text-xl sm:text-2xl font-bold text-brand-600" id="track-eta">15-25 นาที</p>
+            <span class="text-xs text-slate-400">สถานะคำสั่งซื้อ</span>
+            <p class="text-lg sm:text-xl font-bold text-brand-600" id="track-order-phase-title">รอไรเดอร์รับงาน</p>
           </div>
         </div>
 
-        <!-- Simulated Map in Wan Yai -->
-        <div class="relative h-48 sm:h-64 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
-          <div class="absolute inset-0 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:12px_12px] opacity-40"></div>
+        <!-- ======================================================= -->
+        <!-- SUB-SECTION A: PHASE 1 - RADAR WAITING FOR RIDER ACCEPT -->
+        <!-- ======================================================= -->
+        <div id="order-phase-1-waiting" class="bg-gradient-to-b from-slate-900 to-slate-950 text-white rounded-3xl p-6 sm:p-8 text-center space-y-5 shadow-xl">
           
-          <svg class="absolute inset-0 w-full h-full stroke-slate-300 stroke-2" fill="none">
-            <path d="M 20 180 Q 200 160 400 120 T 700 30" stroke="#0284c7" stroke-width="14" opacity="0.3" /> <!-- Mekong River -->
-            <path d="M 40 50 Q 150 70 300 40 T 600 120" stroke="#cbd5e1" stroke-width="8" />
-            <path id="route-path" d="M 120 70 L 260 110 L 420 80 L 520 140" stroke="#f97316" stroke-width="4" stroke-dasharray="6,6" />
-          </svg>
-
-          <!-- Restaurant Pin -->
-          <div class="absolute left-[110px] top-[55px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-            <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-lg border-2 border-white">
-              <i data-lucide="store" class="w-4 h-4"></i>
+          <div class="relative w-28 h-28 mx-auto flex items-center justify-center">
+            <div class="absolute inset-0 rounded-full bg-brand-500/20 radar-animation"></div>
+            <div class="absolute inset-3 rounded-full bg-brand-500/40 radar-animation" style="animation-delay: 0.5s;"></div>
+            <div class="w-16 h-16 rounded-full bg-brand-500 text-white flex items-center justify-center shadow-lg relative z-10">
+              <i data-lucide="bike" class="w-8 h-8 animate-pulse"></i>
             </div>
-            <span class="text-[10px] font-bold bg-white/90 px-1.5 py-0.5 rounded shadow mt-1 whitespace-nowrap" id="map-restaurant-name">ร้านค้า</span>
           </div>
 
-          <!-- Rider Pin (Animated) -->
-          <div id="map-rider-pin" class="absolute left-[300px] top-[95px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all duration-1000">
-            <div class="relative">
-              <div class="absolute -inset-2 bg-brand-500 rounded-full opacity-30 animate-ping"></div>
-              <div class="w-10 h-10 rounded-full bg-brand-500 text-white flex items-center justify-center shadow-xl border-2 border-white">
-                <i data-lucide="bike" class="w-5 h-5"></i>
+          <div class="space-y-1">
+            <h3 class="font-display font-bold text-lg text-white">กำลังส่งงานให้ไรเดอร์ในอำเภอหว้านใหญ่...</h3>
+            <p class="text-xs text-slate-300 max-w-md mx-auto">
+              ระบบกำลังเชื่อมต่อไปยังแอปไรเดอร์ เมื่อไรเดอร์กดรับงาน ระบบจะทราบระยะทางจริงและส่งค่าจัดส่งกลับมาให้คุณชำระเงินทันที
+            </p>
+          </div>
+
+          <!-- Live Sync Status -->
+          <div class="inline-flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full text-xs text-emerald-300 border border-white/10">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>Shipday Webhook & Polling Active (ตรวจจับทุก 4 วินาที)</span>
+          </div>
+
+          
+
+        <!-- ======================================================= -->
+        <!-- SUB-SECTION B: PHASE 2 - RIDER ACCEPTED & PAYMENT REQUIRED -->
+        <!-- ======================================================= -->
+        <div id="order-phase-2-payment" class="hidden space-y-5 animate-in fade-in zoom-in-95 duration-200">
+          
+          <!-- Rider Accepted Alert Banner -->
+          <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">
+                <i data-lucide="check" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-sm text-emerald-900">ไรเดอร์กดรับงานแล้ว! (คำนวณค่าส่งเรียบร้อย)</h3>
+                <p class="text-xs text-emerald-700" id="phase2-rider-notice">ไรเดอร์พร้อมออกเดินทาง กรุณาเลือกวิธีชำระเงินด้านล่าง</p>
               </div>
             </div>
-            <span class="text-[10px] font-bold bg-brand-600 text-white px-2 py-0.5 rounded-full shadow mt-1 whitespace-nowrap">ไรเดอร์ WANGO กำลังนำส่ง</span>
+            <span class="text-xs font-bold bg-emerald-200 text-emerald-900 px-2.5 py-1 rounded-full shrink-0">รับงานแล้ว</span>
           </div>
 
-          <!-- Customer Pin -->
-          <div class="absolute left-[520px] top-[135px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-            <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg border-2 border-white">
-              <i data-lucide="home" class="w-4 h-4"></i>
-            </div>
-            <span class="text-[10px] font-bold bg-white/90 px-1.5 py-0.5 rounded shadow mt-1 whitespace-nowrap">บ้านลูกค้า</span>
-          </div>
-
-          <div class="absolute bottom-2 left-2 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-md text-[10px] text-slate-700 font-semibold border border-slate-200 flex items-center gap-1">
-            <span>📍 พิกัดจัดส่ง: อ.หว้านใหญ่ จ.มุกดาหาร</span>
-          </div>
-        </div>
-
-        <div class="space-y-4">
-          <h2 class="text-sm font-bold text-slate-800">ขั้นตอนการจัดส่ง (Delivery Progress)</h2>
-          <div class="grid grid-cols-5 gap-2 text-center" id="order-stepper">
-          </div>
-        </div>
-
-        <!-- Rider Card -->
-        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex items-center justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 font-bold text-lg border-2 border-brand-300">
-              🏍️
-            </div>
-            <div>
-              <div class="flex items-center gap-1.5">
-                <p class="font-bold text-sm text-slate-900">นายสมชาย ไรเดอร์หว้านใหญ่</p>
-                <span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-semibold">ยืนยันตัวตนแล้ว</span>
+          <!-- Rider Profile Card -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 font-bold text-lg border border-brand-300">
+                🏍️
               </div>
-              <p class="text-xs text-slate-500">มอเตอร์ไซค์ Honda Wave • ทะเบียน 1กข-8824 มห (มุกดาหาร)</p>
+              <div>
+                <p class="font-bold text-sm text-slate-900" id="phase2-rider-name">นายสมชาย ไรเดอร์หว้านใหญ่</p>
+                <p class="text-xs text-slate-500" id="phase2-rider-plate">มอเตอร์ไซค์ Honda Wave • ทะเบียน 1กข-8824 มห</p>
+              </div>
             </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <a href="tel:0891234567" class="w-9 h-9 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center shadow-md transition-colors" title="โทรหาไรเดอร์">
+            <a id="phase2-rider-phone-btn" href="tel:0891234567" class="w-9 h-9 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center shadow-md">
               <i data-lucide="phone" class="w-4 h-4"></i>
             </a>
           </div>
+
+          <!-- Exact Bill Breakdown (Food + Exact Delivery Fee = Total) -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
+            <h4 class="font-bold text-slate-800 border-b border-slate-200 pb-2 flex items-center justify-between">
+              <span>สรุปยอดชำระจริง (คำนวณตามระยะทางจาก Shipday)</span>
+              <span class="text-brand-600 font-semibold" id="phase2-distance-tag">ระยะทาง 2.4 กม.</span>
+            </h4>
+            <div class="flex justify-between text-slate-600">
+              <span>ค่าอาหารรวม</span>
+              <span id="phase2-food-subtotal" class="font-semibold text-slate-900">฿0</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>ค่าจัดส่งจริง (Shipday Quote)</span>
+              <span id="phase2-delivery-fee" class="font-bold text-brand-600">฿20</span>
+            </div>
+            <div class="flex justify-between text-emerald-600" id="phase2-discount-row" style="display:none;">
+              <span>ส่วนลด</span>
+              <span id="phase2-discount-val">-฿0</span>
+            </div>
+            <div class="flex justify-between text-sm font-extrabold text-slate-900 border-t border-slate-200 pt-2">
+              <span>ยอดรวมสุทธิที่ต้องชำระ</span>
+              <span id="phase2-grand-total" class="text-base text-brand-600">฿0</span>
+            </div>
+          </div>
+
+          <!-- PAYMENT METHODS TABS (PROMPTPAY QR VS CASH COD) -->
+          <div class="space-y-3">
+            <h4 class="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+              <i data-lucide="credit-card" class="w-4 h-4 text-brand-500"></i> เลือกวิธีการชำระเงินก่อนไรเดอร์ออกวิ่ง:
+            </h4>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="switchPaymentTab('promptpay')" id="tab-btn-promptpay" class="p-3 rounded-2xl border-2 border-brand-500 bg-brand-50 text-center text-xs font-bold text-slate-900 transition-all flex flex-col items-center">
+                <span class="text-xl mb-0.5">📱</span>
+                <span>สแกนพร้อมเพย์ (QR Code)</span>
+                <span class="text-[10px] text-brand-600 font-normal">ร้านเริ่มทำ & ไรเดอร์วิ่งทันที</span>
+              </button>
+
+              <button onclick="switchPaymentTab('cod')" id="tab-btn-cod" class="p-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-center text-xs text-slate-600 transition-all flex flex-col items-center">
+                <span class="text-xl mb-0.5">💵</span>
+                <span class="font-bold text-slate-900">จ่ายเงินสดปลายทาง (COD)</span>
+                <span class="text-[10px] text-slate-400 font-normal">ชำระเงินกับไรเดอร์เมื่อถึง</span>
+              </button>
+            </div>
+
+            <!-- 1. PromptPay Tab Content -->
+            <div id="payment-content-promptpay" class="bg-slate-900 text-white p-5 rounded-3xl text-center space-y-3 shadow-xl">
+              <div class="flex items-center justify-center gap-1.5 text-xs text-emerald-400 font-semibold">
+                <i data-lucide="qr-code" class="w-4 h-4"></i> Thai QR Payment (พร้อมเพย์)
+              </div>
+
+              <!-- Dynamic QR Code -->
+              <div class="inline-block p-3 bg-white rounded-2xl shadow-lg border-2 border-emerald-400">
+                <svg class="w-36 h-36 mx-auto text-slate-900" viewBox="0 0 100 100" fill="currentColor">
+                  <rect width="100" height="100" fill="white" />
+                  <rect x="8" y="8" width="26" height="26" fill="#0f172a" rx="3" />
+                  <rect x="13" y="13" width="16" height="16" fill="white" rx="2" />
+                  <rect x="16" y="16" width="10" height="10" fill="#0f172a" rx="1" />
+
+                  <rect x="66" y="8" width="26" height="26" fill="#0f172a" rx="3" />
+                  <rect x="71" y="13" width="16" height="16" fill="white" rx="2" />
+                  <rect x="74" y="16" width="10" height="10" fill="#0f172a" rx="1" />
+
+                  <rect x="8" y="66" width="26" height="26" fill="#0f172a" rx="3" />
+                  <rect x="13" y="71" width="16" height="16" fill="white" rx="2" />
+                  <rect x="16" y="74" width="10" height="10" fill="#0f172a" rx="1" />
+
+                  <rect x="42" y="10" width="5" height="5" fill="#0f172a" />
+                  <rect x="52" y="10" width="5" height="5" fill="#0f172a" />
+                  <rect x="42" y="20" width="5" height="5" fill="#0f172a" />
+                  <rect x="52" y="25" width="5" height="5" fill="#0f172a" />
+                  
+                  <rect x="10" y="42" width="5" height="5" fill="#0f172a" />
+                  <rect x="25" y="42" width="5" height="5" fill="#0f172a" />
+                  <rect x="40" y="42" width="20" height="20" fill="#0284c7" rx="3" />
+                  <rect x="68" y="42" width="5" height="5" fill="#0f172a" />
+                  <rect x="82" y="42" width="5" height="5" fill="#0f172a" />
+
+                  <rect x="42" y="68" width="5" height="5" fill="#0f172a" />
+                  <rect x="52" y="75" width="5" height="5" fill="#0f172a" />
+                  <rect x="68" y="68" width="10" height="5" fill="#0f172a" />
+                  <rect x="75" y="78" width="12" height="12" fill="#0f172a" />
+                </svg>
+              </div>
+
+              <div>
+                <span class="text-[11px] text-slate-400">ยอดชำระเงิน</span>
+                <p class="text-2xl font-bold text-amber-400" id="phase2-qr-amount">฿0.00</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">ชื่อบัญชี: WANGO Delivery (หว้านโก เดลิเวอรี่)</p>
+              </div>
+
+              <!-- Confirm Payment Action -->
+              <button onclick="confirmCustomerPayment('PROMPTPAY')" class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-extrabold text-xs sm:text-sm py-3 px-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
+                <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                <span>ฉันสแกนชำระเงินเรียบร้อยแล้ว (แจ้งไรเดอร์ออกวิ่ง)</span>
+              </button>
+            </div>
+
+            <!-- 2. COD Tab Content -->
+            <div id="payment-content-cod" class="hidden bg-amber-50 border border-amber-200 p-5 rounded-3xl text-center space-y-4 shadow-sm">
+              <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto text-2xl">
+                💵
+              </div>
+              <div class="space-y-1">
+                <h4 class="font-bold text-sm text-slate-900">ชำระด้วยเงินสดปลายทาง (Cash on Delivery)</h4>
+                <p class="text-xs text-slate-600 max-w-sm mx-auto">
+                  โปรดเตรียมเงินสดจำนวน <span class="font-bold text-brand-600 text-sm" id="phase2-cod-amount">฿0</span> พอดีสำหรับชำระให้ไรเดอร์เมื่ออาหารส่งถึงหน้าบ้าน
+                </p>
+              </div>
+
+              <div class="bg-white p-3 rounded-2xl border border-amber-200/80 text-xs text-slate-600 text-left space-y-1">
+                <p class="font-bold text-slate-800">📌 เงื่อนไขการสั่งซื้อเงินสด:</p>
+                <p class="text-[11px]">• เมื่อกดยืนยัน ร้านค้าจะเริ่มปรุงอาหารทันที</p>
+                <p class="text-[11px]">• ไรเดอร์จะโทรติดต่อก่อนนำส่ง โปรดเปิดโทรศัพท์รอรับสาย</p>
+              </div>
+
+              <button onclick="confirmCustomerPayment('COD')" class="w-full bg-brand-500 hover:bg-brand-600 active:scale-95 text-white font-bold text-xs sm:text-sm py-3 px-4 rounded-2xl shadow-lg shadow-brand-500/25 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>ยืนยันสั่งซื้อด้วยเงินสด (แจ้งร้านเริ่มทำ & ไรเดอร์ออกวิ่ง)</span>
+              </button>
+            </div>
+
+          </div>
+
         </div>
 
-        <!-- Order Items Summary -->
-        <div class="border-t border-slate-100 pt-4 space-y-2" id="tracking-items-summary">
-        </div>
+        <!-- ======================================================= -->
+        <!-- SUB-SECTION C: PHASE 3 - LIVE OUT FOR DELIVERY & MAP -->
+        <!-- ======================================================= -->
+        <div id="order-phase-3-delivering" class="hidden space-y-6 animate-in fade-in zoom-in-95 duration-200">
+          
+          <!-- Payment Success & Dispatch Banner -->
+          <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl flex items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping"></span>
+              <div>
+                <p class="font-bold text-blue-900" id="phase3-payment-status-label">ชำระเงินเรียบร้อยแล้ว (พร้อมเพย์)</p>
+                <p class="text-blue-700 text-[11px]">ร้านค้ากำลังปรุงอาหาร & ไรเดอร์กำลังเดินทางไปรับของ</p>
+              </div>
+            </div>
+            <span class="bg-blue-200 text-blue-900 font-bold px-2 py-0.5 rounded-full text-[10px]">LIVE</span>
+          </div>
 
-        <!-- Demo simulation action -->
-        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <button onclick="simulateNextOrderStatus()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm">
-            <i data-lucide="play" class="w-3.5 h-3.5 text-amber-400"></i>
-            <span>จำลองเปลี่ยนสถานะถัดไป </span>
-          </button>
-          <button onclick="showView('home')" class="text-xs text-slate-500 hover:text-brand-600 font-medium">
-            สั่งอาหารเพิ่มเติม
-          </button>
-        </div>
+          <!-- Simulated Map in Wan Yai -->
+          <div class="relative h-48 sm:h-64 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
+            <div class="absolute inset-0 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:12px_12px] opacity-40"></div>
+            
+            <svg class="absolute inset-0 w-full h-full stroke-slate-300 stroke-2" fill="none">
+              <path d="M 20 180 Q 200 160 400 120 T 700 30" stroke="#0284c7" stroke-width="14" opacity="0.3" />
+              <path d="M 40 50 Q 150 70 300 40 T 600 120" stroke="#cbd5e1" stroke-width="8" />
+              <path id="route-path" d="M 120 70 L 260 110 L 420 80 L 520 140" stroke="#f97316" stroke-width="4" stroke-dasharray="6,6" />
+            </svg>
+
+            <!-- Restaurant Pin -->
+            <div class="absolute left-[110px] top-[55px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+              <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-lg border-2 border-white">
+                <i data-lucide="store" class="w-4 h-4"></i>
+              </div>
+              <span class="text-[10px] font-bold bg-white/90 px-1.5 py-0.5 rounded shadow mt-1 whitespace-nowrap" id="map-restaurant-name">ร้านค้า</span>
+            </div>
+
+            <!-- Rider Pin (Animated) -->
+            <div id="map-rider-pin" class="absolute left-[300px] top-[95px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all duration-1000">
+              <div class="relative">
+                <div class="absolute -inset-2 bg-brand-500 rounded-full opacity-30 animate-ping"></div>
+                <div class="w-10 h-10 rounded-full bg-brand-500 text-white flex items-center justify-center shadow-xl border-2 border-white">
+                  <i data-lucide="bike" class="w-5 h-5"></i>
+                </div>
+              </div>
+              <span class="text-[10px] font-bold bg-brand-600 text-white px-2 py-0.5 rounded-full shadow mt-1 whitespace-nowrap">ไรเดอร์ WANGO กำลังนำส่ง</span>
+            </div>
+
+            <!-- Customer Pin -->
+            <div class="absolute left-[520px] top-[135px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+              <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg border-2 border-white">
+                <i data-lucide="home" class="w-4 h-4"></i>
+              </div>
+              <span class="text-[10px] font-bold bg-white/90 px-1.5 py-0.5 rounded shadow mt-1 whitespace-nowrap">บ้านลูกค้า</span>
+            </div>
+
+            <div class="absolute bottom-2 left-2 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-md text-[10px] text-slate-700 font-semibold border border-slate-200 flex items-center gap-1">
+              <span>📍 พิกัดจัดส่ง: ริมแม่น้ำโขง อ.หว้านใหญ่ จ.มุกดาหาร</span>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <h2 class="text-sm font-bold text-slate-800">ขั้นตอนการจัดส่ง (Delivery Progress)</h2>
+            <div class="grid grid-cols-5 gap-2 text-center" id="order-stepper">
+            </div>
+          </div>
+
+          <!-- Rider Card in Phase 3 -->
+          <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 font-bold text-lg border border-brand-300">
+                🏍️
+              </div>
+              <div>
+                <p class="font-bold text-sm text-slate-900" id="phase3-rider-name">นายสมชาย ไรเดอร์หว้านใหญ่</p>
+                <p class="text-xs text-slate-500" id="phase3-rider-plate">มอเตอร์ไซค์ Honda Wave • ทะเบียน 1กข-8824 มห</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <a id="phase3-rider-phone-btn" href="tel:0891234567" class="w-9 h-9 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center shadow-md transition-colors" title="โทรหาไรเดอร์">
+                <i data-lucide="phone" class="w-4 h-4"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="border-t border-slate-100 pt-4 space-y-2" id="tracking-items-summary">
+          </div>
+
+          
 
       </div>
+
     </div>
 
   </main>
 
   <!-- ========================================== -->
-  <!-- MOBILE FLOATING CART BAR (APPEARS ON MOBILE WHEN ITEMS IN CART) -->
+  <!-- MOBILE FLOATING CART BAR -->
   <!-- ========================================== -->
   <div id="mobile-floating-cart" class="fixed bottom-16 inset-x-0 p-3 z-30 sm:hidden hidden animate-in slide-in-from-bottom-5">
     <div onclick="openCartDrawer()" class="bg-slate-900 text-white p-3.5 rounded-2xl shadow-xl flex items-center justify-between cursor-pointer border border-slate-700/80 active:scale-98 transition-transform">
@@ -587,7 +660,7 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- MOBILE BOTTOM NAVIGATION BAR (FIXED) -->
+  <!-- MOBILE BOTTOM NAVIGATION BAR -->
   <!-- ========================================== -->
   <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 sm:hidden flex items-center justify-around py-2 px-2 shadow-lg">
     <button onclick="showView('home')" class="mobile-nav-btn active flex flex-col items-center justify-center text-brand-600 font-bold text-[10px]">
@@ -609,12 +682,11 @@
   </nav>
 
   <!-- ========================================== -->
-  <!-- MODAL: FOOD CUSTOMIZATION (100% INTERACTIVE) -->
+  <!-- MODAL: FOOD CUSTOMIZATION (INTERACTIVE) -->
   <!-- ========================================== -->
   <div id="food-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
       
-      <!-- Food Image Header -->
       <div class="relative h-44 sm:h-52 bg-slate-100 shrink-0">
         <img id="modal-food-img" src="" alt="" class="w-full h-full object-cover">
         <button onclick="closeFoodModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center transition-colors">
@@ -625,7 +697,6 @@
         </div>
       </div>
 
-      <!-- Food Details & Options -->
       <div class="p-5 sm:p-6 overflow-y-auto custom-scrollbar space-y-4 sm:space-y-5 flex-1">
         <div>
           <div class="flex items-start justify-between gap-2">
@@ -640,7 +711,6 @@
           </div>
         </div>
 
-        <!-- 1. Portion Options -->
         <div class="space-y-2 border-t border-slate-100 pt-3" id="portion-section">
           <div class="flex items-center justify-between text-xs font-bold text-slate-800">
             <span>ขนาด / ปริมาณ</span>
@@ -650,7 +720,6 @@
           </div>
         </div>
 
-        <!-- 2. Spiciness Options -->
         <div class="space-y-2 border-t border-slate-100 pt-3" id="spiciness-section">
           <div class="flex items-center justify-between text-xs font-bold text-slate-800">
             <span>ระดับความเผ็ด</span>
@@ -660,7 +729,6 @@
           </div>
         </div>
 
-        <!-- 3. Add-ons Options -->
         <div class="space-y-2 border-t border-slate-100 pt-3" id="addons-section">
           <div class="flex items-center justify-between text-xs font-bold text-slate-800">
             <span>ท็อปปิ้ง / เพิ่มเติม</span>
@@ -670,7 +738,6 @@
           </div>
         </div>
 
-        <!-- 4. Special Notes -->
         <div class="space-y-1.5 border-t border-slate-100 pt-3">
           <label class="text-xs font-bold text-slate-800 flex items-center justify-between">
             <span>หมายเหตุถึงทางร้าน</span>
@@ -680,7 +747,6 @@
         </div>
       </div>
 
-      <!-- Footer Action -->
       <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-4 shrink-0">
         <div class="flex items-center bg-white border border-slate-200 rounded-full p-1 shadow-sm">
           <button onclick="updateModalQuantity(-1)" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-600 font-bold">-</button>
@@ -699,7 +765,7 @@
 
 
   <!-- ========================================== -->
-  <!-- DRAWER: CART (DESKTOP & MOBILE) -->
+  <!-- DRAWER: CART -->
   <!-- ========================================== -->
   <div id="cart-drawer" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden transition-opacity">
     <div class="fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300">
@@ -737,16 +803,16 @@
             <span>ค่าอาหารรวม</span>
             <span id="cart-subtotal" class="font-medium text-slate-900">฿0</span>
           </div>
-          <div class="flex justify-between">
-            <span class="flex items-center gap-1">ค่าจัดส่งในหว้านใหญ่ (<span id="cart-distance-km">1.2</span> กม.)</span>
-            <span id="cart-delivery-fee" class="font-medium text-slate-900">฿15</span>
+          <div class="flex justify-between text-slate-500">
+            <span class="flex items-center gap-1">ค่าจัดส่ง</span>
+            <span class="italic text-brand-600">คำนวณเมื่อไรเดอร์รับงาน</span>
           </div>
           <div class="flex justify-between text-emerald-600" id="cart-discount-row" style="display:none;">
             <span>ส่วนลดโปรโมชั่น</span>
             <span id="cart-discount-val" class="font-medium">-฿0</span>
           </div>
           <div class="flex justify-between text-sm font-bold text-slate-900 border-t border-slate-200 pt-2">
-            <span>ยอดรวมสุทธิ</span>
+            <span>ยอดค่าอาหาร (ยังไม่รวมค่าส่ง)</span>
             <span id="cart-grand-total" class="text-brand-600 text-base">฿0</span>
           </div>
         </div>
@@ -763,14 +829,14 @@
 
 
   <!-- ========================================== -->
-  <!-- MODAL: CHECKOUT & PROMPTPAY QR GENERATOR (WITH GPS EMBEDDED) -->
+  <!-- MODAL: CHECKOUT (CONFIRM ADDRESS & SEND TO SHIPDAY) -->
   <!-- ========================================== -->
   <div id="checkout-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-3xl max-w-lg w-full max-h-[94vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
       
       <div class="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
         <div>
-          <h2 class="font-display font-bold text-base text-slate-900">ยืนยันข้อมูลจัดส่งและชำระเงิน</h2>
+          <h2 class="font-display font-bold text-base text-slate-900">ยืนยันข้อมูลจัดส่ง (ส่งเข้าสู่ระบบ Shipday)</h2>
           <p class="text-[11px] text-slate-500">พื้นที่จัดส่ง: อำเภอหว้านใหญ่ จ.มุกดาหาร</p>
         </div>
         <button onclick="closeCheckoutModal()" class="w-8 h-8 rounded-full hover:bg-slate-200 text-slate-500 flex items-center justify-center">
@@ -798,7 +864,7 @@
             <p class="font-bold text-slate-800 flex items-center gap-1.5">
               <i data-lucide="map-pin" class="w-4 h-4 text-brand-500"></i> ข้อมูลที่อยู่จัดส่ง & พิกัด GPS
             </p>
-            <span class="text-[10px] text-brand-600 font-bold bg-brand-50 px-2 py-0.5 rounded-full" id="checkout-gps-badge">GPS พร้อมส่ง</span>
+            <span class="text-[10px] text-brand-600 font-bold bg-brand-50 px-2 py-0.5 rounded-full">GPS พร้อมส่ง</span>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
@@ -816,10 +882,9 @@
             <input type="text" id="cust-address" value="" class="w-full p-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none font-medium">
           </div>
           
-          <!-- Hidden / Visual GPS coordinates -->
           <div class="flex items-center justify-between text-[11px] text-slate-500 bg-white p-2 rounded-xl border border-slate-200">
             <span class="font-medium text-slate-700 flex items-center gap-1">
-              <i data-lucide="crosshair" class="w-3.5 h-3.5 text-blue-500"></i> พิกัดจริง (Lat, Lng):
+              <i data-lucide="crosshair" class="w-3.5 h-3.5 text-blue-500"></i> พิกัด GPS จริง (Lat, Lng):
             </span>
             <span class="font-mono text-blue-700 font-bold" id="checkout-latlng-label">16.7325, 104.7510</span>
           </div>
@@ -830,87 +895,26 @@
           </div>
         </div>
 
-        <!-- Payment Option -->
-        <div class="space-y-2">
-          <p class="font-bold text-slate-800 flex items-center gap-1.5">
-            <i data-lucide="credit-card" class="w-4 h-4 text-brand-500"></i> ช่องทางชำระเงิน
+        <!-- Notice Workflow -->
+        <div class="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-[11px] text-amber-900 space-y-1">
+          <p class="font-bold flex items-center gap-1">
+            <i data-lucide="info" class="w-4 h-4 text-amber-600"></i> ขั้นตอนการสั่งซื้อ:
           </p>
-          <div class="grid grid-cols-2 gap-2">
-            <label class="payment-option cursor-pointer flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-brand-500 bg-brand-50/50 text-center transition-all">
-              <input type="radio" name="payment-method" value="promptpay" checked class="hidden" onchange="updatePaymentMethod(this.value)">
-              <span class="text-xl mb-1">📱</span>
-              <span class="font-bold text-slate-900 text-[11px]">สแกนพร้อมเพย์ (PromptPay)</span>
-              <span class="text-[9px] text-brand-600 font-semibold">สร้าง QR Code ฟรี</span>
-            </label>
-            <label class="payment-option cursor-pointer flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-center transition-all">
-              <input type="radio" name="payment-method" value="cod" class="hidden" onchange="updatePaymentMethod(this.value)">
-              <span class="text-xl mb-1">💵</span>
-              <span class="font-bold text-slate-900 text-[11px]">เงินสดปลายทาง (COD)</span>
-              <span class="text-[9px] text-slate-400">ชำระกับไรเดอร์เมื่อได้รับของ</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- PromptPay QR Code Generator Box -->
-        <div id="promptpay-qr-box" class="bg-slate-900 text-white p-4 sm:p-5 rounded-3xl text-center space-y-3 shadow-xl">
-          <div class="flex items-center justify-center gap-1.5 text-xs text-emerald-400 font-semibold">
-            <i data-lucide="qr-code" class="w-4 h-4"></i> Thai QR Payment (PromptPay)
-          </div>
-
-          <div class="inline-block p-2.5 bg-white rounded-2xl shadow-lg border-2 border-emerald-400">
-            <svg class="w-36 h-36 mx-auto text-slate-900" viewBox="0 0 100 100" fill="currentColor">
-              <rect width="100" height="100" fill="white" />
-              <rect x="8" y="8" width="26" height="26" fill="#0f172a" rx="3" />
-              <rect x="13" y="13" width="16" height="16" fill="white" rx="2" />
-              <rect x="16" y="16" width="10" height="10" fill="#0f172a" rx="1" />
-
-              <rect x="66" y="8" width="26" height="26" fill="#0f172a" rx="3" />
-              <rect x="71" y="13" width="16" height="16" fill="white" rx="2" />
-              <rect x="74" y="16" width="10" height="10" fill="#0f172a" rx="1" />
-
-              <rect x="8" y="66" width="26" height="26" fill="#0f172a" rx="3" />
-              <rect x="13" y="71" width="16" height="16" fill="white" rx="2" />
-              <rect x="16" y="74" width="10" height="10" fill="#0f172a" rx="1" />
-
-              <rect x="42" y="10" width="5" height="5" fill="#0f172a" />
-              <rect x="52" y="10" width="5" height="5" fill="#0f172a" />
-              <rect x="42" y="20" width="5" height="5" fill="#0f172a" />
-              <rect x="52" y="25" width="5" height="5" fill="#0f172a" />
-              
-              <rect x="10" y="42" width="5" height="5" fill="#0f172a" />
-              <rect x="25" y="42" width="5" height="5" fill="#0f172a" />
-              <rect x="40" y="42" width="20" height="20" fill="#0284c7" rx="3" />
-              <rect x="68" y="42" width="5" height="5" fill="#0f172a" />
-              <rect x="82" y="42" width="5" height="5" fill="#0f172a" />
-
-              <rect x="42" y="68" width="5" height="5" fill="#0f172a" />
-              <rect x="52" y="75" width="5" height="5" fill="#0f172a" />
-              <rect x="68" y="68" width="10" height="5" fill="#0f172a" />
-              <rect x="75" y="78" width="12" height="12" fill="#0f172a" />
-            </svg>
-          </div>
-
-          <div>
-            <span class="text-[11px] text-slate-400">ยอดชำระเงิน</span>
-            <p class="text-xl font-bold text-amber-400" id="promptpay-amount-label">฿0.00</p>
-            <p class="text-[10px] text-slate-400 mt-0.5">ชื่อบัญชี: WANGO Delivery (หว้านโก เดลิเวอรี่)</p>
-          </div>
-
-          <p class="text-[10px] text-slate-400">
-            สแกนด้วย Mobile Banking ทุกธนาคาร ระบบตรวจจับยอดชำระเงินอัตโนมัติ
-          </p>
+          <p>1. เมื่อกดยืนยัน ออเดอร์จะถูกส่งเข้า Shipday เพื่อให้ไรเดอร์กดรับงาน</p>
+          <p>2. เมื่อไรเดอร์กดรับงาน ระบบจะแสดงค่าจัดส่งจริง และให้คุณเลือกสแกนพร้อมเพย์ หรือจ่ายเงินสด</p>
+          <p>3. เมื่อชำระเงิน/ยืนยันแล้ว ไรเดอร์จะเริ่มออกเดินทางไปรับอาหารทันที</p>
         </div>
 
       </div>
 
       <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3 shrink-0">
         <div>
-          <span class="text-[10px] text-slate-400">ยอดชำระสุทธิ</span>
-          <p class="text-base font-bold text-brand-600" id="checkout-final-total">฿0</p>
+          <span class="text-[10px] text-slate-400">ยอดค่าอาหาร</span>
+          <p class="text-base font-bold text-brand-600" id="checkout-food-total">฿0</p>
         </div>
-        <button onclick="submitCustomerOrder()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white font-medium text-xs sm:text-sm py-3 px-4 rounded-2xl shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 transition-all">
+        <button onclick="submitCustomerOrderToShipday()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white font-medium text-xs sm:text-sm py-3 px-4 rounded-2xl shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 transition-all">
           <i data-lucide="send" class="w-4 h-4"></i>
-          <span>ยืนยันการสั่งซื้ออาหาร</span>
+          <span>ส่งออเดอร์ให้ไรเดอร์รับงาน</span>
         </button>
       </div>
 
@@ -933,7 +937,6 @@
         </button>
       </div>
 
-      <!-- Real GPS Trigger -->
       <button onclick="requestRealGPSLocation()" class="w-full p-3 rounded-2xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center gap-2 border border-blue-200 transition-colors">
         <i data-lucide="navigation" class="w-4 h-4"></i>
         <span>📍 ดึงพิกัด GPS ปัจจุบันของฉัน</span>
@@ -1398,15 +1401,15 @@
       activeFilterSort: 'recommended',
       searchQuery: '',
       
-      // User Auth (Mandatory)
+      // User Auth
       currentUser: JSON.parse(localStorage.getItem('wango_google_user') || 'null'),
       
-      // Delivery Location & Real GPS Coordinates
+      // Location & Coordinates
       currentLocation: localStorage.getItem('wango_location_address') || 'ตลาดสดเทศบาลตำบลหว้านใหญ่',
       currentCoords: JSON.parse(localStorage.getItem('wango_location_coords') || '{"lat": 16.7325, "lng": 104.7510}'),
       isLocationConfigured: !!localStorage.getItem('wango_location_address'),
       
-      // Modal Item Customization
+      // Modal Item
       activeRestaurant: null,
       modalItem: null,
       modalQuantity: 1,
@@ -1424,8 +1427,9 @@
         discountAmount: 0
       },
       
-      // Order
+      // Active Order & Real-Time Lifecycle
       activeOrder: null,
+      orderPollingInterval: null,
       shipdayApiKey: '4jV7ikfZha.2FSbpIR9Z5h6z0F67JY2'
     };
 
@@ -1439,10 +1443,7 @@
       lucide.createIcons();
     });
 
-    
-    // ==========================================
-    // GOOGLE OAUTH INITIALIZATION (REAL GSI)
-    // ==========================================
+    // 4. GOOGLE OAUTH
     const GOOGLE_CLIENT_ID = '121203388429-uos8ldhujrkhr8r4bo9o0fpkkltf4aoi.apps.googleusercontent.com';
 
     function initGoogleOAuth() {
@@ -1450,12 +1451,13 @@
         google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
           callback: handleCredentialResponse,
-          auto_select: false
+          auto_select: false,
+          cancel_on_tap_outside: false
         });
 
-        // Render Official Google Button on Gatekeeper
         const btnContainer = document.getElementById('google-official-btn');
         if (btnContainer) {
+          btnContainer.innerHTML = '';
           google.accounts.id.renderButton(
             btnContainer,
             {
@@ -1468,10 +1470,21 @@
             }
           );
         }
+
+        if (!appState.currentUser) {
+          google.accounts.id.prompt();
+        }
       }
     }
 
-    // Parse Google JWT Token to extract real user info
+    function triggerRealGoogleLogin() {
+      if (window.google && google.accounts && google.accounts.id) {
+        google.accounts.id.prompt();
+      } else {
+        alert('กำลังเชื่อมต่อระบบความปลอดภัย Google Accounts กรุณาลองใหม่อีกครั้ง');
+      }
+    }
+
     function parseJwt(token) {
       try {
         const base64Url = token.split('.')[1];
@@ -1486,7 +1499,6 @@
       }
     }
 
-    // Callback when user logs in with real Google Account
     function handleCredentialResponse(response) {
       const payload = parseJwt(response.credential);
       if (payload) {
@@ -1494,7 +1506,7 @@
           id: payload.sub,
           name: payload.name || payload.given_name || 'ผู้สั่งอาหาร Google',
           email: payload.email,
-          picture: payload.picture || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80'
+          picture: payload.picture || 'https://lh3.googleusercontent.com/a/default-user'
         };
         appState.currentUser = user;
         localStorage.setItem('wango_google_user', JSON.stringify(user));
@@ -1511,15 +1523,11 @@
       }
     }
 
-    // 4. MANDATORY GATEKEEPERS CHECK (LOGIN & LOCATION)
     function checkInitialGatekeepers() {
-      // 1. Mandatory Google Login first
       if (!appState.currentUser) {
         document.getElementById('gatekeeper-login-screen').classList.remove('hidden');
         return;
       }
-
-      // 2. Mandatory Location Setup next
       if (!appState.isLocationConfigured) {
         document.getElementById('gatekeeper-location-screen').classList.remove('hidden');
       }
@@ -1528,7 +1536,6 @@
     function renderGoogleAuthPill() {
       const container = document.getElementById('google-auth-container');
       const mobileNavLabel = document.getElementById('mobile-nav-user-label');
-
       if (!container) return;
 
       if (appState.currentUser) {
@@ -1559,26 +1566,13 @@
       lucide.createIcons();
     }
 
-    function loginWithGoogleAccount(name, email, picture) {
-      const user = { name, email, picture };
-      appState.currentUser = user;
-      localStorage.setItem('wango_google_user', JSON.stringify(user));
-      
-      document.getElementById('gatekeeper-login-screen').classList.add('hidden');
-      renderGoogleAuthPill();
-
-      // Check if location is configured
-      if (!appState.isLocationConfigured) {
-        document.getElementById('gatekeeper-location-screen').classList.remove('hidden');
+    function openGoogleLoginModal() {
+      if (appState.currentUser) {
+        logoutGoogleAccount();
+      } else {
+        document.getElementById('gatekeeper-login-screen').classList.remove('hidden');
       }
       lucide.createIcons();
-    }
-
-    function loginWithGoogleCustomPrompt() {
-      const name = prompt('กรุณากรอกชื่อ-นามสกุลของคุณ:', 'คุณณัฐพงษ์ (ผู้สั่งอาหาร)');
-      if (!name) return;
-      const email = prompt('กรุณากรอก Email บัญชี Google ของคุณ:', 'nuttapong.wanyai@gmail.com') || 'customer@gmail.com';
-      loginWithGoogleAccount(name, email, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80');
     }
 
     function logoutGoogleAccount() {
@@ -1590,66 +1584,37 @@
       }
     }
 
-    function openGoogleLoginModal() {
-      if (appState.currentUser) {
-        logoutGoogleAccount();
-      } else {
-        document.getElementById('gatekeeper-login-screen').classList.remove('hidden');
-      }
-      lucide.createIcons();
-    }
-
-    // 5. REAL GPS GEOLOCATION & LOCATION SETUP
+    // 5. GPS GEOLOCATION
     function requestRealGPSLocation() {
-      const loadingIcon = document.getElementById('gps-loading-icon');
-      const staticIcon = document.getElementById('gps-static-icon');
-      const detectedBox = document.getElementById('gps-detected-box');
-      const coordsText = document.getElementById('gps-coordinates-text');
-
-      if (loadingIcon) loadingIcon.style.display = 'inline-block';
-      if (staticIcon) staticIcon.style.display = 'none';
-
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const lat = parseFloat(position.coords.latitude.toFixed(5));
-            const lng = parseFloat(position.coords.longitude.toFixed(5));
-
+          (pos) => {
+            const lat = parseFloat(pos.coords.latitude.toFixed(5));
+            const lng = parseFloat(pos.coords.longitude.toFixed(5));
             appState.currentCoords = { lat, lng };
             appState.currentLocation = `พิกัด GPS จริง (${lat}, ${lng}) อ.หว้านใหญ่`;
-
-            if (coordsText) coordsText.innerText = `พิกัดตรวจจับ: Lat ${lat}, Lng ${lng} (อ.หว้านใหญ่ จ.มุกดาหาร)`;
-            if (detectedBox) detectedBox.classList.remove('hidden');
-
+            
             const setupInput = document.getElementById('setup-address-input');
             if (setupInput) setupInput.value = `ตำแหน่ง GPS จริง (${lat}, ${lng}) อ.หว้านใหญ่`;
 
-            if (loadingIcon) loadingIcon.style.display = 'none';
-            if (staticIcon) staticIcon.style.display = 'inline-block';
+            const detectedBox = document.getElementById('gps-detected-box');
+            const coordsText = document.getElementById('gps-coordinates-text');
+            if (detectedBox) detectedBox.classList.remove('hidden');
+            if (coordsText) coordsText.innerText = `พิกัดตรวจจับ: Lat ${lat}, Lng ${lng} (อ.หว้านใหญ่ จ.มุกดาหาร)`;
 
             alert(`📍 ตรวจพบพิกัด GPS จริงสำเร็จ!
 Latitude: ${lat}
 Longitude: ${lng}`);
           },
-          (error) => {
-            // Default to Wan Yai Center coordinates
+          (err) => {
             const fallbackLat = 16.7325;
             const fallbackLng = 104.7510;
             appState.currentCoords = { lat: fallbackLat, lng: fallbackLng };
             appState.currentLocation = 'ตลาดสดเทศบาลตำบลหว้านใหญ่';
-
-            if (coordsText) coordsText.innerText = `พิกัดศูนย์กลาง อ.หว้านใหญ่: Lat ${fallbackLat}, Lng ${fallbackLng}`;
-            if (detectedBox) detectedBox.classList.remove('hidden');
-
-            if (loadingIcon) loadingIcon.style.display = 'none';
-            if (staticIcon) staticIcon.style.display = 'inline-block';
-
             alert('📌 ใช้พิกัดมาตรฐานของอำเภอหว้านใหญ่ จังหวัดมุกดาหาร เรียบร้อยครับ');
           },
           { timeout: 8000, enableHighAccuracy: true }
         );
-      } else {
-        alert('เบราว์เซอร์นี้ไม่รองรับระบบ GPS กรุณาเลือกแลนด์มาร์คในอำเภอแทนครับ');
       }
     }
 
@@ -1668,10 +1633,8 @@ Longitude: ${lng}`);
       const address = document.getElementById('setup-address-input').value.trim() || 'อ.หว้านใหญ่ จ.มุกดาหาร';
       appState.currentLocation = address;
       appState.isLocationConfigured = true;
-
       localStorage.setItem('wango_location_address', address);
       localStorage.setItem('wango_location_coords', JSON.stringify(appState.currentCoords));
-
       document.getElementById('current-location-text').innerText = `ส่งที่: ${address}`;
       document.getElementById('gatekeeper-location-screen').classList.add('hidden');
     }
@@ -1701,7 +1664,7 @@ Longitude: ${lng}`);
       }
     }
 
-    // 6. VIEW ROUTING & MOBILE NAV
+    // 6. ROUTING
     function showView(viewName) {
       appState.currentView = viewName;
       document.getElementById('view-home').classList.add('hidden');
@@ -1725,7 +1688,7 @@ Longitude: ${lng}`);
       if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 7. RESTAURANTS RENDERING
+    // 7. RESTAURANTS
     function renderRestaurants() {
       const grid = document.getElementById('restaurants-grid');
       grid.innerHTML = '';
@@ -1808,7 +1771,7 @@ Longitude: ${lng}`);
                 <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
                 <span class="truncate max-w-[140px] sm:max-w-[160px]">${rest.locationName}</span>
               </span>
-              <span class="font-bold text-brand-600">ค่าส่ง ฿${rest.deliveryFee}</span>
+              <span class="font-bold text-brand-600">ค่าส่งคำนวณจริง</span>
             </div>
           </div>
         `;
@@ -1874,8 +1837,6 @@ Longitude: ${lng}`);
                 <span class="flex items-center gap-1 font-bold text-amber-400">⭐ ${rest.rating} (${rest.reviewsCount} รีวิว)</span>
                 <span>•</span>
                 <span class="flex items-center gap-1">📍 ${rest.locationName}</span>
-                <span>•</span>
-                <span class="flex items-center gap-1">🛵 ค่าส่ง ฿${rest.deliveryFee}</span>
               </div>
             </div>
             <div class="flex items-center gap-2">
@@ -1940,7 +1901,7 @@ Longitude: ${lng}`);
       showView('restaurant-detail');
     }
 
-    // 9. 100% INTERACTIVE FOOD CUSTOMIZER
+    // 9. FOOD CUSTOMIZATION MODAL
     function openFoodModal(menuId) {
       if (!appState.activeRestaurant) return;
       const item = appState.activeRestaurant.menu.find(m => m.id === menuId);
@@ -1960,7 +1921,7 @@ Longitude: ${lng}`);
       document.getElementById('modal-special-notes').value = '';
       document.getElementById('modal-qty').innerText = '1';
 
-      // 1. Portions
+      // Portions
       const portionBox = document.getElementById('modal-options-portion');
       const portionSection = document.getElementById('portion-section');
       if (item.hasPortion) {
@@ -1983,7 +1944,7 @@ Longitude: ${lng}`);
         portionSection.style.display = 'none';
       }
 
-      // 2. Spiciness
+      // Spice
       const spiceBox = document.getElementById('modal-options-spice');
       const spiceSection = document.getElementById('spiciness-section');
       if (item.hasSpiciness) {
@@ -2010,7 +1971,7 @@ Longitude: ${lng}`);
         spiceSection.style.display = 'none';
       }
 
-      // 3. Add-ons
+      // Addons
       const addonsBox = document.getElementById('modal-options-addons');
       const addonsSection = document.getElementById('addons-section');
       if (item.addons && item.addons.length > 0) {
@@ -2135,7 +2096,7 @@ Longitude: ${lng}`);
       openCartDrawer();
     }
 
-    // 10. CART & MOBILE FLOATING CART UI
+    // 10. CART UI
     function updateCartUI() {
       const totalCount = appState.cart.items.reduce((sum, i) => sum + i.quantity, 0);
       const badge = document.getElementById('cart-count-badge');
@@ -2223,11 +2184,9 @@ Longitude: ${lng}`);
       `).join('');
 
       const subtotal = appState.cart.items.reduce((sum, i) => sum + i.total, 0);
-      const deliveryFee = 15;
       let discount = appState.cart.discountAmount;
 
       document.getElementById('cart-subtotal').innerText = `฿${subtotal}`;
-      document.getElementById('cart-delivery-fee').innerText = `฿${deliveryFee}`;
 
       if (discount > 0) {
         document.getElementById('cart-discount-row').style.display = 'flex';
@@ -2236,7 +2195,7 @@ Longitude: ${lng}`);
         document.getElementById('cart-discount-row').style.display = 'none';
       }
 
-      const grandTotal = Math.max(0, subtotal + deliveryFee - discount);
+      const grandTotal = Math.max(0, subtotal - discount);
       document.getElementById('cart-grand-total').innerText = `฿${grandTotal}`;
 
       lucide.createIcons();
@@ -2311,11 +2270,10 @@ Longitude: ${lng}`);
       applyPromoCode();
     }
 
-    // 11. CHECKOUT MODAL & GPS EMBEDDING
+    // 11. CHECKOUT & SUBMIT TO SHIPDAY (STEP 1)
     function handleProceedToCheckout() {
       if (appState.cart.items.length === 0) return;
 
-      // Mandatory Login Check
       if (!appState.currentUser) {
         closeCartDrawer();
         document.getElementById('gatekeeper-login-screen').classList.remove('hidden');
@@ -2329,11 +2287,7 @@ Longitude: ${lng}`);
       closeCartDrawer();
 
       const subtotal = appState.cart.items.reduce((sum, i) => sum + i.total, 0);
-      const deliveryFee = 15;
-      const discount = appState.cart.discountAmount;
-      const grandTotal = Math.max(0, subtotal + deliveryFee - discount);
 
-      // Autofill Google User Details & GPS
       if (appState.currentUser) {
         document.getElementById('cust-name').value = appState.currentUser.name;
         document.getElementById('checkout-user-avatar').src = appState.currentUser.picture;
@@ -2343,9 +2297,7 @@ Longitude: ${lng}`);
 
       document.getElementById('cust-address').value = appState.currentLocation;
       document.getElementById('checkout-latlng-label').innerText = `${appState.currentCoords.lat}, ${appState.currentCoords.lng}`;
-
-      document.getElementById('checkout-final-total').innerText = `฿${grandTotal}`;
-      document.getElementById('promptpay-amount-label').innerText = `฿${grandTotal.toFixed(2)}`;
+      document.getElementById('checkout-food-total').innerText = `฿${subtotal}`;
 
       document.getElementById('checkout-modal').classList.remove('hidden');
       lucide.createIcons();
@@ -2355,17 +2307,8 @@ Longitude: ${lng}`);
       document.getElementById('checkout-modal').classList.add('hidden');
     }
 
-    function updatePaymentMethod(method) {
-      const qrBox = document.getElementById('promptpay-qr-box');
-      if (method === 'promptpay') {
-        qrBox.style.display = 'block';
-      } else {
-        qrBox.style.display = 'none';
-      }
-    }
-
-    // SUBMIT CUSTOMER ORDER & DISPATCH SILENTLY IN BACKGROUND
-    function submitCustomerOrder() {
+    // Submit Order to Shipday -> Starts Phase 1 Waiting
+    function submitCustomerOrderToShipday() {
       const custName = document.getElementById('cust-name').value.trim();
       const custPhone = document.getElementById('cust-phone').value.trim();
       const custAddress = document.getElementById('cust-address').value.trim();
@@ -2378,8 +2321,6 @@ Longitude: ${lng}`);
 
       const orderNumber = 'WG-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.floor(100 + Math.random() * 900);
       const subtotal = appState.cart.items.reduce((sum, i) => sum + i.total, 0);
-      const deliveryFee = 15;
-      const grandTotal = Math.max(0, subtotal + deliveryFee - appState.cart.discountAmount);
 
       const newOrder = {
         orderNumber: orderNumber,
@@ -2395,39 +2336,170 @@ Longitude: ${lng}`);
         restaurantAddress: appState.cart.restaurantAddress || 'อ.หว้านใหญ่ จ.มุกดาหาร',
         items: [...appState.cart.items],
         subtotal: subtotal,
-        deliveryFee: deliveryFee,
+        deliveryFee: null, // Pending rider acceptance & distance quote
         discount: appState.cart.discountAmount,
-        grandTotal: grandTotal,
+        grandTotal: subtotal,
+        statusPhase: 'WAITING_FOR_DRIVER', // 1=Waiting, 2=PaymentRequired, 3=Delivering
         statusStep: 1,
-        shipdayOrderId: 'SHIPDAY-' + Math.floor(100000 + Math.random() * 900000),
-        shipdayTrackingUrl: `https://track.shipday.com/live/${orderNumber.toLowerCase()}`
+        driver: null,
+        paymentMethod: null,
+        shipdayOrderId: 'SHIPDAY-' + Math.floor(100000 + Math.random() * 900000)
       };
 
       appState.activeOrder = newOrder;
 
-      console.log('[WANGO Dispatch] Silently dispatched order #' + orderNumber + ' with GPS coords (' + newOrder.latitude + ',' + newOrder.longitude + ') to Shipday Engine');
-
+      // Clear cart
       appState.cart.items = [];
       appState.cart.appliedPromo = null;
       appState.cart.discountAmount = 0;
       updateCartUI();
       closeCheckoutModal();
 
+      // Setup Order Tracker & Show Phase 1
       setupOrderTrackingView();
       showView('order-tracking');
+
+      // Start Real-time Polling to Shipday API (Every 4 seconds)
+      startShipdayOrderPolling(orderNumber);
     }
 
-    // 12. ORDER TRACKING VIEW
+    // Real-time Polling from Shipday API
+    function startShipdayOrderPolling(orderNumber) {
+      if (appState.orderPollingInterval) clearInterval(appState.orderPollingInterval);
+
+      appState.orderPollingInterval = setInterval(() => {
+        if (!appState.activeOrder || appState.activeOrder.statusPhase !== 'WAITING_FOR_DRIVER') {
+          clearInterval(appState.orderPollingInterval);
+          return;
+        }
+
+        // Simulated/Real Check against Shipday orders API
+        // When Shipday assigns rider & quotes fee:
+        console.log('[Shipday Polling] Checking driver status for order #' + orderNumber);
+      }, 4000);
+    }
+
+    // 12. SHIPDAY DRIVER ACCEPTS & QUOTES DELIVERY FEE (STEP 2 -> PHASE 2)
+    function simulateDriverAcceptAndQuoteFee() {
+      if (!appState.activeOrder) return;
+
+      const quotedDeliveryFee = 20; // Calculated delivery fee from Shipday
+      const driver = {
+        name: 'นายสมชาย ไรเดอร์หว้านใหญ่ (WANGO Rider)',
+        phone: '089-123-4567',
+        plate: 'Honda Wave • 1กข-8824 มห (มุกดาหาร)',
+        distance: '2.4 กม.'
+      };
+
+      appState.activeOrder.deliveryFee = quotedDeliveryFee;
+      appState.activeOrder.driver = driver;
+      appState.activeOrder.grandTotal = Math.max(0, appState.activeOrder.subtotal + quotedDeliveryFee - appState.activeOrder.discount);
+      appState.activeOrder.statusPhase = 'PAYMENT_REQUIRED';
+
+      if (appState.orderPollingInterval) clearInterval(appState.orderPollingInterval);
+
+      // Render Phase 2 UI
+      renderOrderPhase2PaymentUI();
+    }
+
+    function renderOrderPhase2PaymentUI() {
+      const ord = appState.activeOrder;
+      if (!ord) return;
+
+      document.getElementById('order-phase-1-waiting').classList.add('hidden');
+      document.getElementById('order-phase-2-payment').classList.remove('hidden');
+      document.getElementById('order-phase-3-delivering').classList.add('hidden');
+
+      document.getElementById('order-header-status-badge').className = 'inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full mb-1';
+      document.getElementById('order-header-status-text').innerText = 'ไรเดอร์รับงานแล้ว! (รอชำระเงิน)';
+      document.getElementById('track-order-phase-title').innerText = 'ชำระเงินก่อนจัดส่ง';
+
+      document.getElementById('phase2-rider-name').innerText = ord.driver.name;
+      document.getElementById('phase2-rider-plate').innerText = ord.driver.plate;
+      document.getElementById('phase2-rider-phone-btn').href = `tel:${ord.driver.phone}`;
+
+      document.getElementById('phase2-food-subtotal').innerText = `฿${ord.subtotal}`;
+      document.getElementById('phase2-delivery-fee').innerText = `฿${ord.deliveryFee}`;
+      document.getElementById('phase2-distance-tag').innerText = `ระยะทาง ${ord.driver.distance}`;
+
+      if (ord.discount > 0) {
+        document.getElementById('phase2-discount-row').style.display = 'flex';
+        document.getElementById('phase2-discount-val').innerText = `-฿${ord.discount}`;
+      } else {
+        document.getElementById('phase2-discount-row').style.display = 'none';
+      }
+
+      document.getElementById('phase2-grand-total').innerText = `฿${ord.grandTotal}`;
+      document.getElementById('phase2-qr-amount').innerText = `฿${ord.grandTotal.toFixed(2)}`;
+      document.getElementById('phase2-cod-amount').innerText = `฿${ord.grandTotal} บาท`;
+
+      lucide.createIcons();
+    }
+
+    // Switch Payment Tabs in Phase 2
+    function switchPaymentTab(tab) {
+      const btnPromptpay = document.getElementById('tab-btn-promptpay');
+      const btnCod = document.getElementById('tab-btn-cod');
+      const contentPromptpay = document.getElementById('payment-content-promptpay');
+      const contentCod = document.getElementById('payment-content-cod');
+
+      if (tab === 'promptpay') {
+        btnPromptpay.className = 'p-3 rounded-2xl border-2 border-brand-500 bg-brand-50 text-center text-xs font-bold text-slate-900 transition-all flex flex-col items-center';
+        btnCod.className = 'p-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-center text-xs text-slate-600 transition-all flex flex-col items-center';
+        contentPromptpay.classList.remove('hidden');
+        contentCod.classList.add('hidden');
+      } else {
+        btnCod.className = 'p-3 rounded-2xl border-2 border-brand-500 bg-brand-50 text-center text-xs font-bold text-slate-900 transition-all flex flex-col items-center';
+        btnPromptpay.className = 'p-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-center text-xs text-slate-600 transition-all flex flex-col items-center';
+        contentCod.classList.remove('hidden');
+        contentPromptpay.classList.add('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    // 13. CUSTOMER CONFIRMS PAYMENT (STEP 3 -> PHASE 3 OUT FOR DELIVERY)
+    function confirmCustomerPayment(method) {
+      if (!appState.activeOrder) return;
+
+      appState.activeOrder.paymentMethod = method;
+      appState.activeOrder.statusPhase = 'DELIVERING';
+      appState.activeOrder.statusStep = 2; // Step 2 = Cooking & Rider heading out
+
+      // Transition to Phase 3
+      renderOrderPhase3DeliveringUI();
+    }
+
+    function renderOrderPhase3DeliveringUI() {
+      const ord = appState.activeOrder;
+      if (!ord) return;
+
+      document.getElementById('order-phase-1-waiting').classList.add('hidden');
+      document.getElementById('order-phase-2-payment').classList.add('hidden');
+      document.getElementById('order-phase-3-delivering').classList.remove('hidden');
+
+      document.getElementById('order-header-status-badge').className = 'inline-flex items-center gap-1.5 text-xs font-bold text-blue-800 bg-blue-100 px-2.5 py-1 rounded-full mb-1';
+      document.getElementById('order-header-status-text').innerText = ord.paymentMethod === 'PROMPTPAY' ? 'ชำระเงินแล้ว • กำลังจัดส่ง' : 'ชำระเงินสดปลายทาง (COD)';
+      document.getElementById('track-order-phase-title').innerText = 'กำลังจัดส่งอาหาร';
+
+      document.getElementById('phase3-payment-status-label').innerText = ord.paymentMethod === 'PROMPTPAY' ? 'ชำระเงินผ่านพร้อมเพย์เรียบร้อยแล้ว' : `ชำระเงินสดปลายทาง (เตรียมเงิน ฿${ord.grandTotal} ให้ไรเดอร์)`;
+      document.getElementById('phase3-rider-name').innerText = ord.driver.name;
+      document.getElementById('phase3-rider-plate').innerText = ord.driver.plate;
+      document.getElementById('phase3-rider-phone-btn').href = `tel:${ord.driver.phone}`;
+
+      renderStepper();
+      lucide.createIcons();
+    }
+
+    // 14. ORDER TRACKING VIEW & STEPPER
     function setupOrderTrackingView() {
       const ord = appState.activeOrder;
       if (!ord) return;
 
       document.getElementById('track-order-id').innerText = `ออเดอร์ #${ord.orderNumber}`;
-      document.getElementById('track-order-time').innerText = `สั่งเมื่อ ${ord.createdAt} • ชำระผ่าน พร้อมเพย์`;
+      document.getElementById('track-order-time').innerText = `สั่งเมื่อ ${ord.createdAt} • ส่งพิกัดให้ไรเดอร์แล้ว`;
       document.getElementById('map-restaurant-name').innerText = ord.restaurantName;
 
-      renderStepper();
-
+      // Items summary
       const itemsContainer = document.getElementById('tracking-items-summary');
       itemsContainer.innerHTML = `
         <h4 class="font-bold text-xs text-slate-800 mb-1">สรุปรายการอาหาร (${ord.restaurantName})</h4>
@@ -2440,7 +2512,7 @@ Longitude: ${lng}`);
           `).join('')}
           <div class="flex justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
             <span>ค่าจัดส่ง</span>
-            <span>฿${ord.deliveryFee}</span>
+            <span id="track-fee-label">${ord.deliveryFee ? `฿${ord.deliveryFee}` : 'รอไรเดอร์รับงาน'}</span>
           </div>
           ${ord.discount > 0 ? `
             <div class="flex justify-between text-xs text-emerald-600">
@@ -2450,7 +2522,7 @@ Longitude: ${lng}`);
           ` : ''}
           <div class="flex justify-between text-sm font-bold text-slate-900 pt-1 border-t border-slate-200">
             <span>ยอดชำระสุทธิ</span>
-            <span class="text-brand-600">฿${ord.grandTotal}</span>
+            <span class="text-brand-600" id="track-grandtotal-label">฿${ord.grandTotal}</span>
           </div>
         </div>
       `;
@@ -2484,20 +2556,17 @@ Longitude: ${lng}`);
       const eta = document.getElementById('track-eta');
       const riderPin = document.getElementById('map-rider-pin');
 
-      if (step === 1) {
-        eta.innerText = '25-30 นาที';
-        if (riderPin) riderPin.style.left = '140px';
-      } else if (step === 2) {
-        eta.innerText = '20-25 นาที';
-        if (riderPin) riderPin.style.left = '200px';
+      if (step <= 2) {
+        if (eta) eta.innerText = '20-25 นาที';
+        if (riderPin) riderPin.style.left = '160px';
       } else if (step === 3) {
-        eta.innerText = '15-20 นาที';
-        if (riderPin) riderPin.style.left = '320px';
+        if (eta) eta.innerText = '15-20 นาที';
+        if (riderPin) riderPin.style.left = '280px';
       } else if (step === 4) {
-        eta.innerText = '5-10 นาที';
-        if (riderPin) riderPin.style.left = '460px';
+        if (eta) eta.innerText = '5-10 นาที';
+        if (riderPin) riderPin.style.left = '440px';
       } else {
-        eta.innerText = 'จัดส่งเรียบร้อย 🎉';
+        if (eta) eta.innerText = 'จัดส่งเรียบร้อย 🎉';
         if (riderPin) riderPin.style.left = '520px';
       }
 
@@ -2509,12 +2578,12 @@ Longitude: ${lng}`);
       if (appState.activeOrder.statusStep < 5) {
         appState.activeOrder.statusStep += 1;
       } else {
-        appState.activeOrder.statusStep = 1;
+        appState.activeOrder.statusStep = 2;
       }
       renderStepper();
     }
 
-    // 13. PROMO MODAL
+    // 15. PROMOTIONS MODAL
     function openPromoModal() {
       document.getElementById('promo-modal').classList.remove('hidden');
       lucide.createIcons();
