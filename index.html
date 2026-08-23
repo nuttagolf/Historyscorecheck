@@ -2360,6 +2360,8 @@
     }
 
     // Shipday Order Dispatcher
+    
+    // Shipday Order Dispatcher with Explicit Response & Error Diagnostic
     async function submitCustomerOrderToShipday() {
       const custName = document.getElementById('cust-name').value.trim();
       const custPhone = document.getElementById('cust-phone').value.trim();
@@ -2427,43 +2429,60 @@
 
       const headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + appState.shipdayApiKey,
-        'apiKey': appState.shipdayApiKey
+        'Authorization': 'Basic 4jV7ikfZha.2FSbpIR9Z5h6z0F67JY2',
+        'apiKey': '4jV7ikfZha.2FSbpIR9Z5h6z0F67JY2'
       };
 
-      console.log('[Shipday Dispatch] Submitting order #' + orderNumber, orderPayload);
+      console.log('[Shipday Order Submission Started] Payload:', orderPayload);
 
-      // Attempt dispatch to Shipday
-      let dispatchSuccess = false;
+      // Attempt 1: Direct Shipday API
+      let dispatched = false;
+      let statusMsg = '';
+
       try {
         const res = await fetch('https://api.shipday.com/orders', {
           method: 'POST',
           headers: headers,
           body: JSON.stringify(orderPayload)
         });
+        const data = await res.json().catch(() => null);
+        console.log('[Shipday Direct Response]:', res.status, data);
         if (res.ok) {
-          dispatchSuccess = true;
+          dispatched = true;
           alert(`✅ ส่งคำสั่งซื้อเข้าสู่ระบบ Shipday สำเร็จ!\nเลขออเดอร์: ${orderNumber}`);
+        } else {
+          statusMsg = `Shipday API Error (HTTP ${res.status}): ` + (data ? JSON.stringify(data) : 'Unknown error');
         }
       } catch (err) {
-        console.warn('Direct Shipday notice:', err.message);
+        console.warn('[Shipday Direct Blocked by Browser CORS]:', err.message);
+        statusMsg = 'Browser CORS blocked direct call. ' + err.message;
       }
 
-      if (!dispatchSuccess) {
+      // Attempt 2: Backend Relay (/api/orders)
+      if (!dispatched) {
         try {
-          const proxyUrl = 'https://corsproxy.io/?url=' + encodeURIComponent('https://api.shipday.com/orders');
-          const res = await fetch(proxyUrl, {
+          const res = await fetch('/api/orders', {
             method: 'POST',
-            headers: headers,
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderPayload)
           });
           if (res.ok) {
-            dispatchSuccess = true;
-            alert(`✅ ส่งคำสั่งซื้อเข้าสู่ระบบ Shipday สำเร็จ!\nเลขออเดอร์: ${orderNumber}`);
+            dispatched = true;
+            alert(`✅ ส่งคำสั่งซื้อผ่านเซิร์ฟเวอร์เข้าสู่ Shipday สำเร็จ!\nเลขออเดอร์: ${orderNumber}`);
           }
-        } catch (pe) {
-          console.warn('Proxy notice:', pe.message);
+        } catch (e) {
+          console.warn('[Backend Relay Not Reachable]:', e.message);
         }
+      }
+
+      // If not dispatched, inform user clearly about browser CORS constraint
+      if (!dispatched) {
+        alert(`ℹ️ การแจ้งเตือนการเชื่อมต่อ Shipday:\n` +
+              `คำสั่งซื้อ #${orderNumber} ถูกสร้างแล้วในหน้าเว็บ\n\n` +
+              `⚠️ ข้อจำกัดทางเทคนิค: การเรียก API ตรงจาก GitHub Pages ถูกระบบความปลอดภัย CORS ของเบราว์เซอร์สกัดกั้น\n` +
+              `วิธีให้ออเดอร์เด้งเข้า Shipday 100%:\n` +
+              `1. รันผ่านเซิร์ฟเวอร์ backend (เช่น node server_example.js) หรือ\n` +
+              `2. เชื่อมต่อผ่าน Webhook URL ที่คุณตั้งค่าไว้`);
       }
 
       // Clear cart
@@ -2473,11 +2492,11 @@
       updateCartUI();
       closeCheckoutModal();
 
-      // Show Phase 1 Tracker
+      // Show Tracker
       setupOrderTrackingView();
       showView('order-tracking');
 
-      // Start Real-time Polling
+      // Start Polling
       startShipdayOrderPolling(orderNumber);
     }
 
