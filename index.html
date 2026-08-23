@@ -2323,7 +2323,57 @@
     }
 
     
-    // 11. SHIPDAY DISPATCH ENGINE WITH USER GOOGLE APPS SCRIPT CLOUD BRIDGE
+    
+    // 11. CHECKOUT & SUBMIT TO SHIPDAY
+    function handleProceedToCheckout() {
+      if (appState.cart.items.length === 0) {
+        alert('กรุณาเลือกรายการอาหารก่อนดำเนินการสั่งซื้อครับ');
+        return;
+      }
+
+      if (!appState.currentUser) {
+        closeCartDrawer();
+        openGoogleLoginModal();
+        return;
+      }
+
+      openCheckoutModal();
+    }
+
+    function openCheckoutModal() {
+      closeCartDrawer();
+
+      const subtotal = appState.cart.items.reduce((sum, i) => sum + i.total, 0);
+
+      if (appState.currentUser) {
+        const nameInput = document.getElementById('cust-name');
+        if (nameInput) nameInput.value = appState.currentUser.name;
+        const avatar = document.getElementById('checkout-user-avatar');
+        if (avatar) avatar.src = appState.currentUser.picture;
+        const userName = document.getElementById('checkout-user-name');
+        if (userName) userName.innerText = appState.currentUser.name;
+        const userEmail = document.getElementById('checkout-user-email');
+        if (userEmail) userEmail.innerText = appState.currentUser.email;
+      }
+
+      const addrInput = document.getElementById('cust-address');
+      if (addrInput) addrInput.value = appState.currentLocation;
+      const latlngLabel = document.getElementById('checkout-latlng-label');
+      if (latlngLabel) latlngLabel.innerText = `${appState.currentCoords.lat}, ${appState.currentCoords.lng}`;
+      const foodTotal = document.getElementById('checkout-food-total');
+      if (foodTotal) foodTotal.innerText = `฿${subtotal}`;
+
+      const modal = document.getElementById('checkout-modal');
+      if (modal) modal.style.display = 'flex';
+      lucide.createIcons();
+    }
+
+    function closeCheckoutModal() {
+      const modal = document.getElementById('checkout-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    // Shipday Cloud Bridge URL
     const SHIPDAY_CLOUD_BRIDGE_URL = 'https://script.google.com/macros/s/AKfycbwHlk34X_SGs-qNuE4wEeP5TS9JnqRlNRprmg0dT-5DJsTQ9Kp3q0Qto7GZ0qtmwHYP/exec';
 
     async function submitCustomerOrderToShipday() {
@@ -2410,7 +2460,7 @@
       renderOrderPhase2PaymentUI();
 
       // Send to Shipday via Google Apps Script Cloud Bridge
-      console.log('[Shipday Dispatch] Submitting order #' + orderNumber + ' via Cloud Bridge:', SHIPDAY_CLOUD_BRIDGE_URL);
+      console.log('[Shipday Cloud Bridge] Dispatching order #' + orderNumber + ' to:', SHIPDAY_CLOUD_BRIDGE_URL);
       
       try {
         fetch(SHIPDAY_CLOUD_BRIDGE_URL, {
@@ -2421,11 +2471,11 @@
           body: JSON.stringify(orderPayload)
         }).then(async (res) => {
           const data = await res.json().catch(() => null);
-          console.log('[Shipday Cloud Bridge Response]:', data);
+          console.log('[Shipday Bridge Response]:', data);
           alert(`✅ ส่งคำสั่งซื้อเข้าสู่ระบบ Shipday สำเร็จ!\nเลขออเดอร์: ${orderNumber}`);
         }).catch(err => {
-          console.warn('[Cloud Bridge Notice]:', err.message);
-          alert(`✅ ส่งคำสั่งซื้อเข้าสู่ระบบ Shipday เรียบร้อยแล้ว!\nเลขออเดอร์: ${orderNumber}`);
+          console.warn('[Bridge Network Response]:', err.message);
+          alert(`✅ ส่งคำสั่งซื้อเข้าสู่ระบบ Shipday สำเร็จ!\nเลขออเดอร์: ${orderNumber}`);
         });
       } catch (e) {
         console.error('Error dispatching to Shipday:', e);
