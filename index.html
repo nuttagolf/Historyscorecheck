@@ -515,6 +515,31 @@
     background: #DCEAF4;
     z-index: 1;
   }
+  .map-style-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 4px;
+    border: 2px solid var(--primary);
+    border-radius: 14px;
+    background: #fff;
+  }
+  .map-style-btn {
+    min-height: 42px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--primary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .map-style-btn.active {
+    background: var(--primary);
+    color: #fff;
+  }
   .zone-summary {
     margin-top: 10px;
     border: 3px solid var(--primary);
@@ -1540,6 +1565,10 @@
         <button type="button" id="closeMapBtn" class="close-btn">&times;</button>
       </div>
       <div class="map-modal-body">
+        <div class="map-style-toggle" role="group" aria-label="รูปแบบแผนที่">
+          <button type="button" id="streetMapBtn" class="map-style-btn active" aria-pressed="true">🗺️ แผนที่ถนน</button>
+          <button type="button" id="satelliteMapBtn" class="map-style-btn" aria-pressed="false">🛰️ ภาพถ่ายดาวเทียม</button>
+        </div>
         <div id="locationMap"></div>
         <div id="mapStatus" class="map-status" role="status" aria-live="polite">กำลังโหลดแผนที่…</div>
       </div>
@@ -1613,6 +1642,9 @@
 
   let locationMap;
   let customerMarker;
+  let streetTileLayer;
+  let satelliteTileLayer;
+  let activeMapStyle = 'street';
   let customerLocation = null;
   let currentOrder = null; // { orderNumber, accessToken, total, qrImageLink, paymentStatus }
   let selectedSlipFile = null;
@@ -1845,7 +1877,10 @@
 
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.success) {
-        throw new Error(result.message || 'การตรวจสอบสลิปไม่สำเร็จ');
+        const apiMessage = typeof result.message === 'string'
+          ? result.message
+          : (result.message?.th || result.message?.message || result.error?.message || 'การตรวจสอบสลิปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+        throw new Error(apiMessage);
       }
 
       // Success paid state
@@ -2098,19 +2133,26 @@
     mapStatus.className = 'map-status';
     locationMap = L.map('locationMap', { scrollWheelZoom: false })
       .setView([STORE_LOCATION.lat, STORE_LOCATION.lng], 13);
-    const tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    streetTileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       crossOrigin: true
     });
+    satelliteTileLayer = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+      crossOrigin: true
+    });
     let tileErrorShown = false;
-    tileLayer.on('tileerror', () => {
+    const showTileError = () => {
       if (tileErrorShown) return;
       tileErrorShown = true;
       mapStatus.textContent = 'พื้นหลังโหลดไม่ครบ แต่ยังแตะเพื่อปักหมุดและคำนวณระยะได้';
       mapStatus.className = 'map-status error';
-    });
-    tileLayer.addTo(locationMap);
+    };
+    streetTileLayer.on('tileerror', showTileError);
+    satelliteTileLayer.on('tileerror', showTileError);
+    streetTileLayer.addTo(locationMap);
     L.circleMarker([STORE_LOCATION.lat, STORE_LOCATION.lng], {
       radius: 9,
       color: '#1E2D4A',
@@ -2172,6 +2214,28 @@
   const closeMapBtn = document.getElementById('closeMapBtn');
   const confirmMapBtn = document.getElementById('confirmMapBtn');
   const mapStatus = document.getElementById('mapStatus');
+  const streetMapBtn = document.getElementById('streetMapBtn');
+  const satelliteMapBtn = document.getElementById('satelliteMapBtn');
+
+  function setMapStyle(style) {
+    if (!locationMap || !streetTileLayer || !satelliteTileLayer) return;
+    activeMapStyle = style === 'satellite' ? 'satellite' : 'street';
+    const useSatellite = activeMapStyle === 'satellite';
+    if (locationMap.hasLayer(streetTileLayer)) locationMap.removeLayer(streetTileLayer);
+    if (locationMap.hasLayer(satelliteTileLayer)) locationMap.removeLayer(satelliteTileLayer);
+    (useSatellite ? satelliteTileLayer : streetTileLayer).addTo(locationMap);
+    streetMapBtn.classList.toggle('active', !useSatellite);
+    satelliteMapBtn.classList.toggle('active', useSatellite);
+    streetMapBtn.setAttribute('aria-pressed', String(!useSatellite));
+    satelliteMapBtn.setAttribute('aria-pressed', String(useSatellite));
+    mapStatus.textContent = useSatellite
+      ? 'โหมดภาพถ่ายดาวเทียม • แตะหลังคาหรือบริเวณบ้านเพื่อปักหมุด'
+      : 'โหมดแผนที่ถนน • แตะแผนที่เพื่อปักหมุดบ้านลูกค้า';
+    mapStatus.className = 'map-status';
+  }
+
+  streetMapBtn.addEventListener('click', () => setMapStyle('street'));
+  satelliteMapBtn.addEventListener('click', () => setMapStyle('satellite'));
 
   // Remove the old timeout auto-init logic from syncPickupFields
   function syncPickupFields() {
@@ -2194,7 +2258,10 @@
     requestAnimationFrame(() => {
       if (!locationMap) initializeLocationMap();
       requestAnimationFrame(() => {
-        if (locationMap) locationMap.invalidateSize({ pan: false });
+        if (locationMap) {
+          locationMap.invalidateSize({ pan: false });
+          setMapStyle(activeMapStyle);
+        }
       });
     });
   });
