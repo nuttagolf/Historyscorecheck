@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>แจ้งฝากผ้า - Wash Me Pls Laundry</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynhWMzNCqPDEkssA0XVeqbBqy3wk=" crossorigin="">
+<style>
+  :root {
+    --primary: #1E2D4A;          /* Retro Dark Navy */
+    --primary-light: #E8F1F8;    /* Soft Navy Tint */
+    --accent: #E05A36;           /* Retro Orange-Red */
+    --accent-hover: #C54422;     
+    --accent-bg: #FDF1ED;        
+    --bg-color: #7BB8E4;         /* Retro Sky Blue */
+    --cream: #F8F6EF;            /* Mascot Cream */
+    --text-main: #1E2D4A;
+    --text-muted: #536480;
+    --success: #10B981;
+    --success-bg: #ECFDF5;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Kanit', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-main);
+    min-height: 100vh;
+    padding-bottom: 60px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Bubble Background */
+  .bubble-container {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .bubble {
+    position: absolute;
+    bottom: -100px;
+    background: rgba(255, 246, 239, 0.4);
+    border-radius: 50%;
+    backdrop-filter: blur(0.5px);
+    box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.6);
+    animation: rise 12s infinite ease-in;
+  }
+  @keyframes rise {
+    0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.8; }
+    90% { opacity: 0.8; }
+    100% { transform: translateY(-120vh) scale(1.2) rotate(360deg); opacity: 0; }
+  }
+
+  .app {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px 16px;
+    width: 100%;
+  }
+
+  /* Topbar with Retro Cartoon style */
+  .topbar {
+    text-align: center;
+    padding: 20px 16px 10px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .logo-wrapper {
+    position: relative;
+    width: 130px;
+    height: 130px;
+    margin: 0 auto 12px;
+  }
+  .logo-badge {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--bg-color);
+    border: 4px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 4px 4px 0px var(--primary);
+    overflow: hidden;
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-6px) rotate(1deg); }
+  }
+  .logo-badge img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .topbar h1 {
+    margin: 0;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--cream);
+    text-shadow: 2px 2px 0px var(--primary);
+    letter-spacing: 0.5px;
+  }
+
+  /* Washing Machine Animation Visualizer (Retro outlines) */
+  .machine-visualizer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0 20px;
+  }
+  .washing-machine {
+    width: 80px;
+    height: 95px;
+    background: var(--cream);
+    border: 3px solid var(--primary);
+    border-radius: 14px;
+    position: relative;
+    box-shadow: 5px 5px 0px var(--primary);
+  }
+  .machine-top {
+    height: 22px;
+    border-bottom: 3px solid var(--primary);
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    justify-content: space-between;
+  }
+  .machine-dial {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--primary);
+  }
+  .machine-display {
+    width: 32px;
+    height: 10px;
+    background: var(--primary-light);
+    border: 2px solid var(--primary);
+    border-radius: 4px;
+    font-size: 7px;
+    font-family: 'Fredoka', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-weight: bold;
+  }
+  .machine-door {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 3px solid var(--primary);
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #e0f2fe;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .water {
+    width: 100%;
+    height: 50%;
+    background: rgba(123, 184, 228, 0.7);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+  .spinning-clothes {
+    font-size: 20px;
+    animation: spin 1.5s linear infinite;
+    transform-origin: center;
+    z-index: 2;
+  }
+  @keyframes spin {
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Retro Cartoon Cards */
+  .card {
+    background: var(--cream);
+    border: 3px solid var(--primary);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: 5px 5px 0px var(--primary);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .card h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 17px;
+    margin: 0 0 16px;
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .step-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--cream);
+    border: 2px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Service Option Grid */
+  .option-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .option {
+    position: relative;
+    border: 3px solid var(--primary);
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 8px;
+    text-align: center;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: var(--primary);
+  }
+  .option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .option .icon {
+    font-size: 26px;
+    transition: transform 0.2s ease;
+  }
+  .option:hover .icon {
+    transform: scale(1.1);
+  }
+  .option input:checked + span {
+    font-weight: 700;
+  }
+  .option:has(input:checked) {
+    background: var(--accent);
+    color: var(--cream);
+    box-shadow: inset 0px 4px 0px rgba(0,0,0,0.1);
+  }
+
+  /* Checkbox Option Style */
+  .checkbox-option {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 16px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    border: 3px solid var(--primary);
+    background: #fff;
+    border-radius: 18px;
+    transition: all 0.15s ease;
+  }
+  .checkbox-option input {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--primary);
+    border-radius: 6px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .checkbox-option:has(input:checked) {
+    background: var(--success-bg);
+  }
+
+  .hint {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin: 10px 2px 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+  }
+  .free-tag {
+    display: inline-block;
+    background: var(--success);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 2px solid var(--primary);
+    margin-left: auto;
+  }
+
+  /* Quantity Rows */
+  .qty-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #fff;
+    border: 3px solid var(--primary);
+    border-radius: 18px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+  }
+  .qty-row:last-of-type {
+    margin-bottom: 0;
+  }
+  .qty-label {
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--primary);
+  }
+  .qty-label small {
+    display: block;
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 2px;
+    font-weight: 500;
+  }
+  .qty-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .qty-btn {
+    width: 38px;
+    height: 38px;
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--cream);
+    font-family: 'Fredoka', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 2px 0px var(--primary);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .qty-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px var(--primary);
+  }
+  .qty-btn.minus {
+    background: #E2E8F0;
+    color: #4A5568;
+  }
+  .qty-value {
+    min-width: 24px;
+    text-align: center;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  /* Inputs, Select, Textarea */
+  input[type="text"], input[type="tel"], input[type="date"], select, textarea {
+    width: 100%;
+    border: 3px solid var(--primary);
+    border-radius: 16px;
+    padding: 14px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 15px;
+    margin-bottom: 12px;
+    color: var(--text-main);
+    background: #fff;
+    outline: none;
+    font-weight: 500;
+  }
+  input:focus, select:focus, textarea:focus {
+    background-color: var(--primary-light);
+  }
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231E2D4A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 42px;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+    margin-bottom: 0;
+  }
+
+  .field-label {
+    display: block;
+    margin: 2px 2px 7px;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .delivery-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .delivery-option {
+    position: relative;
+    border: 3px solid var(--primary);
+    border-radius: 16px;
+    background: #fff;
+    padding: 14px 10px;
+    cursor: pointer;
+    text-align: center;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .delivery-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .delivery-option:has(input:checked) {
+    background: var(--accent);
+    color: var(--cream);
+  }
+  .delivery-option .delivery-icon {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 24px;
+  }
+  .delivery-question + .delivery-question {
+    margin-top: 16px;
+  }
+  .delivery-option small {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.82;
+  }
+  .map-panel {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 3px dashed var(--primary);
+  }
+  .location-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .location-btn {
+    width: 100%;
+    border: 3px solid var(--primary);
+    border-radius: 14px;
+    padding: 11px 12px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-family: 'Kanit', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .location-btn:disabled {
+    opacity: 0.65;
+    cursor: wait;
+  }
+  #locationMap {
+    width: 100%;
+    height: 280px;
+    border: 3px solid var(--primary);
+    border-radius: 16px;
+    overflow: hidden;
+    background: #DCEAF4;
+    z-index: 1;
+  }
+  .zone-summary {
+    margin-top: 10px;
+    border: 3px solid var(--primary);
+    border-radius: 14px;
+    padding: 11px 13px;
+    background: #fff;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .zone-summary.ready { background: var(--success-bg); }
+  .zone-summary.outside { background: #FEE2E2; color: #991B1B; }
+  .zone-summary .zone-price {
+    color: var(--accent);
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .map-attribution-note {
+    margin-top: 7px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .leaflet-control-attribution { font-size: 9px; }
+  .form-status {
+    display: none;
+    margin: 0 0 12px;
+    padding: 11px 13px;
+    border: 2px solid var(--primary);
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .form-status.show { display: block; }
+  .form-status.loading { background: var(--primary-light); }
+  .form-status.error { background: #FEE2E2; color: #991B1B; }
+  .form-status.success { background: var(--success-bg); color: #047857; }
+  .submit-btn:disabled {
+    cursor: wait;
+    opacity: 0.65;
+  }
+
+  @media (max-width: 390px) {
+    .delivery-options { grid-template-columns: 1fr; }
+    .live-price-bar { align-items: stretch; gap: 12px; }
+    .live-price-bar .submit-btn { padding-inline: 14px !important; }
+  }
+
+  /* Live Pricing sticky bar */
+  .live-price-bar {
+    position: sticky;
+    bottom: 16px;
+    z-index: 100;
+    background: var(--cream);
+    border: 3px solid var(--primary);
+    border-radius: 20px;
+    padding: 14px 20px;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 6px 6px 0px var(--primary);
+    margin-bottom: 16px;
+    animation: fadeInUp 0.4s ease-out;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .live-price-info {
+    display: flex;
+    flex-direction: column;
+  }
+  .live-price-label {
+    font-size: 12px;
+    opacity: 0.85;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .live-price-amount {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* Estimated wash time indicator */
+  .wash-time-est {
+    font-size: 11px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 2px;
+    font-weight: 600;
+  }
+
+  /* Submit / Action Buttons */
+  .submit-btn {
+    width: 100%;
+    background: var(--accent);
+    color: var(--cream);
+    border: 3px solid var(--primary);
+    padding: 18px;
+    border-radius: 20px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 4px 4px 0px var(--primary);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .submit-btn:hover {
+    background: var(--accent-hover);
+  }
+  .submit-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--primary);
+  }
+
+  /* Receipt Summary styling */
+  .receipt {
+    background: #fff;
+    border-radius: 24px;
+    border: 3px solid var(--primary);
+    padding: 24px 20px;
+    box-shadow: 5px 5px 0px var(--primary);
+    position: relative;
+    overflow: hidden;
+  }
+  .receipt::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 6px;
+    background: repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 8px, var(--primary) 8px, var(--primary) 16px);
+  }
+  .receipt-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .receipt-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0 0 4px 0;
+  }
+  .receipt-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .receipt-divider {
+    border-top: 3px dashed var(--primary);
+    margin: 16px 0;
+  }
+  .receipt-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  .receipt-row .label {
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .receipt-row .val {
+    font-weight: 600;
+    text-align: right;
+    color: var(--primary);
+  }
+  .receipt-row.total {
+    margin-top: 14px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .hidden-textarea {
+    position: absolute;
+    left: -9999px;
+  }
+
+  /* Action Buttons for copy/share */
+  .summary-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .line-btn {
+    width: 100%;
+    background: #06C755;
+    color: #fff;
+    border: 3px solid var(--primary);
+    padding: 16px;
+    border-radius: 18px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 4px 4px 0px var(--primary);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .line-btn:hover {
+    background: #05B34C;
+  }
+  .line-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--primary);
+  }
+  .copy-btn {
+    width: 100%;
+    background: var(--cream);
+    color: var(--primary);
+    border: 3px solid var(--primary);
+    padding: 16px;
+    border-radius: 18px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 4px 4px 0px var(--primary);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .copy-btn:hover {
+    background: var(--primary-light);
+  }
+  .copy-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--primary);
+  }
+  .edit-btn {
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--primary);
+    padding: 12px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 14px;
+    margin-top: 8px;
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 600;
+  }
+  .edit-btn:hover {
+    color: var(--accent);
+  }
+
+  .hidden {
+    display: none !important;
+  }
+  .thai-qr-code {
+    width: 224px;
+    min-height: 224px;
+    margin: 0 auto;
+    padding: 12px;
+    border: 3px solid var(--primary);
+    border-radius: 18px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .thai-qr-code img,
+  .thai-qr-code canvas {
+    display: block;
+    width: 196px !important;
+    height: 196px !important;
+    border-radius: 8px;
+  }
+  .payment-amount {
+    margin: 10px 0 14px;
+    color: var(--accent);
+    font-family: 'Fredoka', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .payment-safety {
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #FFF7ED;
+    color: #9A3412;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  /* Payment State Badge */
+  .payment-state-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13.5px;
+    font-weight: 700;
+    border: 2px solid var(--primary);
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+  }
+  .state-generating {
+    background: #FEF3C7;
+    color: #92400E;
+  }
+  .state-awaiting {
+    background: #E0F2FE;
+    color: #0369A1;
+  }
+  .state-verifying {
+    background: #EDE9FE;
+    color: #6D28D9;
+    animation: pulse 1.5s infinite ease-in-out;
+  }
+  .state-paid {
+    background: #D1FAE5;
+    color: #065F46;
+    border-color: #047857;
+  }
+  .state-error {
+    background: #FEE2E2;
+    color: #991B1B;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.02); opacity: 0.85; }
+  }
+
+  /* Slip Upload Section */
+  .slip-section {
+    margin-top: 14px;
+    text-align: center;
+  }
+  .slip-divider {
+    border-top: 2px dashed #E2E8F0;
+    margin: 14px 0 16px;
+  }
+  .slip-dropzone {
+    border: 2.5px dashed var(--primary);
+    border-radius: 16px;
+    padding: 16px 12px;
+    background: #F8FAFC;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    margin-bottom: 12px;
+  }
+  .slip-dropzone:hover {
+    background: #EFF6FF;
+    border-color: var(--accent);
+  }
+  .slip-dropzone.dragover {
+    background: #DBEAFE;
+    border-color: var(--accent);
+  }
+  .slip-preview-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .slip-preview-box img {
+    max-width: 160px;
+    max-height: 200px;
+    border-radius: 10px;
+    border: 2px solid var(--primary);
+    box-shadow: 2px 2px 0px var(--primary);
+  }
+  .slip-preview-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .slip-file-name {
+    font-size: 12px;
+    color: var(--text-muted);
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .remove-slip-btn {
+    background: #FEE2E2;
+    border: 1.5px solid #DC2626;
+    color: #DC2626;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .verify-slip-btn {
+    width: 100%;
+    background: #10B981;
+    color: #fff;
+    border: 3px solid var(--primary);
+    padding: 14px;
+    border-radius: 16px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 3px 3px 0px var(--primary);
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease;
+  }
+  .verify-slip-btn:hover {
+    background: #059669;
+  }
+  .verify-slip-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px var(--primary);
+  }
+  .verify-slip-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .slip-status-msg {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .slip-status-msg.success {
+    background: #D1FAE5;
+    color: #065F46;
+    border: 2px solid #059669;
+  }
+  .slip-status-msg.error {
+    background: #FEE2E2;
+    color: #991B1B;
+    border: 2px solid #DC2626;
+  }
+  .slip-status-msg.loading {
+    background: #EFF6FF;
+    color: #1D4ED8;
+    border: 2px solid #3B82F6;
+  }
+</style>
+</head>
+<body>
+
+<!-- Dynamic Background Bubbles -->
+<div class="bubble-container" id="bubbleContainer"></div>
+
+<div class="app">
+
+  <div class="topbar">
+    <div class="logo-wrapper">
+      <div class="logo-badge">
+        <img src="logo.png" alt="🧺" onerror="this.style.display='none';">
+        <span style="position: absolute; pointer-events: none;">🧺</span>
+      </div>
+    </div>
+    <h1>WASH ME PLS LAUNDRY</h1>
+  </div>
+
+  <form id="orderForm">
+
+    <!-- Step 1: Service -->
+    <section class="card">
+      <h2><span class="step-num">1</span> เลือกบริการ</h2>
+      <div class="option-grid">
+        <label class="option">
+          <input type="radio" name="service" value="wash" data-label="ซักอย่างเดียว">
+          <span class="icon">🧼</span>
+          <span>ซักอย่างเดียว</span>
+          <small style="font-size: 11px; color: var(--accent); font-weight: 700; margin-top: 2px;">60 ฿/ใบ</small>
+        </label>
+        <label class="option">
+          <input type="radio" name="service" value="dry" data-label="อบอย่างเดียว">
+          <span class="icon">🔥</span>
+          <span>อบอย่างเดียว</span>
+          <small style="font-size: 11px; color: var(--accent); font-weight: 700; margin-top: 2px;">60 ฿/ใบ</small>
+        </label>
+        <label class="option">
+          <input type="radio" name="service" value="both" data-label="ซัก + อบ" checked>
+          <span class="icon">🧺✨</span>
+          <span>ซัก+อบ</span>
+          <small style="font-size: 11px; color: var(--accent); font-weight: 700; margin-top: 2px;">120 ฿/ใบ</small>
+        </label>
+      </div>
+    </section>
+
+    <!-- Step 2: Basket Sizes -->
+    <section class="card">
+      <h2><span class="step-num">2</span> ขนาดผ้าโดยประมาณ (ขนาดตะกร้า)</h2>
+      <div class="qty-row">
+        <div class="qty-label">ตะกร้า S<small>ประมาณ 15-20 ชิ้น</small></div>
+        <div class="qty-control">
+          <button type="button" class="qty-btn minus" data-target="sizeSQty" data-step="-1">−</button>
+          <span class="qty-value" id="sizeSQty">0</span>
+          <button type="button" class="qty-btn" data-target="sizeSQty" data-step="1">+</button>
+        </div>
+      </div>
+      <div class="qty-row">
+        <div class="qty-label">ตะกร้า M<small>ประมาณ 25-35 ชิ้น</small></div>
+        <div class="qty-control">
+          <button type="button" class="qty-btn minus" data-target="sizeMQty" data-step="-1">−</button>
+          <span class="qty-value" id="sizeMQty">0</span>
+          <button type="button" class="qty-btn" data-target="sizeMQty" data-step="1">+</button>
+        </div>
+      </div>
+      <div class="qty-row">
+        <div class="qty-label">ตะกร้า L<small>ประมาณ 40-50 ชิ้น</small></div>
+        <div class="qty-control">
+          <button type="button" class="qty-btn minus" data-target="sizeLQty" data-step="-1">−</button>
+          <span class="qty-value" id="sizeLQty">0</span>
+          <button type="button" class="qty-btn" data-target="sizeLQty" data-step="1">+</button>
+        </div>
+      </div>
+      <p class="hint">💡 *ราคาคิดตามบริการ: ซัก 60฿ / อบ 60฿ / ซัก+อบ 120฿ ต่อใบ</p>
+    </section>
+
+    <!-- Step 3: Add-ons -->
+    <section class="card">
+      <h2><span class="step-num">3</span> น้ำยาซัก / น้ำยาปรับผ้านุ่ม</h2>
+      <div class="qty-row">
+        <div class="qty-label">🧴 น้ำยาซักของร้าน<small>ซองละ 10 บาท</small></div>
+        <div class="qty-control">
+          <button type="button" class="qty-btn minus" data-target="detergentQty" data-step="-1">−</button>
+          <span class="qty-value" id="detergentQty">0</span>
+          <button type="button" class="qty-btn" data-target="detergentQty" data-step="1">+</button>
+        </div>
+      </div>
+      <div class="qty-row">
+        <div class="qty-label">🌸 น้ำยาปรับผ้านุ่มของร้าน<small>ซองละ 10 บาท</small></div>
+        <div class="qty-control">
+          <button type="button" class="qty-btn minus" data-target="softenerQty" data-step="-1">−</button>
+          <span class="qty-value" id="softenerQty">0</span>
+          <button type="button" class="qty-btn" data-target="softenerQty" data-step="1">+</button>
+        </div>
+      </div>
+      <p class="hint">💡 *หากนำน้ำยามาเองไม่มีค่าใช้จ่ายเพิ่มค่ะ</p>
+    </section>
+
+    <!-- Step 4: Special care -->
+    <section class="card">
+      <h2><span class="step-num">4</span> การแยกชิ้นพิเศษ</h2>
+      <label class="option checkbox-option">
+        <input type="checkbox" id="socks">
+        <span>🧦 มีถุงเท้า/กางเกงในที่ต้องแยกซัก</span>
+        <span class="free-tag">ฟรี! ไม่บวกเพิ่ม</span>
+      </label>
+    </section>
+
+    <!-- Step 5: Pickup and return choices -->
+    <section class="card">
+      <h2><span class="step-num">5</span> เลือกวิธีรับ–ส่งผ้า</h2>
+
+      <div class="delivery-question">
+        <label class="field-label">ส่งผ้าให้ร้านอย่างไร</label>
+        <div class="delivery-options">
+          <label class="delivery-option">
+            <input type="radio" name="dispatchMode" value="driver_pickup" checked>
+            <span class="delivery-icon">🛵</span>
+            ให้ร้านไปรับถึงบ้าน
+            <small>คิดค่ารับ 1 เที่ยว</small>
+          </label>
+          <label class="delivery-option">
+            <input type="radio" name="dispatchMode" value="self_dropoff">
+            <span class="delivery-icon">🏪</span>
+            นำมาส่งที่ร้านเอง
+            <small>ไม่มีค่ารับผ้า</small>
+          </label>
+        </div>
+      </div>
+
+      <div class="delivery-question">
+        <label class="field-label">รับผ้าสะอาดอย่างไร</label>
+        <div class="delivery-options">
+          <label class="delivery-option">
+            <input type="radio" name="returnMode" value="driver_return" checked>
+            <span class="delivery-icon">🏠</span>
+            ให้ร้านนำไปส่ง
+            <small>รวมเป็นราคาไป–กลับ</small>
+          </label>
+          <label class="delivery-option">
+            <input type="radio" name="returnMode" value="self_collect">
+            <span class="delivery-icon">🙋</span>
+            มารับที่ร้านเอง
+            <small>จ่ายเฉพาะเที่ยวรับ</small>
+          </label>
+        </div>
+      </div>
+
+      <div id="customerLocationFields" class="map-panel">
+        <div id="pickupScheduleFields">
+          <label class="field-label" for="pickupDate">วันที่ต้องการให้ไปรับผ้า</label>
+          <input type="date" id="pickupDate" required>
+          <label class="field-label" for="pickupTime">เวลาที่ต้องการให้ไปรับผ้า</label>
+          <select id="pickupTime" required>
+            <option value="">-- เลือกเวลา --</option>
+          </select>
+        </div>
+
+        <label class="field-label" for="pickupAddress">ที่อยู่และจุดสังเกต</label>
+        <textarea id="pickupAddress" placeholder="บ้านเลขที่ หมู่ ตำบล จุดสังเกต หรือรายละเอียดที่ช่วยให้คนขับหาเจอ" required></textarea>
+
+        <label class="field-label">ปักหมุดบ้านลูกค้า</label>
+        <div class="location-actions">
+          <button type="button" id="locateMeBtn" class="location-btn">📍 ใช้ตำแหน่งปัจจุบัน</button>
+        </div>
+        <div id="locationMap" role="application" aria-label="แผนที่สำหรับปักหมุดบ้านลูกค้า"></div>
+        <div id="zoneSummary" class="zone-summary" aria-live="polite">แตะแผนที่หรือกดใช้ตำแหน่งปัจจุบันเพื่อคำนวณค่าส่ง</div>
+        <p class="map-attribution-note">ระยะที่แสดงเป็นระยะโดยประมาณจากหมุดร้านถึงหมุดลูกค้า</p>
+        <p id="storeLocationWarning" class="hint hidden">⚠️ พิกัดร้านในระบบเป็นจุดตั้งต้นชั่วคราว กรุณาให้ร้านยืนยันราคาก่อนชำระเงิน</p>
+        <p class="hint">⏰ *หากให้ร้านไปรับ เลือกเวลาได้ตั้งแต่ 08:00–19:00 น.</p>
+      </div>
+    </section>
+
+    <!-- Step 6: Contact -->
+    <section class="card">
+      <h2><span class="step-num">6</span> ข้อมูลติดต่อ</h2>
+      <input type="text" id="name" placeholder="ชื่อลูกค้า" required>
+      <input type="tel" id="phone" placeholder="เบอร์โทร" required>
+      <textarea id="note" placeholder="หมายเหตุเพิ่มเติม (ถ้ามี) เช่น ผ้าสีตกง่าย, ระวังกระดุมชำรุด"></textarea>
+    </section>
+
+    <!-- Live Pricing Bar -->
+    <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
+
+    <div class="live-price-bar">
+      <div class="live-price-info">
+        <span class="live-price-label">ยอดรวมประมาณ</span>
+        <span class="live-price-amount" id="livePrice">0 ฿</span>
+        <span class="wash-time-est" id="timeEst">เวลาซักประมาณ: 0 นาที</span>
+      </div>
+      <button id="submitOrderBtn" type="submit" class="submit-btn" style="width: auto; padding: 10px 24px; font-size: 15px; box-shadow: none;">
+        ยืนยันรายการ 🧺
+      </button>
+    </div>
+
+  </form>
+
+  <!-- Summary Screen -->
+  <div id="summary" class="hidden">
+    
+    <!-- Relocated Machine Visualizer inside receipt screen -->
+    <div class="machine-visualizer">
+      <div class="washing-machine">
+        <div class="machine-top">
+          <div class="machine-dial"></div>
+          <div class="machine-display" id="machineTime">00:00</div>
+        </div>
+        <div class="machine-door">
+          <div class="water"></div>
+          <span class="spinning-clothes">🌀</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="receipt">
+      <div class="receipt-header">
+        <div class="receipt-title">WASH ME PLS LAUNDRY</div>
+        <div class="receipt-subtitle">ใบเสร็จสรุปรายการฝากผ้า</div>
+      </div>
+      <div class="receipt-divider"></div>
+      <div class="receipt-row">
+        <span class="label">เลขออเดอร์:</span>
+        <span class="val" id="recOrderNumber">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">สถานะรับผ้า:</span>
+        <span class="val" id="recPickupStatus">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">ชื่อลูกค้า:</span>
+        <span class="val" id="recName">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">เบอร์โทร:</span>
+        <span class="val" id="recPhone">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">บริการ:</span>
+        <span class="val" id="recService">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">ขนาดตะกร้า:</span>
+        <span class="val" id="recBaskets">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">น้ำยาซัก:</span>
+        <span class="val" id="recDetergent">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">น้ำยาปรับผ้านุ่ม:</span>
+        <span class="val" id="recSoftener">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">ถุงเท้า/กางเกงใน:</span>
+        <span class="val" id="recSocks">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">วิธีส่งผ้า:</span>
+        <span class="val" id="recDispatchMode">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">วิธีรับผ้าสะอาด:</span>
+        <span class="val" id="recReturnMode">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">วัน–เวลารับผ้า:</span>
+        <span class="val" id="recPickup">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">สถานที่รับผ้า:</span>
+        <span class="val" id="recPickupAddress">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">โซน / ค่ารับ–ส่ง:</span>
+        <span class="val" id="recDeliveryQuote">-</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">หมายเหตุ:</span>
+        <span class="val" id="recNote">-</span>
+      </div>
+      
+      <div class="receipt-divider"></div>
+      <div class="receipt-row total">
+        <span>ยอดรวมทั้งสิ้น:</span>
+        <span id="recTotal">0 บาท</span>
+      </div>
+    </div>
+
+    <!-- Thai QR Payment / Slip2Go card -->
+    <div class="card payment-card" style="margin-top: 18px; text-align: center; background: #fff;">
+      <h3 style="margin: 0 0 10px; font-size: 16px; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 6px;">
+        📱 สแกนจ่ายด้วยแอปธนาคาร & ตรวจสอบสลิป
+      </h3>
+
+      <!-- Dynamic Payment State Badge -->
+      <div>
+        <div id="paymentStateBadge" class="payment-state-badge state-awaiting">
+          <span id="paymentBadgeIcon">⏳</span> <span id="paymentStateText">รอชำระเงิน</span>
+        </div>
+      </div>
+
+      <div style="background: #002D62; color: #fff; padding: 4px 10px; border-radius: 6px; display: inline-block; font-size: 11px; font-weight: bold; margin-bottom: 12px; font-family: 'Fredoka', sans-serif;">
+        THAI QR PAYMENT • PROMPTPAY
+      </div>
+
+      <div class="thai-qr-code" role="img" aria-label="QR พร้อมเพย์สำหรับยอดชำระ">
+        <div id="qrLoading" class="hidden" style="font-size: 13px; color: var(--text-muted);">กำลังสร้าง QR...</div>
+        <img id="slip2goQrImg" class="hidden" alt="Slip2Go QR Code" />
+        <div id="qrCode"></div>
+      </div>
+
+      <div id="qrAmount" class="payment-amount">0.00 บาท</div>
+      <p style="font-size: 13.5px; color: var(--text-muted); margin: 6px 0 8px;">
+        เลขพร้อมเพย์ของร้าน: <span id="promptPayIdText" style="font-weight: bold; color: var(--text-main); letter-spacing: 0.5px;">-</span>
+      </p>
+      <button id="copyPromptPayBtn" type="button" style="background: var(--primary-light); border: none; color: var(--primary); padding: 8px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; margin-bottom: 6px;">
+        📋 คัดลอกเลขพร้อมเพย์ (สแกนรูปในจอไม่ได้)
+      </button>
+
+      <!-- Slip Upload Section -->
+      <div id="slipSection" class="slip-section">
+        <div class="slip-divider"></div>
+        <h4 style="margin: 0 0 10px; font-size: 14.5px; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 6px;">
+          🧾 อัปโหลดสลิปเพื่อยืนยันออเดอร์
+        </h4>
+
+        <div id="slipDropzone" class="slip-dropzone">
+          <input type="file" id="slipFileInput" accept="image/jpeg,image/png,image/webp,image/heic" style="display: none;" />
+          <div id="dropzonePrompt">
+            <div style="font-size: 26px; margin-bottom: 4px;">📸</div>
+            <div style="font-size: 13.5px; font-weight: 600; color: var(--primary);">แตะเพื่อเลือกรูปสลิป หรือ ถ่ายภาพ</div>
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">รองรับ JPG, PNG (สูงสุด 6MB)</div>
+          </div>
+          <div id="slipPreviewBox" class="slip-preview-box hidden">
+            <img id="slipPreviewImg" src="" alt="Slip Preview" />
+            <div class="slip-preview-info">
+              <span id="slipFileName" class="slip-file-name">-</span>
+              <button type="button" id="removeSlipBtn" class="remove-slip-btn">✕ เปลี่ยนรูป</button>
+            </div>
+          </div>
+        </div>
+
+        <button id="verifySlipBtn" type="button" class="verify-slip-btn hidden">
+          🔍 ตรวจสอบสลิปและยืนยันยอดเงิน
+        </button>
+
+        <div id="slipStatusMsg" class="slip-status-msg hidden"></div>
+      </div>
+
+      <p class="payment-safety">
+        💡 เมื่อโอนเงินแล้ว กรุณาแนบรูปสลิปในช่องด้านบน ระบบจะตรวจสอบยอดเงินและยืนยันการรับผ้าอัตโนมัติค่ะ
+      </p>
+    </div>
+
+    <!-- Hidden element for clipboard copy text -->
+    <textarea id="summaryText" class="hidden-textarea" readonly></textarea>
+    
+    <div class="summary-actions">
+      <!-- Direct Share on LINE -->
+      <button id="lineBtn" type="button" class="line-btn">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="flex-shrink:0;">
+          <path d="M24 10.3c0-4.8-5.4-8.8-12-8.8S0 5.5 0 10.3c0 4.3 4.3 7.9 10.1 8.7 0.4 0.1 0.9 0.4 1 1 0.1 0.6 0 1.5-.1 2.1l-.1.8c-.1 0.4.1 0.6.4 0.4.3-.2 2.2-1.6 3.1-2.7 2.3-2 3.9-4.8 3.9-7.3z"/>
+        </svg>
+        ส่งรายการฝากผ้าเข้าแชท LINE 💬
+      </button>
+      <button id="copyBtn" type="button" class="copy-btn">📋 คัดลอกข้อความสำหรับส่งเอง</button>
+      <button id="editBtn" type="button" class="edit-btn">← ย้อนกลับไปแก้ไขรายการ</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="thai-qr.js"></script>
+<script src="config.js"></script>
+<script>
+  const APP_CONFIG = window.WASH_ME_CONFIG || {};
+  const API_BASE_URL = String(APP_CONFIG.apiUrl || '').replace(/\/api\/orders\/?$/, '').trim();
+  const ORDERS_ENDPOINT = API_BASE_URL ? `${API_BASE_URL}/api/orders` : (APP_CONFIG.apiUrl || '/api/orders');
+  const MERCHANT_PROMPTPAY_ID = String(APP_CONFIG.promptPayId || '').trim();
+  const STORE_LOCATION = APP_CONFIG.storeLocation || { lat: 16.71431, lng: 104.75455, label: 'WASH ME PLS LAUNDRY', approximate: true };
+  const DELIVERY_ZONES = Array.isArray(APP_CONFIG.deliveryZones) ? APP_CONFIG.deliveryZones : [
+    { key: 'A', maxKm: 3, oneWayFee: 30, roundTripFee: 49 },
+    { key: 'B', maxKm: 6, oneWayFee: 40, roundTripFee: 69 },
+    { key: 'C', maxKm: 10, oneWayFee: 50, roundTripFee: 89 }
+  ];
+
+  const form = document.getElementById('orderForm');
+  const summary = document.getElementById('summary');
+  const summaryText = document.getElementById('summaryText');
+  const copyBtn = document.getElementById('copyBtn');
+  const lineBtn = document.getElementById('lineBtn');
+  const editBtn = document.getElementById('editBtn');
+  const livePriceEl = document.getElementById('livePrice');
+  const timeEstEl = document.getElementById('timeEst');
+  const machineTime = document.getElementById('machineTime');
+  const qrCodeEl = document.getElementById('qrCode');
+  const qrLoadingEl = document.getElementById('qrLoading');
+  const slip2goQrImg = document.getElementById('slip2goQrImg');
+  const qrAmountEl = document.getElementById('qrAmount');
+  const promptPayIdText = document.getElementById('promptPayIdText');
+  const copyPromptPayBtn = document.getElementById('copyPromptPayBtn');
+  const submitOrderBtn = document.getElementById('submitOrderBtn');
+  const formStatus = document.getElementById('formStatus');
+  const pickupDateEl = document.getElementById('pickupDate');
+  const pickupTimeEl = document.getElementById('pickupTime');
+  const pickupAddressEl = document.getElementById('pickupAddress');
+  const pickupScheduleFields = document.getElementById('pickupScheduleFields');
+  const customerLocationFields = document.getElementById('customerLocationFields');
+  const locateMeBtn = document.getElementById('locateMeBtn');
+  const zoneSummary = document.getElementById('zoneSummary');
+  const storeLocationWarning = document.getElementById('storeLocationWarning');
+
+  // Slip Upload UI Elements
+  const paymentStateBadge = document.getElementById('paymentStateBadge');
+  const paymentBadgeIcon = document.getElementById('paymentBadgeIcon');
+  const paymentStateText = document.getElementById('paymentStateText');
+  const slipSection = document.getElementById('slipSection');
+  const slipDropzone = document.getElementById('slipDropzone');
+  const slipFileInput = document.getElementById('slipFileInput');
+  const dropzonePrompt = document.getElementById('dropzonePrompt');
+  const slipPreviewBox = document.getElementById('slipPreviewBox');
+  const slipPreviewImg = document.getElementById('slipPreviewImg');
+  const slipFileName = document.getElementById('slipFileName');
+  const removeSlipBtn = document.getElementById('removeSlipBtn');
+  const verifySlipBtn = document.getElementById('verifySlipBtn');
+  const slipStatusMsg = document.getElementById('slipStatusMsg');
+
+  let locationMap;
+  let customerMarker;
+  let customerLocation = null;
+  let currentOrder = null; // { orderNumber, accessToken, total, qrImageLink, paymentStatus }
+  let selectedSlipFile = null;
+  let statusPollTimer = null;
+
+  // Format and show merchant promptpay ID
+  if (MERCHANT_PROMPTPAY_ID.length === 10) {
+    promptPayIdText.textContent = MERCHANT_PROMPTPAY_ID.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+  } else {
+    promptPayIdText.textContent = MERCHANT_PROMPTPAY_ID;
+  }
+
+  function setPaymentState(state, customText = '') {
+    paymentStateBadge.className = `payment-state-badge state-${state}`;
+    if (state === 'generating') {
+      paymentBadgeIcon.textContent = '⏳';
+      paymentStateText.textContent = customText || 'กำลังสร้าง QR...';
+    } else if (state === 'awaiting') {
+      paymentBadgeIcon.textContent = '⏳';
+      paymentStateText.textContent = customText || 'รอชำระเงิน';
+    } else if (state === 'verifying') {
+      paymentBadgeIcon.textContent = '🔄';
+      paymentStateText.textContent = customText || 'กำลังตรวจสอบสลิป...';
+    } else if (state === 'paid') {
+      paymentBadgeIcon.textContent = '✅';
+      paymentStateText.textContent = customText || 'ชำระเงินแล้ว ✅';
+    } else if (state === 'error') {
+      paymentBadgeIcon.textContent = '⚠️';
+      paymentStateText.textContent = customText || 'สลิปไม่ถูกต้อง';
+    }
+  }
+
+  function renderQrPayment(total, slip2goUrl = null) {
+    qrAmountEl.textContent = `${Number(total).toFixed(2)} บาท`;
+    if (slip2goUrl) {
+      slip2goQrImg.src = slip2goUrl;
+      slip2goQrImg.classList.remove('hidden');
+      qrCodeEl.classList.add('hidden');
+      qrLoadingEl.classList.add('hidden');
+      return;
+    }
+
+    // Fallback: Local Thai QR generator
+    slip2goQrImg.classList.add('hidden');
+    qrCodeEl.classList.remove('hidden');
+    qrCodeEl.innerHTML = '';
+    try {
+      if (!window.ThaiQR || typeof QRCode === 'undefined') {
+        throw new Error('ไม่สามารถโหลดระบบสร้าง QR ได้');
+      }
+      const payload = window.ThaiQR.buildPromptPayPayload(MERCHANT_PROMPTPAY_ID, total);
+      new QRCode(qrCodeEl, {
+        text: payload,
+        width: 196,
+        height: 196,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    } catch (error) {
+      qrCodeEl.textContent = error.message || 'สร้าง QR ไม่สำเร็จ';
+    }
+  }
+
+  function setSlipStatus(message = '', state = '') {
+    if (!message) {
+      slipStatusMsg.className = 'slip-status-msg hidden';
+      slipStatusMsg.textContent = '';
+      return;
+    }
+    slipStatusMsg.className = `slip-status-msg ${state}`;
+    slipStatusMsg.textContent = message;
+  }
+
+  function resetSlipSelection() {
+    selectedSlipFile = null;
+    slipFileInput.value = '';
+    slipPreviewImg.src = '';
+    slipFileName.textContent = '-';
+    slipPreviewBox.classList.add('hidden');
+    dropzonePrompt.classList.remove('hidden');
+    verifySlipBtn.classList.add('hidden');
+    setSlipStatus();
+  }
+
+  function handleFileSelected(file) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setSlipStatus('กรุณาเลือกไฟล์รูปภาพเท่านั้นค่ะ (JPG, PNG)', 'error');
+      return;
+    }
+    if (file.size > 6 * 1024 * 1024) {
+      setSlipStatus('ไฟล์สลิปมีขนาดเกิน 6MB ค่ะ', 'error');
+      return;
+    }
+    selectedSlipFile = file;
+    slipFileName.textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = e => {
+      slipPreviewImg.src = e.target.result;
+      slipPreviewBox.classList.remove('hidden');
+      dropzonePrompt.classList.add('hidden');
+      verifySlipBtn.classList.remove('hidden');
+      setSlipStatus();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  slipDropzone.addEventListener('click', e => {
+    if (e.target !== removeSlipBtn) {
+      slipFileInput.click();
+    }
+  });
+
+  slipFileInput.addEventListener('change', e => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileSelected(e.target.files[0]);
+    }
+  });
+
+  removeSlipBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    resetSlipSelection();
+  });
+
+  // Drag & drop handlers
+  slipDropzone.addEventListener('dragover', e => {
+    e.preventDefault();
+    slipDropzone.classList.add('dragover');
+  });
+  slipDropzone.addEventListener('dragleave', () => {
+    slipDropzone.classList.remove('dragover');
+  });
+  slipDropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    slipDropzone.classList.remove('dragover');
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileSelected(e.dataTransfer.files[0]);
+    }
+  });
+
+  // Slip Verification Submit
+  verifySlipBtn.addEventListener('click', async () => {
+    if (!selectedSlipFile || !currentOrder) {
+      setSlipStatus('กรุณาเลือกรูปสลิปก่อนค่ะ', 'error');
+      return;
+    }
+
+    verifySlipBtn.disabled = true;
+    verifySlipBtn.textContent = 'กำลังตรวจสอบสลิป… ⏳';
+    setPaymentState('verifying', 'กำลังตรวจสอบสลิป...');
+    setSlipStatus('กำลังส่งสลิปไปตรวจสอบยอดเงิน กรุณารอสักครู่ค่ะ…', 'loading');
+
+    const slipEndpoint = API_BASE_URL
+      ? `${API_BASE_URL}/api/orders/${encodeURIComponent(currentOrder.orderNumber)}/slip`
+      : `/api/orders/${encodeURIComponent(currentOrder.orderNumber)}/slip`;
+
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedSlipFile);
+
+      const response = await fetch(slipEndpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${currentOrder.accessToken}`
+        },
+        body: formData
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'การตรวจสอบสลิปไม่สำเร็จ');
+      }
+
+      // Success paid state
+      currentOrder.paymentStatus = 'paid';
+      setPaymentState('paid', 'ชำระเงินแล้ว ✅');
+      setSlipStatus('ชำระเงินและตรวจสอบสลิปสำเร็จเรียบร้อยแล้วค่ะ ✅', 'success');
+      verifySlipBtn.classList.add('hidden');
+      dropzonePrompt.classList.add('hidden');
+      removeSlipBtn.classList.add('hidden');
+
+      // Update pickup status on receipt
+      const receiptStatus = result.shipdayCreated
+        ? 'ชำระเงินแล้ว (รับคำขอนัดรับผ้าแล้ว ✅)'
+        : (currentOrder.returnRequested ? 'ชำระเงินแล้ว (รอร้านยืนยันการส่งกลับ)' : 'ชำระเงินแล้ว (นำมาส่งและรับที่ร้าน)');
+      document.getElementById('recPickupStatus').textContent = receiptStatus;
+
+      stopStatusPolling();
+    } catch (error) {
+      setPaymentState('error', 'สลิปไม่ผ่าน');
+      setSlipStatus(error.message || 'เกิดข้อผิดพลาดในการตรวจสอบสลิป กรุณาลองใหม่อีกครั้งค่ะ', 'error');
+      verifySlipBtn.disabled = false;
+      verifySlipBtn.textContent = '🔍 ตรวจสอบสลิปและยืนยันยอดเงิน';
+    }
+  });
+
+  function startStatusPolling(orderNumber, token) {
+    stopStatusPolling();
+    const statusEndpoint = API_BASE_URL
+      ? `${API_BASE_URL}/api/orders/${encodeURIComponent(orderNumber)}/status`
+      : `/api/orders/${encodeURIComponent(orderNumber)}/status`;
+
+    statusPollTimer = setInterval(async () => {
+      if (!currentOrder || currentOrder.paymentStatus === 'paid') {
+        stopStatusPolling();
+        return;
+      }
+      try {
+        const response = await fetch(statusEndpoint, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.paymentStatus === 'paid') {
+            currentOrder.paymentStatus = 'paid';
+            setPaymentState('paid', 'ชำระเงินแล้ว ✅');
+            setSlipStatus('ชำระเงินเรียบร้อยแล้วค่ะ ขอบคุณค่ะ ✅', 'success');
+            verifySlipBtn.classList.add('hidden');
+            stopStatusPolling();
+          }
+        }
+      } catch {}
+    }, 3000);
+  }
+
+  function stopStatusPolling() {
+    if (statusPollTimer) {
+      clearInterval(statusPollTimer);
+      statusPollTimer = null;
+    }
+  }
+
+  // Dynamic Background Bubble Generator
+  (function createBubbles() {
+    const container = document.getElementById('bubbleContainer');
+    const bubbleCount = 15;
+    for(let i = 0; i < bubbleCount; i++) {
+      const bubble = document.createElement('div');
+      bubble.classList.add('bubble');
+      const size = Math.random() * 60 + 20;
+      bubble.style.width = `${size}px`;
+      bubble.style.height = `${size}px`;
+      bubble.style.left = `${Math.random() * 100}%`;
+      bubble.style.animationDelay = `${Math.random() * 8}s`;
+      bubble.style.animationDuration = `${Math.random() * 8 + 6}s`;
+      container.appendChild(bubble);
+    }
+  })();
+
+  // Time Option Populater
+  (function populatePickupTimes(){
+    const select = document.getElementById('pickupTime');
+    for(let h = 8; h <= 19; h++){
+      for(let m = 0; m < 60; m += 30){
+        if(h === 19 && m > 0) break;
+        const hh = String(h).padStart(2, '0');
+        const mm = String(m).padStart(2, '0');
+        const val = `${hh}:${mm}`;
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = `${val} น.`;
+        select.appendChild(opt);
+      }
+    }
+  })();
+
+  // Pickup/return form state and customer map pin
+  function getBangkokNow() {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Bangkok',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23'
+    }).formatToParts(new Date()).reduce((result, part) => {
+      if (part.type !== 'literal') result[part.type] = part.value;
+      return result;
+    }, {});
+    return {
+      date: `${parts.year}-${parts.month}-${parts.day}`,
+      minutes: Number(parts.hour) * 60 + Number(parts.minute)
+    };
+  }
+
+  function isPickupSlotPast(date, time) {
+    if (!date || !time) return false;
+    const now = getBangkokNow();
+    if (date < now.date) return true;
+    if (date > now.date) return false;
+    const [hour, minute] = time.split(':').map(Number);
+    return (hour * 60 + minute) <= now.minutes;
+  }
+
+  function refreshPickupTimeOptions() {
+    const now = getBangkokNow();
+    pickupDateEl.min = now.date;
+    if (pickupDateEl.value && pickupDateEl.value < now.date) pickupDateEl.value = now.date;
+    Array.from(pickupTimeEl.options).forEach(option => {
+      if (!option.value) return;
+      option.disabled = isPickupSlotPast(pickupDateEl.value, option.value);
+      option.textContent = option.disabled ? `${option.value} น. (ผ่านไปแล้ว)` : `${option.value} น.`;
+    });
+    if (pickupTimeEl.selectedOptions[0]?.disabled) pickupTimeEl.value = '';
+  }
+
+  const todayInBangkok = getBangkokNow().date;
+  pickupDateEl.min = todayInBangkok;
+  pickupDateEl.value = todayInBangkok;
+  pickupDateEl.addEventListener('change', refreshPickupTimeOptions);
+  pickupTimeEl.addEventListener('focus', refreshPickupTimeOptions);
+  refreshPickupTimeOptions();
+  setInterval(refreshPickupTimeOptions, 60_000);
+
+  function getDispatchMode() {
+    return document.querySelector('input[name="dispatchMode"]:checked').value;
+  }
+
+  function getReturnMode() {
+    return document.querySelector('input[name="returnMode"]:checked').value;
+  }
+
+  function getDriverLegCount() {
+    return (getDispatchMode() === 'driver_pickup' ? 1 : 0) +
+      (getReturnMode() === 'driver_return' ? 1 : 0);
+  }
+
+  function haversineKm(from, to) {
+    const radians = value => value * Math.PI / 180;
+    const earthRadiusKm = 6371;
+    const latDistance = radians(to.lat - from.lat);
+    const lngDistance = radians(to.lng - from.lng);
+    const a = Math.sin(latDistance / 2) ** 2 +
+      Math.cos(radians(from.lat)) * Math.cos(radians(to.lat)) *
+      Math.sin(lngDistance / 2) ** 2;
+    return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function getDeliveryQuote() {
+    const legs = getDriverLegCount();
+    if (legs === 0) {
+      return { ready: true, legs, fee: 0, zone: null, distanceKm: 0, outside: false };
+    }
+    if (!customerLocation) {
+      return { ready: false, legs, fee: 0, zone: null, distanceKm: null, outside: false };
+    }
+    const distanceKm = haversineKm(STORE_LOCATION, customerLocation);
+    const zone = DELIVERY_ZONES.find(item => distanceKm <= Number(item.maxKm));
+    if (!zone) {
+      return { ready: true, legs, fee: 0, zone: null, distanceKm, outside: true };
+    }
+    return {
+      ready: true,
+      legs,
+      fee: legs === 2 ? Number(zone.roundTripFee) : Number(zone.oneWayFee),
+      zone,
+      distanceKm,
+      outside: false
+    };
+  }
+
+  function renderDeliveryQuote() {
+    const quote = getDeliveryQuote();
+    zoneSummary.className = 'zone-summary';
+    if (quote.legs === 0) {
+      zoneSummary.classList.add('ready');
+      zoneSummary.innerHTML = 'นำผ้ามาส่งและมารับเอง <span class="zone-price">ฟรีค่ารับ–ส่ง</span>';
+      return;
+    }
+    if (!quote.ready) {
+      zoneSummary.textContent = 'แตะแผนที่หรือกดใช้ตำแหน่งปัจจุบันเพื่อคำนวณค่าส่ง';
+      return;
+    }
+    if (quote.outside) {
+      zoneSummary.classList.add('outside');
+      zoneSummary.textContent = `ระยะประมาณ ${quote.distanceKm.toFixed(1)} กม. เกินพื้นที่ 10 กม. กรุณาติดต่อร้านเพื่อตรวจสอบราคา`;
+      return;
+    }
+    const tripLabel = quote.legs === 2 ? 'รับและส่งกลับ' : 'เที่ยวเดียว';
+    zoneSummary.classList.add('ready');
+    zoneSummary.innerHTML = `โซน ${quote.zone.key} • ${quote.distanceKm.toFixed(1)} กม. • ${tripLabel} <span class="zone-price">${quote.fee} บาท</span>`;
+  }
+
+  function setCustomerPin(lat, lng, moveMap = true) {
+    customerLocation = { lat: Number(lat), lng: Number(lng) };
+    if (!customerMarker) {
+      customerMarker = L.marker([lat, lng], { draggable: true }).addTo(locationMap);
+      customerMarker.bindTooltip('บ้านลูกค้า', { direction: 'top' });
+      customerMarker.on('dragend', event => {
+        const point = event.target.getLatLng();
+        setCustomerPin(point.lat, point.lng, false);
+      });
+    } else {
+      customerMarker.setLatLng([lat, lng]);
+    }
+    if (moveMap) locationMap.setView([lat, lng], 15);
+    renderDeliveryQuote();
+    updateLiveStats();
+  }
+
+  function initializeLocationMap() {
+    if (locationMap || typeof L === 'undefined') return;
+    locationMap = L.map('locationMap', { scrollWheelZoom: false })
+      .setView([STORE_LOCATION.lat, STORE_LOCATION.lng], 13);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(locationMap);
+    L.circleMarker([STORE_LOCATION.lat, STORE_LOCATION.lng], {
+      radius: 9,
+      color: '#1E2D4A',
+      weight: 3,
+      fillColor: '#E05A36',
+      fillOpacity: 1
+    }).addTo(locationMap).bindTooltip('จุดร้าน', { permanent: false, direction: 'top' });
+    DELIVERY_ZONES.forEach((zone, index) => {
+      const colors = ['#10B981', '#F59E0B', '#E05A36'];
+      L.circle([STORE_LOCATION.lat, STORE_LOCATION.lng], {
+        radius: Number(zone.maxKm) * 1000,
+        color: colors[index] || '#536480',
+        weight: 1,
+        fill: false,
+        dashArray: '5 6',
+        interactive: false
+      }).addTo(locationMap);
+    });
+    locationMap.on('click', event => setCustomerPin(event.latlng.lat, event.latlng.lng));
+  }
+
+  locateMeBtn.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      setFormStatus('อุปกรณ์นี้ไม่รองรับการระบุตำแหน่ง กรุณาแตะแผนที่เพื่อปักหมุดค่ะ', 'error');
+      return;
+    }
+    locateMeBtn.disabled = true;
+    locateMeBtn.textContent = 'กำลังหาตำแหน่ง…';
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        setCustomerPin(position.coords.latitude, position.coords.longitude);
+        setFormStatus('ปักหมุดจากตำแหน่งปัจจุบันแล้ว กรุณาตรวจสอบหมุดบนแผนที่ค่ะ', 'success');
+        locateMeBtn.disabled = false;
+        locateMeBtn.textContent = '📍 ใช้ตำแหน่งปัจจุบัน';
+      },
+      () => {
+        setFormStatus('ไม่สามารถอ่านตำแหน่งได้ กรุณาอนุญาตการเข้าถึงตำแหน่งหรือแตะแผนที่ค่ะ', 'error');
+        locateMeBtn.disabled = false;
+        locateMeBtn.textContent = '📍 ใช้ตำแหน่งปัจจุบัน';
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  });
+
+  function setFormStatus(message = '', state = '') {
+    formStatus.textContent = message;
+    formStatus.className = `form-status${message ? ' show' : ''}${state ? ` ${state}` : ''}`;
+  }
+
+  function syncPickupFields() {
+    const hasPickup = getDispatchMode() === 'driver_pickup';
+    const usesDriver = getDriverLegCount() > 0;
+    pickupScheduleFields.classList.toggle('hidden', !hasPickup);
+    customerLocationFields.classList.toggle('hidden', !usesDriver);
+    pickupDateEl.required = hasPickup;
+    pickupTimeEl.required = hasPickup;
+    pickupAddressEl.required = usesDriver;
+    storeLocationWarning.classList.toggle('hidden', !usesDriver || !STORE_LOCATION.approximate);
+    if (usesDriver) {
+      initializeLocationMap();
+      setTimeout(() => locationMap && locationMap.invalidateSize(), 0);
+    }
+    renderDeliveryQuote();
+    updateLiveStats();
+  }
+
+  document.querySelectorAll('input[name="dispatchMode"], input[name="returnMode"]').forEach(radio => {
+    radio.addEventListener('change', syncPickupFields);
+  });
+
+  function calculateTotal() {
+    const service = document.querySelector('input[name="service"]:checked')?.value || 'both';
+    const sizeSQty = parseInt(document.getElementById('sizeSQty').textContent, 10) || 0;
+    const sizeMQty = parseInt(document.getElementById('sizeMQty').textContent, 10) || 0;
+    const sizeLQty = parseInt(document.getElementById('sizeLQty').textContent, 10) || 0;
+    const detergentQty = parseInt(document.getElementById('detergentQty').textContent, 10) || 0;
+    const softenerQty = parseInt(document.getElementById('softenerQty').textContent, 10) || 0;
+
+    const totalBaskets = sizeSQty + sizeMQty + sizeLQty;
+    const pricePerBasket = service === 'both' ? 120 : 60;
+    const basketTotal = totalBaskets * pricePerBasket;
+    const detergentTotal = detergentQty * 10;
+    const softenerTotal = softenerQty * 10;
+
+    const deliveryFee = getDeliveryQuote().fee;
+    return basketTotal + detergentTotal + softenerTotal + deliveryFee;
+  }
+
+  function calculateWashTime() {
+    const service = document.querySelector('input[name="service"]:checked').value;
+    const sizeSQty = parseInt(document.getElementById('sizeSQty').textContent, 10);
+    const sizeMQty = parseInt(document.getElementById('sizeMQty').textContent, 10);
+    const sizeLQty = parseInt(document.getElementById('sizeLQty').textContent, 10);
+    
+    const totalBaskets = sizeSQty + sizeMQty + sizeLQty;
+    if (totalBaskets === 0) return 0;
+
+    let baseTime = 0;
+    if (service === 'wash') baseTime = 40;
+    else if (service === 'dry') baseTime = 45;
+    else baseTime = 85;
+
+    const extraTime = Math.max(0, totalBaskets - 1) * 10;
+    return baseTime + extraTime;
+  }
+
+  function updateLiveStats() {
+    const total = calculateTotal();
+    const time = calculateWashTime();
+
+    livePriceEl.textContent = `${total} ฿`;
+    timeEstEl.textContent = `เวลาซักประมาณ: ${time} นาที`;
+  }
+
+  // Handle Qty Buttons Click
+  document.querySelectorAll('.qty-btn').forEach(btn => {
+    btn.addEventListener('click', function(){
+      const targetEl = document.getElementById(this.dataset.target);
+      const step = parseInt(this.dataset.step, 10);
+      let val = parseInt(targetEl.textContent, 10) + step;
+      if(val < 0) val = 0;
+      targetEl.textContent = val;
+      updateLiveStats();
+    });
+  });
+
+  // Watch for service radio modifications
+  document.querySelectorAll('input[name="service"]').forEach(radio => {
+    radio.addEventListener('change', updateLiveStats);
+  });
+
+  syncPickupFields();
+
+  // Form Submit Handler -> Create Order on Backend
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    setFormStatus();
+
+    const service = document.querySelector('input[name="service"]:checked');
+    const dispatchMode = getDispatchMode();
+    const returnMode = getReturnMode();
+    const usesDriver = getDriverLegCount() > 0;
+    const deliveryQuote = getDeliveryQuote();
+    const sizeSQty = parseInt(document.getElementById('sizeSQty').textContent, 10);
+    const sizeMQty = parseInt(document.getElementById('sizeMQty').textContent, 10);
+    const sizeLQty = parseInt(document.getElementById('sizeLQty').textContent, 10);
+    const detergentQty = parseInt(document.getElementById('detergentQty').textContent, 10);
+    const softenerQty = parseInt(document.getElementById('softenerQty').textContent, 10);
+    const socks = document.getElementById('socks').checked;
+    const pickupDate = pickupDateEl.value;
+    const pickupTime = pickupTimeEl.value;
+    const pickupAddress = pickupAddressEl.value.trim();
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const note = document.getElementById('note').value.trim();
+
+    if(!name || !phone){
+      setFormStatus('กรุณากรอกชื่อและเบอร์โทรค่ะ', 'error');
+      return;
+    }
+
+    if((sizeSQty + sizeMQty + sizeLQty) === 0){
+      setFormStatus('กรุณาเลือกจำนวนตะกร้าอย่างน้อย 1 ใบค่ะ', 'error');
+      return;
+    }
+
+    if(dispatchMode === 'driver_pickup' && (!pickupDate || !pickupTime)){
+      setFormStatus('กรุณากรอกวันที่ เวลา และที่อยู่สำหรับรับผ้าให้ครบค่ะ', 'error');
+      return;
+    }
+
+    if(dispatchMode === 'driver_pickup' && isPickupSlotPast(pickupDate, pickupTime)){
+      refreshPickupTimeOptions();
+      setFormStatus('วันหรือเวลาที่เลือกผ่านไปแล้ว กรุณาเลือกเวลาใหม่ค่ะ', 'error');
+      return;
+    }
+
+    if(usesDriver && !pickupAddress){
+      setFormStatus('กรุณากรอกที่อยู่และจุดสังเกตสำหรับคนขับค่ะ', 'error');
+      return;
+    }
+
+    if(usesDriver && !customerLocation){
+      setFormStatus('กรุณาปักหมุดบ้านลูกค้าบนแผนที่ค่ะ', 'error');
+      return;
+    }
+
+    if(deliveryQuote.outside){
+      setFormStatus('หมุดนี้อยู่นอกพื้นที่ 10 กม. กรุณาติดต่อร้านเพื่อตรวจสอบราคาก่อนค่ะ', 'error');
+      return;
+    }
+
+    const washTime = calculateWashTime();
+    const requestBody = {
+      service: service.value,
+      baskets: { S: sizeSQty, M: sizeMQty, L: sizeLQty },
+      detergentQty,
+      softenerQty,
+      socks,
+      pickupDate,
+      pickupTime,
+      pickupAddress,
+      locationLatitude: customerLocation?.lat ?? null,
+      locationLongitude: customerLocation?.lng ?? null,
+      customerName: name,
+      phone,
+      note,
+      dispatchMode,
+      returnMode
+    };
+
+    submitOrderBtn.disabled = true;
+    submitOrderBtn.textContent = 'กำลังสร้างคำขอและ QR...';
+    setFormStatus('กำลังส่งข้อมูลและสร้าง QR พร้อมเพย์…', 'loading');
+    setPaymentState('generating');
+
+    try {
+      let result = {
+        success: true,
+        orderNumber: `WMP${Date.now().toString(36).toUpperCase()}`,
+        total: calculateTotal(),
+        accessToken: null,
+        qrImageLink: null,
+        paymentStatus: 'awaiting_payment'
+      };
+
+      const response = await fetch(ORDERS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      });
+      const responseBody = await response.json().catch(() => ({}));
+      if (!response.ok || !responseBody.success) {
+        throw new Error(responseBody.message || 'ไม่สามารถบันทึกคำขอฝากผ้าได้');
+      }
+      result = responseBody;
+
+      currentOrder = {
+        orderNumber: result.orderNumber,
+        accessToken: result.accessToken,
+        total: Number(result.total ?? calculateTotal()),
+        qrImageLink: result.qrImageLink || null,
+        paymentStatus: result.paymentStatus || 'awaiting_payment',
+        returnRequested: returnMode === 'driver_return'
+      };
+
+      const total = currentOrder.total;
+      const basketLines = [];
+      if(sizeSQty > 0) basketLines.push(`S x${sizeSQty}`);
+      if(sizeMQty > 0) basketLines.push(`M x${sizeMQty}`);
+      if(sizeLQty > 0) basketLines.push(`L x${sizeLQty}`);
+      const basketLine = basketLines.join(', ');
+      const detergentLine = detergentQty > 0 ? `${detergentQty} ซอง` : 'นำมาเอง';
+      const softenerLine = softenerQty > 0 ? `${softenerQty} ซอง` : 'นำมาเอง';
+      const socksLine = socks ? 'มี (แยกซัก)' : 'ไม่มี';
+      const dispatchLine = dispatchMode === 'driver_pickup' ? 'ให้ร้านไปรับถึงบ้าน' : 'นำมาส่งที่ร้านเอง';
+      const returnLine = returnMode === 'driver_return' ? 'ให้ร้านนำไปส่ง' : 'มารับที่ร้านเอง';
+      const pickupLine = dispatchMode === 'driver_pickup' ? `${pickupDate} เวลา ${pickupTime} น.` : '-';
+      const pickupStatusLine = 'รอชำระเงินและตรวจสอบสลิป';
+      const confirmedFee = Number(result.deliveryFee ?? deliveryQuote.fee);
+      const confirmedDistance = Number(result.distanceKm ?? deliveryQuote.distanceKm ?? 0);
+      const confirmedZone = result.zone ?? deliveryQuote.zone?.key ?? null;
+      const deliveryQuoteLine = usesDriver
+        ? `โซน ${confirmedZone || '-'} • ${confirmedDistance.toFixed(1)} กม. • ${confirmedFee} บาท`
+        : 'ไม่มีค่ารับ–ส่ง';
+      const locationMapLink = customerLocation
+        ? `https://www.google.com/maps?q=${customerLocation.lat},${customerLocation.lng}`
+        : '-';
+
+      document.getElementById('recOrderNumber').textContent = result.orderNumber;
+      document.getElementById('recPickupStatus').textContent = pickupStatusLine;
+      document.getElementById('recName').textContent = name;
+      document.getElementById('recPhone').textContent = phone;
+      document.getElementById('recService').textContent = service.dataset.label;
+      document.getElementById('recBaskets').textContent = basketLine;
+      document.getElementById('recDetergent').textContent = detergentLine;
+      document.getElementById('recSoftener').textContent = softenerLine;
+      document.getElementById('recSocks').textContent = socksLine;
+      document.getElementById('recDispatchMode').textContent = dispatchLine;
+      document.getElementById('recReturnMode').textContent = returnLine;
+      document.getElementById('recPickup').textContent = pickupLine;
+      document.getElementById('recPickupAddress').textContent = usesDriver ? pickupAddress : '-';
+      document.getElementById('recDeliveryQuote').textContent = deliveryQuoteLine;
+      document.getElementById('recNote').textContent = note || '-';
+      document.getElementById('recTotal').textContent = `${total} บาท`;
+
+      machineTime.textContent = `${String(Math.floor(washTime / 60)).padStart(2, '0')}:${String(washTime % 60).padStart(2, '0')}`;
+
+      // Render Slip2Go QR or Fallback QR
+      renderQrPayment(total, currentOrder.qrImageLink);
+      setPaymentState('awaiting');
+      resetSlipSelection();
+
+      // Start Polling
+      if (currentOrder.accessToken) {
+        startStatusPolling(currentOrder.orderNumber, currentOrder.accessToken);
+      }
+
+      summaryText.value = 
+`📋 แจ้งฝากผ้า - Wash Me Pls Laundry
+เลขออเดอร์: ${result.orderNumber}
+สถานะ: ${pickupStatusLine}
+ชื่อ: ${name}
+เบอร์โทร: ${phone}
+บริการ: ${service.dataset.label}
+ขนาดตะกร้า: ${basketLine}
+น้ำยาซัก: ${detergentLine}
+น้ำยาปรับผ้านุ่ม: ${softenerLine}
+ถุงเท้า/กางเกงใน: ${socksLine}
+วิธีส่งผ้า: ${dispatchLine}
+วิธีรับผ้าสะอาด: ${returnLine}
+วัน–เวลารับผ้า: ${pickupLine}
+ที่อยู่รับ/ส่ง: ${usesDriver ? pickupAddress : '-'}
+พิกัดบ้าน: ${locationMapLink}
+โซน/ค่ารับ–ส่ง: ${deliveryQuoteLine}
+หมายเหตุ: ${note || '-'}
+
+💰 ยอดชำระ: ${total} บาท`;
+
+      setFormStatus('สร้างคำขอเรียบร้อยแล้ว กรุณาชำระเงินและอัปโหลดสลิปค่ะ', 'success');
+      form.classList.add('hidden');
+      summary.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch(error) {
+      setFormStatus(error.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งค่ะ', 'error');
+    } finally {
+      submitOrderBtn.disabled = false;
+      submitOrderBtn.textContent = 'ยืนยันรายการ 🧺';
+    }
+  });
+
+  // Share to LINE Directly
+  lineBtn.addEventListener('click', function(){
+    const text = summaryText.value;
+    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+    window.open(lineUrl, '_blank');
+  });
+
+  // Clipboard Copier
+  copyBtn.addEventListener('click', function(){
+    const text = summaryText.value;
+    const done = () => {
+      copyBtn.textContent = '✅ คัดลอกเรียบร้อย!';
+      copyBtn.style.backgroundColor = '#10B981';
+      setTimeout(()=>{ 
+        copyBtn.textContent = '📋 คัดลอกข้อความสำหรับส่งเอง'; 
+        copyBtn.style.backgroundColor = '';
+      }, 2500);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(()=>{
+        fallbackCopy(text); done();
+      });
+    } else {
+      fallbackCopy(text); done();
+    }
+  });
+
+  // Copy PromptPay number to clipboard
+  copyPromptPayBtn.addEventListener('click', function(){
+    const done = () => {
+      copyPromptPayBtn.textContent = '✅ คัดลอกเลขพร้อมเพย์แล้ว!';
+      setTimeout(()=>{ copyPromptPayBtn.textContent = '📋 คัดลอกเลขพร้อมเพย์ (สแกนรูปในจอไม่ได้)'; }, 2000);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(MERCHANT_PROMPTPAY_ID).then(done).catch(()=>{
+        fallbackCopy(MERCHANT_PROMPTPAY_ID); done();
+      });
+    } else {
+      fallbackCopy(MERCHANT_PROMPTPAY_ID); done();
+    }
+  });
+
+  function fallbackCopy(text){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+
+  editBtn.addEventListener('click', function(){
+    stopStatusPolling();
+    summary.classList.add('hidden');
+    form.classList.remove('hidden');
+    setFormStatus();
+  });
+</script>
+</body>
+</html>
