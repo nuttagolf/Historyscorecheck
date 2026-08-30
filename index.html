@@ -392,6 +392,7 @@
   /* Inputs, Select, Textarea */
   input[type="text"], input[type="tel"], input[type="date"], select, textarea {
     width: 100%;
+    min-width: 0;
     max-width: 100%;
     box-sizing: border-box !important;
     border: 3px solid var(--primary);
@@ -404,6 +405,14 @@
     background: #fff;
     outline: none;
     font-weight: 500;
+  }
+  input[type="date"] {
+    display: block;
+    min-height: 52px;
+  }
+  input[type="date"]::-webkit-date-and-time-value {
+    min-width: 0;
+    text-align: left;
   }
   input:focus, select:focus, textarea:focus {
     background-color: var(--primary-light);
@@ -1001,12 +1010,90 @@
     color: #1D4ED8;
     border: 2px solid #3B82F6;
   }
+
+  /* LINE Login Overlay */
+  #loginOverlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #E8F0FE;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+  .line-login-btn {
+    background-color: #06C755;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-size: 18px;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    max-width: 320px;
+    margin-top: 24px;
+    box-shadow: 0 4px 12px rgba(6, 199, 85, 0.3);
+    transition: transform 0.1s ease;
+  }
+  .line-login-btn:active {
+    transform: scale(0.98);
+  }
+  .line-login-btn:disabled {
+    cursor: wait;
+    opacity: 0.65;
+  }
+  #loginStatus {
+    min-height: 21px;
+    margin: 12px 0 0;
+    color: #536480;
+    font-family: 'Kanit', sans-serif;
+    font-size: 13px;
+  }
+  #appContainer {
+    display: none;
+  }
+  #userProfileHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    padding: 12px 16px;
+    border-radius: 16px;
+    margin: 16px;
+    margin-top: 80px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 3px solid var(--primary);
+  }
+  #userProfileHeader img {
+    width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-light);
+  }
+  #userProfileHeader div {
+    font-weight: 600; color: var(--text-main); font-size: 16px; font-family: 'Kanit', sans-serif;
+  }
+
 </style>
 </head>
 <body>
 
 <!-- Dynamic Background Bubbles -->
 <div class="bubble-container" id="bubbleContainer"></div>
+
+
+<div id="loginOverlay">
+  <div style="background: white; padding: 32px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 360px;">
+    <div style="font-size: 64px; margin-bottom: 16px;">🧺</div>
+    <h2 style="margin: 0; color: #1E2D4A; font-family: 'Fredoka', sans-serif; font-size: 24px;">WASH ME PLS</h2>
+    <p style="color: #64748B; margin-top: 8px; font-family: 'Kanit', sans-serif;">กรุณาเข้าสู่ระบบด้วย LINE เพื่อทำรายการ</p>
+    <button id="lineLoginBtn" class="line-login-btn">เข้าสู่ระบบด้วย LINE</button>
+    <p id="loginStatus" role="status" aria-live="polite"></p>
+  </div>
+</div>
+<div id="appContainer">
 
 <div class="app">
 
@@ -1018,6 +1105,12 @@
       </div>
     </div>
     <h1>WASH ME PLS LAUNDRY</h1>
+  </div>
+
+  
+  <div id="userProfileHeader" class="hidden">
+    <img id="profileImage" src="" alt="Profile">
+    <div id="profileName">สวัสดีครับ!</div>
   </div>
 
   <form id="orderForm">
@@ -1372,11 +1465,30 @@
   </div>
 
 </div>
+</div>
 
+  <!-- Map Modal -->
+  <div id="mapModal" class="map-modal hidden">
+    <div class="map-modal-content">
+      <div class="map-modal-header">
+        <h3>📍 เลือกตำแหน่งของคุณ</h3>
+        <button type="button" id="closeMapBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="map-modal-body">
+        <div id="locationMap"></div>
+      </div>
+      <div class="map-modal-footer">
+        <button type="button" id="confirmMapBtn" class="btn btn-primary" style="width: 100%;">ยืนยันตำแหน่งนี้</button>
+      </div>
+    </div>
+  </div>
+
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="thai-qr.js"></script>
 <script src="config.js"></script>
+
 <script>
   const APP_CONFIG = window.WASH_ME_CONFIG || {};
   const API_BASE_URL = String(APP_CONFIG.apiUrl || '').replace(/\/api\/orders\/?$/, '').trim();
@@ -1822,7 +1934,7 @@
     if (locationMap) {
       if (!customerMarker) {
         customerMarker = L.marker([lat, lng], { draggable: true }).addTo(locationMap);
-        customerMarker.bindTooltip('���˹��١���', { direction: 'top' });
+        customerMarker.bindTooltip('ตำแหน่งลูกค้า', { direction: 'top' });
         customerMarker.on('dragend', event => {
           const point = event.target.getLatLng();
           setCustomerPin(point.lat, point.lng, false);
@@ -2268,23 +2380,88 @@
     setFormStatus();
   });
 </script>
-  <!-- Map Modal -->
-  <div id="mapModal" class="map-modal hidden">
-    <div class="map-modal-content">
-      <div class="map-modal-header">
-        <h3>📍 เลือกตำแหน่งของคุณ</h3>
-        <button type="button" id="closeMapBtn" class="close-btn">&times;</button>
-      </div>
-      <div class="map-modal-body">
-        <div id="locationMap"></div>
-      </div>
-      <div class="map-modal-footer">
-        <button type="button" id="confirmMapBtn" class="btn btn-primary" style="width: 100%;">ยืนยันตำแหน่งนี้</button>
-      </div>
-    </div>
-  </div>
+<script>
+  (() => {
+    const LIFF_ID = '2011333676-uXeGHJ2V';
+    const loginOverlay = document.getElementById('loginOverlay');
+    const lineLoginBtn = document.getElementById('lineLoginBtn');
+    const loginStatus = document.getElementById('loginStatus');
+    const appContainer = document.getElementById('appContainer');
+    const userProfileHeader = document.getElementById('userProfileHeader');
+    const profileImage = document.getElementById('profileImage');
+    const profileName = document.getElementById('profileName');
+    const nameInput = document.getElementById('name');
+
+    function showLogin(message = '') {
+      loginOverlay.style.display = 'flex';
+      appContainer.style.display = 'none';
+      loginStatus.textContent = message;
+    }
+
+    function showApp() {
+      loginOverlay.style.display = 'none';
+      appContainer.style.display = 'block';
+      loginStatus.textContent = '';
+    }
+
+    async function initializeLiff() {
+      lineLoginBtn.disabled = true;
+      loginStatus.textContent = 'กำลังเชื่อมต่อ LINE…';
+
+      try {
+        if (!window.liff) throw new Error('LIFF SDK unavailable');
+        await window.liff.init({ liffId: LIFF_ID });
+
+        if (!window.liff.isLoggedIn()) {
+          showLogin('กรุณาเข้าสู่ระบบด้วย LINE เพื่อทำรายการ');
+          lineLoginBtn.disabled = false;
+          return;
+        }
+
+        showApp();
+        try {
+          const profile = await window.liff.getProfile();
+          userProfileHeader.classList.remove('hidden');
+          profileName.textContent = `สวัสดีคุณ ${profile.displayName}`;
+          if (profile.pictureUrl) {
+            profileImage.src = profile.pictureUrl;
+            profileImage.hidden = false;
+          } else {
+            profileImage.hidden = true;
+          }
+          if (nameInput && !nameInput.value) nameInput.value = profile.displayName;
+        } catch (profileError) {
+          console.warn('LIFF profile unavailable', profileError);
+        }
+      } catch (error) {
+        console.error('LIFF init failed', error);
+        showLogin('เชื่อมต่อ LINE ไม่สำเร็จ กรุณาลองใหม่');
+        lineLoginBtn.disabled = false;
+      }
+    }
+
+    lineLoginBtn.addEventListener('click', () => {
+      if (!window.liff) {
+        initializeLiff();
+        return;
+      }
+
+      if (!window.liff.isLoggedIn()) {
+        const redirectUri = `${window.location.origin}${window.location.pathname}`;
+        window.liff.login({ redirectUri });
+      } else {
+        initializeLiff();
+      }
+    });
+
+    initializeLiff();
+  })();
+</script>
 </body>
 </html>
+
+
+
 
 
 
