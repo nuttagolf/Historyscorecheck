@@ -1619,6 +1619,7 @@
   let statusPollTimer = null;
   let createRequestKey = null;
   let activeLineIdToken = null;
+  let activeLineAccessToken = null;
 
   const ORDER_STATUS_LABELS = {
     awaiting_payment: 'รอชำระเงิน',
@@ -1660,14 +1661,13 @@
     });
   }
 
-  async function loadMyOrders(lineIdToken = activeLineIdToken) {
-    if (!lineIdToken) return;
-    activeLineIdToken = lineIdToken;
+  async function loadMyOrders(lineToken = activeLineAccessToken || activeLineIdToken) {
+    if (!lineToken) return;
     myOrdersSection.classList.remove('hidden');
     myOrdersList.textContent = 'กำลังโหลดรายการ…';
     try {
       const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/my-orders` : '/api/my-orders';
-      const response = await fetch(endpoint, { headers: { 'Authorization': `Bearer ${lineIdToken}` } });
+      const response = await fetch(endpoint, { headers: { 'Authorization': `Bearer ${lineToken}` } });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.success) throw new Error(result.message || 'โหลดออเดอร์ไม่สำเร็จ');
       renderMyOrders(result.orders || []);
@@ -2350,7 +2350,8 @@
       note,
       dispatchMode,
       returnMode,
-      lineIdToken: activeLineIdToken
+      lineIdToken: activeLineIdToken,
+      lineAccessToken: activeLineAccessToken
     };
 
     submitOrderBtn.disabled = true;
@@ -2469,7 +2470,7 @@
 💰 ยอดชำระ: ${total} บาท`;
 
       setFormStatus('สร้างคำขอเรียบร้อยแล้ว กรุณาชำระเงินและอัปโหลดสลิปค่ะ', 'success');
-      if (activeLineIdToken) loadMyOrders(activeLineIdToken);
+      if (activeLineAccessToken || activeLineIdToken) loadMyOrders();
       form.classList.add('hidden');
       summary.classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2588,10 +2589,13 @@
 
         showApp();
         const idToken = window.liff.getIDToken();
-        if (!idToken) {
-          throw new Error('LIFF ID token unavailable');
+        const accessToken = window.liff.getAccessToken?.();
+        if (!idToken && !accessToken) {
+          throw new Error('LIFF token unavailable');
         }
-        window.loadMyOrders?.(idToken);
+        activeLineIdToken = idToken || null;
+        activeLineAccessToken = accessToken || null;
+        window.loadMyOrders?.(accessToken || idToken);
         try {
           const profile = await window.liff.getProfile();
           userProfileHeader.classList.remove('hidden');
