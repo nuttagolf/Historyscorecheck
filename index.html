@@ -765,6 +765,52 @@
   .hidden {
     display: none !important;
   }
+  
+  /* Map Modal CSS */
+  .map-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .map-modal-content {
+    background: white;
+    width: 95%;
+    max-width: 500px;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  }
+  .map-modal-header {
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--primary);
+    color: white;
+  }
+  .map-modal-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
+  .close-btn { background: none; border: none; color: white; font-size: 28px; cursor: pointer; line-height: 1; }
+  .map-modal-body {
+    position: relative;
+    width: 100%;
+    height: 60vh;
+  }
+  #locationMap {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 0;
+  }
+  .map-modal-footer {
+    padding: 16px;
+    background: white;
+  }
   .thai-qr-code {
     width: 224px;
     min-height: 224px;
@@ -1117,11 +1163,11 @@
         <textarea id="pickupAddress" placeholder="บ้านเลขที่ หมู่ ตำบล จุดสังเกต หรือรายละเอียดที่ช่วยให้คนขับหาเจอ" required></textarea>
 
         <label class="field-label">ปักหมุดบ้านลูกค้า</label>
-        <div class="location-actions">
-          <button type="button" id="locateMeBtn" class="location-btn">📍 ใช้ตำแหน่งปัจจุบัน</button>
+        <div class="location-actions" style="display: flex; gap: 8px;">
+          <button type="button" id="openMapBtn" class="location-btn" style="background: #E05A36; color: white; flex: 1;">??? �ԴἹ���ѡ��ش</button>
+          <button type="button" id="locateMeBtn" class="location-btn" style="flex: 1;">?? �֧�ԡѴ GPS</button>
         </div>
-        <div id="locationMap" role="application" aria-label="แผนที่สำหรับปักหมุดบ้านลูกค้า"></div>
-        <div id="zoneSummary" class="zone-summary" aria-live="polite">แตะแผนที่หรือกดใช้ตำแหน่งปัจจุบันเพื่อคำนวณค่าส่ง</div>
+        <div id="zoneSummary" class="zone-summary" aria-live="polite">��سһѡ��ش���ʹ֧�ԡѴ GPS ���ͤӹǳ�����</div>
         <p class="map-attribution-note">ระยะที่แสดงเป็นระยะโดยประมาณจากหมุดร้านถึงหมุดลูกค้า</p>
         <p id="storeLocationWarning" class="hint hidden">⚠️ พิกัดร้านในระบบเป็นจุดตั้งต้นชั่วคราว กรุณาให้ร้านยืนยันราคาก่อนชำระเงิน</p>
         <p class="hint">⏰ *หากให้ร้านไปรับ เลือกเวลาได้ตั้งแต่ 08:00–19:00 น.</p>
@@ -1773,17 +1819,19 @@
 
   function setCustomerPin(lat, lng, moveMap = true) {
     customerLocation = { lat: Number(lat), lng: Number(lng) };
-    if (!customerMarker) {
-      customerMarker = L.marker([lat, lng], { draggable: true }).addTo(locationMap);
-      customerMarker.bindTooltip('บ้านลูกค้า', { direction: 'top' });
-      customerMarker.on('dragend', event => {
-        const point = event.target.getLatLng();
-        setCustomerPin(point.lat, point.lng, false);
-      });
-    } else {
-      customerMarker.setLatLng([lat, lng]);
+    if (locationMap) {
+      if (!customerMarker) {
+        customerMarker = L.marker([lat, lng], { draggable: true }).addTo(locationMap);
+        customerMarker.bindTooltip('���˹��١���', { direction: 'top' });
+        customerMarker.on('dragend', event => {
+          const point = event.target.getLatLng();
+          setCustomerPin(point.lat, point.lng, false);
+        });
+      } else {
+        customerMarker.setLatLng([lat, lng]);
+      }
+      if (moveMap) locationMap.setView([lat, lng], 15);
     }
-    if (moveMap) locationMap.setView([lat, lng], 15);
     renderDeliveryQuote();
     updateLiveStats();
   }
@@ -1852,6 +1900,12 @@
     formStatus.className = `form-status${message ? ' show' : ''}${state ? ` ${state}` : ''}`;
   }
 
+  const openMapBtn = document.getElementById('openMapBtn');
+  const mapModal = document.getElementById('mapModal');
+  const closeMapBtn = document.getElementById('closeMapBtn');
+  const confirmMapBtn = document.getElementById('confirmMapBtn');
+
+  // Remove the old timeout auto-init logic from syncPickupFields
   function syncPickupFields() {
     const hasPickup = getDispatchMode() === 'driver_pickup';
     const usesDriver = getDriverLegCount() > 0;
@@ -1861,21 +1915,32 @@
     pickupTimeEl.required = hasPickup;
     pickupAddressEl.required = usesDriver;
     storeLocationWarning.classList.toggle('hidden', !usesDriver || !STORE_LOCATION.approximate);
-    
-    if (usesDriver) {
-      // FIX: Wait 350ms for the browser to finish drawing the container at full size
-      // before initializing the map. This guarantees Leaflet knows the exact dimensions.
-      setTimeout(() => {
-        if (!customerLocationFields.classList.contains('hidden')) {
-          initializeLocationMap();
-          if (locationMap) locationMap.invalidateSize(true);
-        }
-      }, 350);
-    }
-    
     renderDeliveryQuote();
     updateLiveStats();
   }
+
+  // Modal map logic
+  openMapBtn.addEventListener('click', () => {
+    mapModal.classList.remove('hidden');
+    
+    // Initialize Leaflet only when modal is shown
+    if (!locationMap) {
+      initializeLocationMap();
+    }
+    
+    // Invalidate size immediately after modal rendering
+    setTimeout(() => {
+      if (locationMap) locationMap.invalidateSize();
+    }, 50);
+  });
+
+  closeMapBtn.addEventListener('click', () => {
+    mapModal.classList.add('hidden');
+  });
+
+  confirmMapBtn.addEventListener('click', () => {
+    mapModal.classList.add('hidden');
+  });
 
   document.querySelectorAll('input[name="dispatchMode"], input[name="returnMode"]').forEach(radio => {
     radio.addEventListener('change', syncPickupFields);
@@ -2203,8 +2268,26 @@
     setFormStatus();
   });
 </script>
+  <!-- Map Modal -->
+  <div id="mapModal" class="map-modal hidden">
+    <div class="map-modal-content">
+      <div class="map-modal-header">
+        <h3>?? ���͡���˹觢ͧ�س</h3>
+        <button type="button" id="closeMapBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="map-modal-body">
+        <div id="locationMap"></div>
+      </div>
+      <div class="map-modal-footer">
+        <button type="button" id="confirmMapBtn" class="btn btn-primary" style="width: 100%;">�׹�ѹ���˹觹��</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
+
+
+
 
 
 
