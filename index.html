@@ -1,55 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<title>เนเธเนเธเธเธฒเธเธเนเธฒ - Wash Me Pls Laundry</title>
-<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js">
-  // LIFF LINE Login Logic
-  const LIFF_ID = "2011333676-uXeGHJ2V";
-  const loginOverlay = document.getElementById('loginOverlay');
-  const lineLoginBtn = document.getElementById('lineLoginBtn');
-  const appContainer = document.getElementById('appContainer');
-  const userProfileHeader = document.getElementById('userProfileHeader');
-  const profileImage = document.getElementById('profileImage');
-  const profileName = document.getElementById('profileName');
-  const nameInput = document.getElementById('name');
-
-  async function initializeLiff() {
-    try {
-      await liff.init({ liffId: LIFF_ID });
-      if (liff.isLoggedIn()) {
-        loginOverlay.style.display = 'none';
-        appContainer.style.display = 'block';
-        
-        const profile = await liff.getProfile();
-        userProfileHeader.classList.remove('hidden');
-        profileImage.src = profile.pictureUrl || 'https://via.placeholder.com/40';
-        profileName.textContent = 'เธชเธงเธฑเธชเธ”เธตเธเธธเธ“ ' + profile.displayName;
-        if (nameInput && !nameInput.value) {
-          nameInput.value = profile.displayName;
-        }
-      } else {
-        loginOverlay.style.display = 'flex';
-        appContainer.style.display = 'none';
-      }
-    } catch (err) {
-      console.error('LIFF init failed', err);
-      // Fallback
-      loginOverlay.style.display = 'none';
-      appContainer.style.display = 'block';
-    }
-  }
-
-  lineLoginBtn.addEventListener('click', () => {
-    if (!liff.isLoggedIn()) {
-      console.log('liff.login() called!'); alert('Redirecting to LINE...'); liff.login();
-    }
-  });
-
-  initializeLiff();
-
-</script>
+<title>แจ้งฝากผ้า - Wash Me Pls Laundry</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynhWMzNCqPDEkssA0XVeqbBqy3wk=" crossorigin="">
 <style>
@@ -1047,61 +1001,6 @@
     color: #1D4ED8;
     border: 2px solid #3B82F6;
   }
-
-  /* LINE Login Overlay */
-  #loginOverlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: #E8F0FE;
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 24px;
-  }
-  .line-login-btn {
-    background-color: #06C755;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 16px 24px;
-    font-size: 18px;
-    font-family: 'Kanit', sans-serif;
-    font-weight: 600;
-    cursor: pointer;
-    width: 100%;
-    max-width: 320px;
-    margin-top: 24px;
-    box-shadow: 0 4px 12px rgba(6, 199, 85, 0.3);
-    transition: transform 0.1s ease;
-  }
-  .line-login-btn:active {
-    transform: scale(0.98);
-  }
-  #appContainer {
-    display: none;
-  }
-  #userProfileHeader {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: white;
-    padding: 12px 16px;
-    border-radius: 16px;
-    margin: 16px;
-    margin-top: 80px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    border: 3px solid var(--primary);
-  }
-  #userProfileHeader img {
-    width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-light);
-  }
-  #userProfileHeader div {
-    font-weight: 600; color: var(--text-main); font-size: 16px; font-family: 'Kanit', sans-serif;
-  }
-
 </style>
 </head>
 <body>
@@ -1109,195 +1008,178 @@
 <!-- Dynamic Background Bubbles -->
 <div class="bubble-container" id="bubbleContainer"></div>
 
-
-<div id="loginOverlay">
-  <div style="background: white; padding: 32px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 360px;">
-    <div style="font-size: 64px; margin-bottom: 16px;">๐งบ</div>
-    <h2 style="margin: 0; color: #1E2D4A; font-family: 'Fredoka', sans-serif; font-size: 24px;">WASH ME PLS</h2>
-    <p style="color: #64748B; margin-top: 8px; font-family: 'Kanit', sans-serif;">เธเธฃเธธเธ“เธฒเน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธเธ”เนเธงเธข LINE เน€เธเธทเนเธญเธ—เธณเธฃเธฒเธขเธเธฒเธฃ</p>
-    <button id="lineLoginBtn" class="line-login-btn">เน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธเธ”เนเธงเธข LINE</button>
-  </div>
-</div>
-<div id="appContainer">
-
 <div class="app">
 
   <div class="topbar">
     <div class="logo-wrapper">
       <div class="logo-badge">
-        <img src="logo.png" alt="๐งบ" onerror="this.style.display='none';">
-        <span style="position: absolute; pointer-events: none;">๐งบ</span>
+        <img src="logo.png" alt="🧺" onerror="this.style.display='none';">
+        <span style="position: absolute; pointer-events: none;">🧺</span>
       </div>
     </div>
     <h1>WASH ME PLS LAUNDRY</h1>
-  </div>
-
-  
-  <div id="userProfileHeader" class="hidden">
-    <img id="profileImage" src="" alt="Profile">
-    <div id="profileName">เธชเธงเธฑเธชเธ”เธตเธเธฃเธฑเธ!</div>
   </div>
 
   <form id="orderForm">
 
     <!-- Step 1: Service -->
     <section class="card">
-      <h2><span class="step-num">1</span> เน€เธฅเธทเธญเธเธเธฃเธดเธเธฒเธฃ</h2>
+      <h2><span class="step-num">1</span> เลือกบริการ</h2>
       <div class="option-grid">
         <label class="option">
-          <input type="radio" name="service" value="wash" data-label="เธเธฑเธเธญเธขเนเธฒเธเน€เธ”เธตเธขเธง">
-          <span class="icon">๐งผ</span>
-          <span>เธเธฑเธเธญเธขเนเธฒเธเน€เธ”เธตเธขเธง</span>
-          <small style="font-size: 11px; color: var(--accent); font-weight: 700; margin-top: 2px;">60 เธฟ/เนเธ</small>
+          <input type="radio" name="service" value="wash" data-label="ซักอย่างเดียว">
+          <span class="icon">🧼</span>
+          <span>ซักอย่างเดียว</span>
+          <small style="font-size: 11px; color: var(--accent); font-weight: 700; margin-top: 2px;">60 ฿/ใบ</small>
         </label>
         <label class="option">
-          <input type="radio" name="service" value="dry" data-label="เธญเธเธญเธขเนเธฒเธเน€เธ”เธตเธขเธง">
-          <span class="icon">๐”ฅ</span>
-          <span>เธญเธเธญเธขเนเธฒเธเน€เธ”เธตเธขเธง</span>
-          <small style="font-size: 11px; color: var(--accent); font-weight: 700; margin-top: 2px;">60 เธฟ/เนเธ</small>
+          <input type="radio" name="service" value="dry" data-label="อบอย่างเดียว">
+          <span class="icon">🔥</span>
+          <span>อบอย่างเดียว</span>
+          <small style="font-size: 11px; color: var(--accent); font-weight: 700; margin-top: 2px;">60 ฿/ใบ</small>
         </label>
         <label class="option">
-          <input type="radio" name="service" value="both" data-label="เธเธฑเธ + เธญเธ" checked>
-          <span class="icon">๐งบโจ</span>
-          <span>เธเธฑเธ+เธญเธ</span>
-          <small style="font-size: 11px; color: var(--accent); font-weight: 700; margin-top: 2px;">120 เธฟ/เนเธ</small>
+          <input type="radio" name="service" value="both" data-label="ซัก + อบ" checked>
+          <span class="icon">🧺✨</span>
+          <span>ซัก+อบ</span>
+          <small style="font-size: 11px; color: var(--accent); font-weight: 700; margin-top: 2px;">120 ฿/ใบ</small>
         </label>
       </div>
     </section>
 
     <!-- Step 2: Basket Sizes -->
     <section class="card">
-      <h2><span class="step-num">2</span> เธเธเธฒเธ”เธเนเธฒเนเธ”เธขเธเธฃเธฐเธกเธฒเธ“ (เธเธเธฒเธ”เธ•เธฐเธเธฃเนเธฒ)</h2>
+      <h2><span class="step-num">2</span> ขนาดผ้าโดยประมาณ (ขนาดตะกร้า)</h2>
       <div class="qty-row">
-        <div class="qty-label">เธ•เธฐเธเธฃเนเธฒ S<small>เธเธฃเธฐเธกเธฒเธ“ 15-20 เธเธดเนเธ</small></div>
+        <div class="qty-label">ตะกร้า S<small>ประมาณ 15-20 ชิ้น</small></div>
         <div class="qty-control">
-          <button type="button" class="qty-btn minus" data-target="sizeSQty" data-step="-1">โ’</button>
+          <button type="button" class="qty-btn minus" data-target="sizeSQty" data-step="-1">−</button>
           <span class="qty-value" id="sizeSQty">0</span>
           <button type="button" class="qty-btn" data-target="sizeSQty" data-step="1">+</button>
         </div>
       </div>
       <div class="qty-row">
-        <div class="qty-label">เธ•เธฐเธเธฃเนเธฒ M<small>เธเธฃเธฐเธกเธฒเธ“ 25-35 เธเธดเนเธ</small></div>
+        <div class="qty-label">ตะกร้า M<small>ประมาณ 25-35 ชิ้น</small></div>
         <div class="qty-control">
-          <button type="button" class="qty-btn minus" data-target="sizeMQty" data-step="-1">โ’</button>
+          <button type="button" class="qty-btn minus" data-target="sizeMQty" data-step="-1">−</button>
           <span class="qty-value" id="sizeMQty">0</span>
           <button type="button" class="qty-btn" data-target="sizeMQty" data-step="1">+</button>
         </div>
       </div>
       <div class="qty-row">
-        <div class="qty-label">เธ•เธฐเธเธฃเนเธฒ L<small>เธเธฃเธฐเธกเธฒเธ“ 40-50 เธเธดเนเธ</small></div>
+        <div class="qty-label">ตะกร้า L<small>ประมาณ 40-50 ชิ้น</small></div>
         <div class="qty-control">
-          <button type="button" class="qty-btn minus" data-target="sizeLQty" data-step="-1">โ’</button>
+          <button type="button" class="qty-btn minus" data-target="sizeLQty" data-step="-1">−</button>
           <span class="qty-value" id="sizeLQty">0</span>
           <button type="button" class="qty-btn" data-target="sizeLQty" data-step="1">+</button>
         </div>
       </div>
-      <p class="hint">๐’ก *เธฃเธฒเธเธฒเธเธดเธ”เธ•เธฒเธกเธเธฃเธดเธเธฒเธฃ: เธเธฑเธ 60เธฟ / เธญเธ 60เธฟ / เธเธฑเธ+เธญเธ 120เธฟ เธ•เนเธญเนเธ</p>
+      <p class="hint">💡 *ราคาคิดตามบริการ: ซัก 60฿ / อบ 60฿ / ซัก+อบ 120฿ ต่อใบ</p>
     </section>
 
     <!-- Step 3: Add-ons -->
     <section class="card">
-      <h2><span class="step-num">3</span> เธเนเธณเธขเธฒเธเธฑเธ / เธเนเธณเธขเธฒเธเธฃเธฑเธเธเนเธฒเธเธธเนเธก</h2>
+      <h2><span class="step-num">3</span> น้ำยาซัก / น้ำยาปรับผ้านุ่ม</h2>
       <div class="qty-row">
-        <div class="qty-label">๐งด เธเนเธณเธขเธฒเธเธฑเธเธเธญเธเธฃเนเธฒเธ<small>เธเธญเธเธฅเธฐ 10 เธเธฒเธ—</small></div>
+        <div class="qty-label">🧴 น้ำยาซักของร้าน<small>ซองละ 10 บาท</small></div>
         <div class="qty-control">
-          <button type="button" class="qty-btn minus" data-target="detergentQty" data-step="-1">โ’</button>
+          <button type="button" class="qty-btn minus" data-target="detergentQty" data-step="-1">−</button>
           <span class="qty-value" id="detergentQty">0</span>
           <button type="button" class="qty-btn" data-target="detergentQty" data-step="1">+</button>
         </div>
       </div>
       <div class="qty-row">
-        <div class="qty-label">๐ธ เธเนเธณเธขเธฒเธเธฃเธฑเธเธเนเธฒเธเธธเนเธกเธเธญเธเธฃเนเธฒเธ<small>เธเธญเธเธฅเธฐ 10 เธเธฒเธ—</small></div>
+        <div class="qty-label">🌸 น้ำยาปรับผ้านุ่มของร้าน<small>ซองละ 10 บาท</small></div>
         <div class="qty-control">
-          <button type="button" class="qty-btn minus" data-target="softenerQty" data-step="-1">โ’</button>
+          <button type="button" class="qty-btn minus" data-target="softenerQty" data-step="-1">−</button>
           <span class="qty-value" id="softenerQty">0</span>
           <button type="button" class="qty-btn" data-target="softenerQty" data-step="1">+</button>
         </div>
       </div>
-      <p class="hint">๐’ก *เธซเธฒเธเธเธณเธเนเธณเธขเธฒเธกเธฒเน€เธญเธเนเธกเนเธกเธตเธเนเธฒเนเธเนเธเนเธฒเธขเน€เธเธดเนเธกเธเนเธฐ</p>
+      <p class="hint">💡 *หากนำน้ำยามาเองไม่มีค่าใช้จ่ายเพิ่มค่ะ</p>
     </section>
 
     <!-- Step 4: Special care -->
     <section class="card">
-      <h2><span class="step-num">4</span> เธเธฒเธฃเนเธขเธเธเธดเนเธเธเธดเน€เธจเธฉ</h2>
+      <h2><span class="step-num">4</span> การแยกชิ้นพิเศษ</h2>
       <label class="option checkbox-option">
         <input type="checkbox" id="socks">
-        <span>๐งฆ เธกเธตเธ–เธธเธเน€เธ—เนเธฒ/เธเธฒเธเน€เธเธเนเธเธ—เธตเนเธ•เนเธญเธเนเธขเธเธเธฑเธ</span>
-        <span class="free-tag">เธเธฃเธต! เนเธกเนเธเธงเธเน€เธเธดเนเธก</span>
+        <span>🧦 มีถุงเท้า/กางเกงในที่ต้องแยกซัก</span>
+        <span class="free-tag">ฟรี! ไม่บวกเพิ่ม</span>
       </label>
     </section>
 
     <!-- Step 5: Pickup and return choices -->
     <section class="card">
-      <h2><span class="step-num">5</span> เน€เธฅเธทเธญเธเธงเธดเธเธตเธฃเธฑเธโ€“เธชเนเธเธเนเธฒ</h2>
+      <h2><span class="step-num">5</span> เลือกวิธีรับ–ส่งผ้า</h2>
 
       <div class="delivery-question">
-        <label class="field-label">เธชเนเธเธเนเธฒเนเธซเนเธฃเนเธฒเธเธญเธขเนเธฒเธเนเธฃ</label>
+        <label class="field-label">ส่งผ้าให้ร้านอย่างไร</label>
         <div class="delivery-options">
           <label class="delivery-option">
             <input type="radio" name="dispatchMode" value="driver_pickup" checked>
-            <span class="delivery-icon">๐ต</span>
-            เนเธซเนเธฃเนเธฒเธเนเธเธฃเธฑเธเธ–เธถเธเธเนเธฒเธ
-            <small>เธเธดเธ”เธเนเธฒเธฃเธฑเธ 1 เน€เธ—เธตเนเธขเธง</small>
+            <span class="delivery-icon">🛵</span>
+            ให้ร้านไปรับถึงบ้าน
+            <small>คิดค่ารับ 1 เที่ยว</small>
           </label>
           <label class="delivery-option">
             <input type="radio" name="dispatchMode" value="self_dropoff">
-            <span class="delivery-icon">๐ช</span>
-            เธเธณเธกเธฒเธชเนเธเธ—เธตเนเธฃเนเธฒเธเน€เธญเธ
-            <small>เนเธกเนเธกเธตเธเนเธฒเธฃเธฑเธเธเนเธฒ</small>
+            <span class="delivery-icon">🏪</span>
+            นำมาส่งที่ร้านเอง
+            <small>ไม่มีค่ารับผ้า</small>
           </label>
         </div>
       </div>
 
       <div class="delivery-question">
-        <label class="field-label">เธฃเธฑเธเธเนเธฒเธชเธฐเธญเธฒเธ”เธญเธขเนเธฒเธเนเธฃ</label>
+        <label class="field-label">รับผ้าสะอาดอย่างไร</label>
         <div class="delivery-options">
           <label class="delivery-option">
             <input type="radio" name="returnMode" value="driver_return" checked>
-            <span class="delivery-icon">๐ </span>
-            เนเธซเนเธฃเนเธฒเธเธเธณเนเธเธชเนเธ
-            <small>เธฃเธงเธกเน€เธเนเธเธฃเธฒเธเธฒเนเธโ€“เธเธฅเธฑเธ</small>
+            <span class="delivery-icon">🏠</span>
+            ให้ร้านนำไปส่ง
+            <small>รวมเป็นราคาไป–กลับ</small>
           </label>
           <label class="delivery-option">
             <input type="radio" name="returnMode" value="self_collect">
-            <span class="delivery-icon">๐</span>
-            เธกเธฒเธฃเธฑเธเธ—เธตเนเธฃเนเธฒเธเน€เธญเธ
-            <small>เธเนเธฒเธขเน€เธเธเธฒเธฐเน€เธ—เธตเนเธขเธงเธฃเธฑเธ</small>
+            <span class="delivery-icon">🙋</span>
+            มารับที่ร้านเอง
+            <small>จ่ายเฉพาะเที่ยวรับ</small>
           </label>
         </div>
       </div>
 
       <div id="customerLocationFields" class="map-panel">
         <div id="pickupScheduleFields">
-          <label class="field-label" for="pickupDate">เธงเธฑเธเธ—เธตเนเธ•เนเธญเธเธเธฒเธฃเนเธซเนเนเธเธฃเธฑเธเธเนเธฒ</label>
+          <label class="field-label" for="pickupDate">วันที่ต้องการให้ไปรับผ้า</label>
           <input type="date" id="pickupDate" required>
-          <label class="field-label" for="pickupTime">เน€เธงเธฅเธฒเธ—เธตเนเธ•เนเธญเธเธเธฒเธฃเนเธซเนเนเธเธฃเธฑเธเธเนเธฒ</label>
+          <label class="field-label" for="pickupTime">เวลาที่ต้องการให้ไปรับผ้า</label>
           <select id="pickupTime" required>
-            <option value="">-- เน€เธฅเธทเธญเธเน€เธงเธฅเธฒ --</option>
+            <option value="">-- เลือกเวลา --</option>
           </select>
         </div>
 
-        <label class="field-label" for="pickupAddress">เธ—เธตเนเธญเธขเธนเนเนเธฅเธฐเธเธธเธ”เธชเธฑเธเน€เธเธ•</label>
-        <textarea id="pickupAddress" placeholder="เธเนเธฒเธเน€เธฅเธเธ—เธตเน เธซเธกเธนเน เธ•เธณเธเธฅ เธเธธเธ”เธชเธฑเธเน€เธเธ• เธซเธฃเธทเธญเธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธ—เธตเนเธเนเธงเธขเนเธซเนเธเธเธเธฑเธเธซเธฒเน€เธเธญ" required></textarea>
+        <label class="field-label" for="pickupAddress">ที่อยู่และจุดสังเกต</label>
+        <textarea id="pickupAddress" placeholder="บ้านเลขที่ หมู่ ตำบล จุดสังเกต หรือรายละเอียดที่ช่วยให้คนขับหาเจอ" required></textarea>
 
-        <label class="field-label">เธเธฑเธเธซเธกเธธเธ”เธเนเธฒเธเธฅเธนเธเธเนเธฒ</label>
+        <label class="field-label">ปักหมุดบ้านลูกค้า</label>
         <div class="location-actions" style="display: flex; gap: 8px;">
-          <button type="button" id="openMapBtn" class="location-btn" style="background: #E05A36; color: white; flex: 1;">๐—บ๏ธ เน€เธเธดเธ”เนเธเธเธ—เธตเนเธเธฑเธเธซเธกเธธเธ”</button>
-          <button type="button" id="locateMeBtn" class="location-btn" style="flex: 1;">๐“ เธ”เธถเธเธเธดเธเธฑเธ” GPS</button>
+          <button type="button" id="openMapBtn" class="location-btn" style="background: #E05A36; color: white; flex: 1;">🗺️ เปิดแผนที่ปักหมุด</button>
+          <button type="button" id="locateMeBtn" class="location-btn" style="flex: 1;">📍 ดึงพิกัด GPS</button>
         </div>
-        <div id="zoneSummary" class="zone-summary" aria-live="polite">เธเธฃเธธเธ“เธฒเธเธฑเธเธซเธกเธธเธ”เธซเธฃเธทเธญเธ”เธถเธเธเธดเธเธฑเธ” GPS เน€เธเธทเนเธญเธเธณเธเธงเธ“เธเนเธฒเธชเนเธ</div>
-        <p class="map-attribution-note">เธฃเธฐเธขเธฐเธ—เธตเนเนเธชเธ”เธเน€เธเนเธเธฃเธฐเธขเธฐเนเธ”เธขเธเธฃเธฐเธกเธฒเธ“เธเธฒเธเธซเธกเธธเธ”เธฃเนเธฒเธเธ–เธถเธเธซเธกเธธเธ”เธฅเธนเธเธเนเธฒ</p>
-        <p id="storeLocationWarning" class="hint hidden">โ ๏ธ เธเธดเธเธฑเธ”เธฃเนเธฒเธเนเธเธฃเธฐเธเธเน€เธเนเธเธเธธเธ”เธ•เธฑเนเธเธ•เนเธเธเธฑเนเธงเธเธฃเธฒเธง เธเธฃเธธเธ“เธฒเนเธซเนเธฃเนเธฒเธเธขเธทเธเธขเธฑเธเธฃเธฒเธเธฒเธเนเธญเธเธเธณเธฃเธฐเน€เธเธดเธ</p>
-        <p class="hint">โฐ *เธซเธฒเธเนเธซเนเธฃเนเธฒเธเนเธเธฃเธฑเธ เน€เธฅเธทเธญเธเน€เธงเธฅเธฒเนเธ”เนเธ•เธฑเนเธเนเธ•เน 08:00โ€“19:00 เธ.</p>
+        <div id="zoneSummary" class="zone-summary" aria-live="polite">กรุณาปักหมุดหรือดึงพิกัด GPS เพื่อคำนวณค่าส่ง</div>
+        <p class="map-attribution-note">ระยะที่แสดงเป็นระยะโดยประมาณจากหมุดร้านถึงหมุดลูกค้า</p>
+        <p id="storeLocationWarning" class="hint hidden">⚠️ พิกัดร้านในระบบเป็นจุดตั้งต้นชั่วคราว กรุณาให้ร้านยืนยันราคาก่อนชำระเงิน</p>
+        <p class="hint">⏰ *หากให้ร้านไปรับ เลือกเวลาได้ตั้งแต่ 08:00–19:00 น.</p>
       </div>
     </section>
 
     <!-- Step 6: Contact -->
     <section class="card">
-      <h2><span class="step-num">6</span> เธเนเธญเธกเธนเธฅเธ•เธดเธ”เธ•เนเธญ</h2>
-      <input type="text" id="name" placeholder="เธเธทเนเธญเธฅเธนเธเธเนเธฒ" required>
-      <input type="tel" id="phone" placeholder="เน€เธเธญเธฃเนเนเธ—เธฃ" required>
-      <textarea id="note" placeholder="เธซเธกเธฒเธขเน€เธซเธ•เธธเน€เธเธดเนเธกเน€เธ•เธดเธก (เธ–เนเธฒเธกเธต) เน€เธเนเธ เธเนเธฒเธชเธตเธ•เธเธเนเธฒเธข, เธฃเธฐเธงเธฑเธเธเธฃเธฐเธ”เธธเธกเธเธณเธฃเธธเธ”"></textarea>
+      <h2><span class="step-num">6</span> ข้อมูลติดต่อ</h2>
+      <input type="text" id="name" placeholder="ชื่อลูกค้า" required>
+      <input type="tel" id="phone" placeholder="เบอร์โทร" required>
+      <textarea id="note" placeholder="หมายเหตุเพิ่มเติม (ถ้ามี) เช่น ผ้าสีตกง่าย, ระวังกระดุมชำรุด"></textarea>
     </section>
 
     <!-- Live Pricing Bar -->
@@ -1305,12 +1187,12 @@
 
     <div class="live-price-bar">
       <div class="live-price-info">
-        <span class="live-price-label">เธขเธญเธ”เธฃเธงเธกเธเธฃเธฐเธกเธฒเธ“</span>
-        <span class="live-price-amount" id="livePrice">0 เธฟ</span>
-        <span class="wash-time-est" id="timeEst">เน€เธงเธฅเธฒเธเธฑเธเธเธฃเธฐเธกเธฒเธ“: 0 เธเธฒเธ—เธต</span>
+        <span class="live-price-label">ยอดรวมประมาณ</span>
+        <span class="live-price-amount" id="livePrice">0 ฿</span>
+        <span class="wash-time-est" id="timeEst">เวลาซักประมาณ: 0 นาที</span>
       </div>
       <button id="submitOrderBtn" type="submit" class="submit-btn" style="width: auto; padding: 10px 24px; font-size: 15px; box-shadow: none;">
-        เธขเธทเธเธขเธฑเธเธฃเธฒเธขเธเธฒเธฃ ๐งบ
+        ยืนยันรายการ 🧺
       </button>
     </div>
 
@@ -1328,7 +1210,7 @@
         </div>
         <div class="machine-door">
           <div class="water"></div>
-          <span class="spinning-clothes">๐€</span>
+          <span class="spinning-clothes">🌀</span>
         </div>
       </div>
     </div>
@@ -1336,140 +1218,140 @@
     <div class="receipt">
       <div class="receipt-header">
         <div class="receipt-title">WASH ME PLS LAUNDRY</div>
-        <div class="receipt-subtitle">เนเธเน€เธชเธฃเนเธเธชเธฃเธธเธเธฃเธฒเธขเธเธฒเธฃเธเธฒเธเธเนเธฒ</div>
+        <div class="receipt-subtitle">ใบเสร็จสรุปรายการฝากผ้า</div>
       </div>
       <div class="receipt-divider"></div>
       <div class="receipt-row">
-        <span class="label">เน€เธฅเธเธญเธญเน€เธ”เธญเธฃเน:</span>
+        <span class="label">เลขออเดอร์:</span>
         <span class="val" id="recOrderNumber">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เธชเธ–เธฒเธเธฐเธฃเธฑเธเธเนเธฒ:</span>
+        <span class="label">สถานะรับผ้า:</span>
         <span class="val" id="recPickupStatus">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เธเธทเนเธญเธฅเธนเธเธเนเธฒ:</span>
+        <span class="label">ชื่อลูกค้า:</span>
         <span class="val" id="recName">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เน€เธเธญเธฃเนเนเธ—เธฃ:</span>
+        <span class="label">เบอร์โทร:</span>
         <span class="val" id="recPhone">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เธเธฃเธดเธเธฒเธฃ:</span>
+        <span class="label">บริการ:</span>
         <span class="val" id="recService">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เธเธเธฒเธ”เธ•เธฐเธเธฃเนเธฒ:</span>
+        <span class="label">ขนาดตะกร้า:</span>
         <span class="val" id="recBaskets">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เธเนเธณเธขเธฒเธเธฑเธ:</span>
+        <span class="label">น้ำยาซัก:</span>
         <span class="val" id="recDetergent">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เธเนเธณเธขเธฒเธเธฃเธฑเธเธเนเธฒเธเธธเนเธก:</span>
+        <span class="label">น้ำยาปรับผ้านุ่ม:</span>
         <span class="val" id="recSoftener">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เธ–เธธเธเน€เธ—เนเธฒ/เธเธฒเธเน€เธเธเนเธ:</span>
+        <span class="label">ถุงเท้า/กางเกงใน:</span>
         <span class="val" id="recSocks">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เธงเธดเธเธตเธชเนเธเธเนเธฒ:</span>
+        <span class="label">วิธีส่งผ้า:</span>
         <span class="val" id="recDispatchMode">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เธงเธดเธเธตเธฃเธฑเธเธเนเธฒเธชเธฐเธญเธฒเธ”:</span>
+        <span class="label">วิธีรับผ้าสะอาด:</span>
         <span class="val" id="recReturnMode">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เธงเธฑเธโ€“เน€เธงเธฅเธฒเธฃเธฑเธเธเนเธฒ:</span>
+        <span class="label">วัน–เวลารับผ้า:</span>
         <span class="val" id="recPickup">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เธชเธ–เธฒเธเธ—เธตเนเธฃเธฑเธเธเนเธฒ:</span>
+        <span class="label">สถานที่รับผ้า:</span>
         <span class="val" id="recPickupAddress">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เนเธเธ / เธเนเธฒเธฃเธฑเธโ€“เธชเนเธ:</span>
+        <span class="label">โซน / ค่ารับ–ส่ง:</span>
         <span class="val" id="recDeliveryQuote">-</span>
       </div>
       <div class="receipt-row">
-        <span class="label">เธซเธกเธฒเธขเน€เธซเธ•เธธ:</span>
+        <span class="label">หมายเหตุ:</span>
         <span class="val" id="recNote">-</span>
       </div>
       
       <div class="receipt-divider"></div>
       <div class="receipt-row total">
-        <span>เธขเธญเธ”เธฃเธงเธกเธ—เธฑเนเธเธชเธดเนเธ:</span>
-        <span id="recTotal">0 เธเธฒเธ—</span>
+        <span>ยอดรวมทั้งสิ้น:</span>
+        <span id="recTotal">0 บาท</span>
       </div>
     </div>
 
     <!-- Thai QR Payment / Slip2Go card -->
     <div class="card payment-card" style="margin-top: 18px; text-align: center; background: #fff;">
       <h3 style="margin: 0 0 10px; font-size: 16px; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 6px;">
-        ๐“ฑ เธชเนเธเธเธเนเธฒเธขเธ”เนเธงเธขเนเธญเธเธเธเธฒเธเธฒเธฃ & เธ•เธฃเธงเธเธชเธญเธเธชเธฅเธดเธ
+        📱 สแกนจ่ายด้วยแอปธนาคาร & ตรวจสอบสลิป
       </h3>
 
       <!-- Dynamic Payment State Badge -->
       <div>
         <div id="paymentStateBadge" class="payment-state-badge state-awaiting">
-          <span id="paymentBadgeIcon">โณ</span> <span id="paymentStateText">เธฃเธญเธเธณเธฃเธฐเน€เธเธดเธ</span>
+          <span id="paymentBadgeIcon">⏳</span> <span id="paymentStateText">รอชำระเงิน</span>
         </div>
       </div>
 
       <div style="background: #002D62; color: #fff; padding: 4px 10px; border-radius: 6px; display: inline-block; font-size: 11px; font-weight: bold; margin-bottom: 12px; font-family: 'Fredoka', sans-serif;">
-        THAI QR PAYMENT โ€ข PROMPTPAY
+        THAI QR PAYMENT • PROMPTPAY
       </div>
 
-      <div class="thai-qr-code" role="img" aria-label="QR เธเธฃเนเธญเธกเน€เธเธขเนเธชเธณเธซเธฃเธฑเธเธขเธญเธ”เธเธณเธฃเธฐ">
-        <div id="qrLoading" class="hidden" style="font-size: 13px; color: var(--text-muted);">เธเธณเธฅเธฑเธเธชเธฃเนเธฒเธ QR...</div>
+      <div class="thai-qr-code" role="img" aria-label="QR พร้อมเพย์สำหรับยอดชำระ">
+        <div id="qrLoading" class="hidden" style="font-size: 13px; color: var(--text-muted);">กำลังสร้าง QR...</div>
         <img id="slip2goQrImg" class="hidden" alt="Slip2Go QR Code" />
         <div id="qrCode"></div>
       </div>
 
-      <div id="qrAmount" class="payment-amount">0.00 เธเธฒเธ—</div>
+      <div id="qrAmount" class="payment-amount">0.00 บาท</div>
       <p style="font-size: 13.5px; color: var(--text-muted); margin: 6px 0 8px;">
-        เน€เธฅเธเธเธฃเนเธญเธกเน€เธเธขเนเธเธญเธเธฃเนเธฒเธ: <span id="promptPayIdText" style="font-weight: bold; color: var(--text-main); letter-spacing: 0.5px;">-</span>
+        เลขพร้อมเพย์ของร้าน: <span id="promptPayIdText" style="font-weight: bold; color: var(--text-main); letter-spacing: 0.5px;">-</span>
       </p>
       <button id="copyPromptPayBtn" type="button" style="background: var(--primary-light); border: none; color: var(--primary); padding: 8px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; margin-bottom: 6px;">
-        ๐“ เธเธฑเธ”เธฅเธญเธเน€เธฅเธเธเธฃเนเธญเธกเน€เธเธขเน (เธชเนเธเธเธฃเธนเธเนเธเธเธญเนเธกเนเนเธ”เน)
+        📋 คัดลอกเลขพร้อมเพย์ (สแกนรูปในจอไม่ได้)
       </button>
 
       <!-- Slip Upload Section -->
       <div id="slipSection" class="slip-section">
         <div class="slip-divider"></div>
         <h4 style="margin: 0 0 10px; font-size: 14.5px; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 6px;">
-          ๐งพ เธญเธฑเธเนเธซเธฅเธ”เธชเธฅเธดเธเน€เธเธทเนเธญเธขเธทเธเธขเธฑเธเธญเธญเน€เธ”เธญเธฃเน
+          🧾 อัปโหลดสลิปเพื่อยืนยันออเดอร์
         </h4>
 
         <div id="slipDropzone" class="slip-dropzone">
           <input type="file" id="slipFileInput" accept="image/jpeg,image/png,image/webp,image/heic" style="display: none;" />
           <div id="dropzonePrompt">
-            <div style="font-size: 26px; margin-bottom: 4px;">๐“ธ</div>
-            <div style="font-size: 13.5px; font-weight: 600; color: var(--primary);">เนเธ•เธฐเน€เธเธทเนเธญเน€เธฅเธทเธญเธเธฃเธนเธเธชเธฅเธดเธ เธซเธฃเธทเธญ เธ–เนเธฒเธขเธ เธฒเธ</div>
-            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">เธฃเธญเธเธฃเธฑเธ JPG, PNG (เธชเธนเธเธชเธธเธ” 6MB)</div>
+            <div style="font-size: 26px; margin-bottom: 4px;">📸</div>
+            <div style="font-size: 13.5px; font-weight: 600; color: var(--primary);">แตะเพื่อเลือกรูปสลิป หรือ ถ่ายภาพ</div>
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">รองรับ JPG, PNG (สูงสุด 6MB)</div>
           </div>
           <div id="slipPreviewBox" class="slip-preview-box hidden">
             <img id="slipPreviewImg" src="" alt="Slip Preview" />
             <div class="slip-preview-info">
               <span id="slipFileName" class="slip-file-name">-</span>
-              <button type="button" id="removeSlipBtn" class="remove-slip-btn">โ• เน€เธเธฅเธตเนเธขเธเธฃเธนเธ</button>
+              <button type="button" id="removeSlipBtn" class="remove-slip-btn">✕ เปลี่ยนรูป</button>
             </div>
           </div>
         </div>
 
         <button id="verifySlipBtn" type="button" class="verify-slip-btn hidden">
-          ๐” เธ•เธฃเธงเธเธชเธญเธเธชเธฅเธดเธเนเธฅเธฐเธขเธทเธเธขเธฑเธเธขเธญเธ”เน€เธเธดเธ
+          🔍 ตรวจสอบสลิปและยืนยันยอดเงิน
         </button>
 
         <div id="slipStatusMsg" class="slip-status-msg hidden"></div>
       </div>
 
       <p class="payment-safety">
-        ๐’ก เน€เธกเธทเนเธญเนเธญเธเน€เธเธดเธเนเธฅเนเธง เธเธฃเธธเธ“เธฒเนเธเธเธฃเธนเธเธชเธฅเธดเธเนเธเธเนเธญเธเธ”เนเธฒเธเธเธ เธฃเธฐเธเธเธเธฐเธ•เธฃเธงเธเธชเธญเธเธขเธญเธ”เน€เธเธดเธเนเธฅเธฐเธขเธทเธเธขเธฑเธเธเธฒเธฃเธฃเธฑเธเธเนเธฒเธญเธฑเธ•เนเธเธกเธฑเธ•เธดเธเนเธฐ
+        💡 เมื่อโอนเงินแล้ว กรุณาแนบรูปสลิปในช่องด้านบน ระบบจะตรวจสอบยอดเงินและยืนยันการรับผ้าอัตโนมัติค่ะ
       </p>
     </div>
 
@@ -1482,10 +1364,10 @@
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="flex-shrink:0;">
           <path d="M24 10.3c0-4.8-5.4-8.8-12-8.8S0 5.5 0 10.3c0 4.3 4.3 7.9 10.1 8.7 0.4 0.1 0.9 0.4 1 1 0.1 0.6 0 1.5-.1 2.1l-.1.8c-.1 0.4.1 0.6.4 0.4.3-.2 2.2-1.6 3.1-2.7 2.3-2 3.9-4.8 3.9-7.3z"/>
         </svg>
-        เธชเนเธเธฃเธฒเธขเธเธฒเธฃเธเธฒเธเธเนเธฒเน€เธเนเธฒเนเธเธ— LINE ๐’ฌ
+        ส่งรายการฝากผ้าเข้าแชท LINE 💬
       </button>
-      <button id="copyBtn" type="button" class="copy-btn">๐“ เธเธฑเธ”เธฅเธญเธเธเนเธญเธเธงเธฒเธกเธชเธณเธซเธฃเธฑเธเธชเนเธเน€เธญเธ</button>
-      <button id="editBtn" type="button" class="edit-btn">โ เธขเนเธญเธเธเธฅเธฑเธเนเธเนเธเนเนเธเธฃเธฒเธขเธเธฒเธฃ</button>
+      <button id="copyBtn" type="button" class="copy-btn">📋 คัดลอกข้อความสำหรับส่งเอง</button>
+      <button id="editBtn" type="button" class="edit-btn">← ย้อนกลับไปแก้ไขรายการ</button>
     </div>
   </div>
 
@@ -1495,23 +1377,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="thai-qr.js"></script>
 <script src="config.js"></script>
-
-  <!-- Map Modal -->
-  <div id="mapModal" class="map-modal hidden">
-    <div class="map-modal-content">
-      <div class="map-modal-header">
-        <h3>๐“ เน€เธฅเธทเธญเธเธ•เธณเนเธซเธเนเธเธเธญเธเธเธธเธ“</h3>
-        <button type="button" id="closeMapBtn" class="close-btn">&times;</button>
-      </div>
-      <div class="map-modal-body">
-        <div id="locationMap"></div>
-      </div>
-      <div class="map-modal-footer">
-        <button type="button" id="confirmMapBtn" class="btn btn-primary" style="width: 100%;">เธขเธทเธเธขเธฑเธเธ•เธณเนเธซเธเนเธเธเธตเน</button>
-      </div>
-    </div>
-  </div>
-
 <script>
   const APP_CONFIG = window.WASH_ME_CONFIG || {};
   const API_BASE_URL = String(APP_CONFIG.apiUrl || '').replace(/\/api\/orders\/?$/, '').trim();
@@ -1582,25 +1447,25 @@
   function setPaymentState(state, customText = '') {
     paymentStateBadge.className = `payment-state-badge state-${state}`;
     if (state === 'generating') {
-      paymentBadgeIcon.textContent = 'โณ';
-      paymentStateText.textContent = customText || 'เธเธณเธฅเธฑเธเธชเธฃเนเธฒเธ QR...';
+      paymentBadgeIcon.textContent = '⏳';
+      paymentStateText.textContent = customText || 'กำลังสร้าง QR...';
     } else if (state === 'awaiting') {
-      paymentBadgeIcon.textContent = 'โณ';
-      paymentStateText.textContent = customText || 'เธฃเธญเธเธณเธฃเธฐเน€เธเธดเธ';
+      paymentBadgeIcon.textContent = '⏳';
+      paymentStateText.textContent = customText || 'รอชำระเงิน';
     } else if (state === 'verifying') {
-      paymentBadgeIcon.textContent = '๐”';
-      paymentStateText.textContent = customText || 'เธเธณเธฅเธฑเธเธ•เธฃเธงเธเธชเธญเธเธชเธฅเธดเธ...';
+      paymentBadgeIcon.textContent = '🔄';
+      paymentStateText.textContent = customText || 'กำลังตรวจสอบสลิป...';
     } else if (state === 'paid') {
-      paymentBadgeIcon.textContent = 'โ…';
-      paymentStateText.textContent = customText || 'เธเธณเธฃเธฐเน€เธเธดเธเนเธฅเนเธง โ…';
+      paymentBadgeIcon.textContent = '✅';
+      paymentStateText.textContent = customText || 'ชำระเงินแล้ว ✅';
     } else if (state === 'error') {
-      paymentBadgeIcon.textContent = 'โ ๏ธ';
-      paymentStateText.textContent = customText || 'เธชเธฅเธดเธเนเธกเนเธ–เธนเธเธ•เนเธญเธ';
+      paymentBadgeIcon.textContent = '⚠️';
+      paymentStateText.textContent = customText || 'สลิปไม่ถูกต้อง';
     }
   }
 
   function renderQrPayment(total, slip2goUrl = null) {
-    qrAmountEl.textContent = `${Number(total).toFixed(2)} เธเธฒเธ—`;
+    qrAmountEl.textContent = `${Number(total).toFixed(2)} บาท`;
     if (slip2goUrl) {
       slip2goQrImg.src = slip2goUrl;
       slip2goQrImg.classList.remove('hidden');
@@ -1615,7 +1480,7 @@
     qrCodeEl.innerHTML = '';
     try {
       if (!window.ThaiQR || typeof QRCode === 'undefined') {
-        throw new Error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เนเธซเธฅเธ”เธฃเธฐเธเธเธชเธฃเนเธฒเธ QR เนเธ”เน');
+        throw new Error('ไม่สามารถโหลดระบบสร้าง QR ได้');
       }
       const payload = window.ThaiQR.buildPromptPayPayload(MERCHANT_PROMPTPAY_ID, total);
       new QRCode(qrCodeEl, {
@@ -1627,7 +1492,7 @@
         correctLevel: QRCode.CorrectLevel.M
       });
     } catch (error) {
-      qrCodeEl.textContent = error.message || 'เธชเธฃเนเธฒเธ QR เนเธกเนเธชเธณเน€เธฃเนเธ';
+      qrCodeEl.textContent = error.message || 'สร้าง QR ไม่สำเร็จ';
     }
   }
 
@@ -1655,11 +1520,11 @@
   function handleFileSelected(file) {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      setSlipStatus('เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเนเธเธฅเนเธฃเธนเธเธ เธฒเธเน€เธ—เนเธฒเธเธฑเนเธเธเนเธฐ (JPG, PNG)', 'error');
+      setSlipStatus('กรุณาเลือกไฟล์รูปภาพเท่านั้นค่ะ (JPG, PNG)', 'error');
       return;
     }
     if (file.size > 6 * 1024 * 1024) {
-      setSlipStatus('เนเธเธฅเนเธชเธฅเธดเธเธกเธตเธเธเธฒเธ”เน€เธเธดเธ 6MB เธเนเธฐ', 'error');
+      setSlipStatus('ไฟล์สลิปมีขนาดเกิน 6MB ค่ะ', 'error');
       return;
     }
     selectedSlipFile = file;
@@ -1711,14 +1576,14 @@
   // Slip Verification Submit
   verifySlipBtn.addEventListener('click', async () => {
     if (!selectedSlipFile || !currentOrder) {
-      setSlipStatus('เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเธฃเธนเธเธชเธฅเธดเธเธเนเธญเธเธเนเธฐ', 'error');
+      setSlipStatus('กรุณาเลือกรูปสลิปก่อนค่ะ', 'error');
       return;
     }
 
     verifySlipBtn.disabled = true;
-    verifySlipBtn.textContent = 'เธเธณเธฅเธฑเธเธ•เธฃเธงเธเธชเธญเธเธชเธฅเธดเธโ€ฆ โณ';
-    setPaymentState('verifying', 'เธเธณเธฅเธฑเธเธ•เธฃเธงเธเธชเธญเธเธชเธฅเธดเธ...');
-    setSlipStatus('เธเธณเธฅเธฑเธเธชเนเธเธชเธฅเธดเธเนเธเธ•เธฃเธงเธเธชเธญเธเธขเธญเธ”เน€เธเธดเธ เธเธฃเธธเธ“เธฒเธฃเธญเธชเธฑเธเธเธฃเธนเนเธเนเธฐโ€ฆ', 'loading');
+    verifySlipBtn.textContent = 'กำลังตรวจสอบสลิป… ⏳';
+    setPaymentState('verifying', 'กำลังตรวจสอบสลิป...');
+    setSlipStatus('กำลังส่งสลิปไปตรวจสอบยอดเงิน กรุณารอสักครู่ค่ะ…', 'loading');
 
     const slipEndpoint = API_BASE_URL
       ? `${API_BASE_URL}/api/orders/${encodeURIComponent(currentOrder.orderNumber)}/slip`
@@ -1738,29 +1603,29 @@
 
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.success) {
-        throw new Error(result.message || 'เธเธฒเธฃเธ•เธฃเธงเธเธชเธญเธเธชเธฅเธดเธเนเธกเนเธชเธณเน€เธฃเนเธ');
+        throw new Error(result.message || 'การตรวจสอบสลิปไม่สำเร็จ');
       }
 
       // Success paid state
       currentOrder.paymentStatus = 'paid';
-      setPaymentState('paid', 'เธเธณเธฃเธฐเน€เธเธดเธเนเธฅเนเธง โ…');
-      setSlipStatus('เธเธณเธฃเธฐเน€เธเธดเธเนเธฅเธฐเธ•เธฃเธงเธเธชเธญเธเธชเธฅเธดเธเธชเธณเน€เธฃเนเธเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธงเธเนเธฐ โ…', 'success');
+      setPaymentState('paid', 'ชำระเงินแล้ว ✅');
+      setSlipStatus('ชำระเงินและตรวจสอบสลิปสำเร็จเรียบร้อยแล้วค่ะ ✅', 'success');
       verifySlipBtn.classList.add('hidden');
       dropzonePrompt.classList.add('hidden');
       removeSlipBtn.classList.add('hidden');
 
       // Update pickup status on receipt
       const receiptStatus = result.shipdayCreated
-        ? 'เธเธณเธฃเธฐเน€เธเธดเธเนเธฅเนเธง (เธฃเธฑเธเธเธณเธเธญเธเธฑเธ”เธฃเธฑเธเธเนเธฒเนเธฅเนเธง โ…)'
-        : (currentOrder.returnRequested ? 'เธเธณเธฃเธฐเน€เธเธดเธเนเธฅเนเธง (เธฃเธญเธฃเนเธฒเธเธขเธทเธเธขเธฑเธเธเธฒเธฃเธชเนเธเธเธฅเธฑเธ)' : 'เธเธณเธฃเธฐเน€เธเธดเธเนเธฅเนเธง (เธเธณเธกเธฒเธชเนเธเนเธฅเธฐเธฃเธฑเธเธ—เธตเนเธฃเนเธฒเธ)');
+        ? 'ชำระเงินแล้ว (รับคำขอนัดรับผ้าแล้ว ✅)'
+        : (currentOrder.returnRequested ? 'ชำระเงินแล้ว (รอร้านยืนยันการส่งกลับ)' : 'ชำระเงินแล้ว (นำมาส่งและรับที่ร้าน)');
       document.getElementById('recPickupStatus').textContent = receiptStatus;
 
       stopStatusPolling();
     } catch (error) {
-      setPaymentState('error', 'เธชเธฅเธดเธเนเธกเนเธเนเธฒเธ');
-      setSlipStatus(error.message || 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”เนเธเธเธฒเธฃเธ•เธฃเธงเธเธชเธญเธเธชเธฅเธดเธ เธเธฃเธธเธ“เธฒเธฅเธญเธเนเธซเธกเนเธญเธตเธเธเธฃเธฑเนเธเธเนเธฐ', 'error');
+      setPaymentState('error', 'สลิปไม่ผ่าน');
+      setSlipStatus(error.message || 'เกิดข้อผิดพลาดในการตรวจสอบสลิป กรุณาลองใหม่อีกครั้งค่ะ', 'error');
       verifySlipBtn.disabled = false;
-      verifySlipBtn.textContent = '๐” เธ•เธฃเธงเธเธชเธญเธเธชเธฅเธดเธเนเธฅเธฐเธขเธทเธเธขเธฑเธเธขเธญเธ”เน€เธเธดเธ';
+      verifySlipBtn.textContent = '🔍 ตรวจสอบสลิปและยืนยันยอดเงิน';
     }
   });
 
@@ -1783,8 +1648,8 @@
           const data = await response.json();
           if (data.paymentStatus === 'paid') {
             currentOrder.paymentStatus = 'paid';
-            setPaymentState('paid', 'เธเธณเธฃเธฐเน€เธเธดเธเนเธฅเนเธง โ…');
-            setSlipStatus('เธเธณเธฃเธฐเน€เธเธดเธเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธงเธเนเธฐ เธเธญเธเธเธธเธ“เธเนเธฐ โ…', 'success');
+            setPaymentState('paid', 'ชำระเงินแล้ว ✅');
+            setSlipStatus('ชำระเงินเรียบร้อยแล้วค่ะ ขอบคุณค่ะ ✅', 'success');
             verifySlipBtn.classList.add('hidden');
             stopStatusPolling();
           }
@@ -1828,7 +1693,7 @@
         const val = `${hh}:${mm}`;
         const opt = document.createElement('option');
         opt.value = val;
-        opt.textContent = `${val} เธ.`;
+        opt.textContent = `${val} น.`;
         select.appendChild(opt);
       }
     }
@@ -1870,7 +1735,7 @@
     Array.from(pickupTimeEl.options).forEach(option => {
       if (!option.value) return;
       option.disabled = isPickupSlotPast(pickupDateEl.value, option.value);
-      option.textContent = option.disabled ? `${option.value} เธ. (เธเนเธฒเธเนเธเนเธฅเนเธง)` : `${option.value} เธ.`;
+      option.textContent = option.disabled ? `${option.value} น. (ผ่านไปแล้ว)` : `${option.value} น.`;
     });
     if (pickupTimeEl.selectedOptions[0]?.disabled) pickupTimeEl.value = '';
   }
@@ -1935,21 +1800,21 @@
     zoneSummary.className = 'zone-summary';
     if (quote.legs === 0) {
       zoneSummary.classList.add('ready');
-      zoneSummary.innerHTML = 'เธเธณเธเนเธฒเธกเธฒเธชเนเธเนเธฅเธฐเธกเธฒเธฃเธฑเธเน€เธญเธ <span class="zone-price">เธเธฃเธตเธเนเธฒเธฃเธฑเธโ€“เธชเนเธ</span>';
+      zoneSummary.innerHTML = 'นำผ้ามาส่งและมารับเอง <span class="zone-price">ฟรีค่ารับ–ส่ง</span>';
       return;
     }
     if (!quote.ready) {
-      zoneSummary.textContent = 'เนเธ•เธฐเนเธเธเธ—เธตเนเธซเธฃเธทเธญเธเธ”เนเธเนเธ•เธณเนเธซเธเนเธเธเธฑเธเธเธธเธเธฑเธเน€เธเธทเนเธญเธเธณเธเธงเธ“เธเนเธฒเธชเนเธ';
+      zoneSummary.textContent = 'แตะแผนที่หรือกดใช้ตำแหน่งปัจจุบันเพื่อคำนวณค่าส่ง';
       return;
     }
     if (quote.outside) {
       zoneSummary.classList.add('outside');
-      zoneSummary.textContent = `เธฃเธฐเธขเธฐเธเธฃเธฐเธกเธฒเธ“ ${quote.distanceKm.toFixed(1)} เธเธก. เน€เธเธดเธเธเธทเนเธเธ—เธตเน 10 เธเธก. เธเธฃเธธเธ“เธฒเธ•เธดเธ”เธ•เนเธญเธฃเนเธฒเธเน€เธเธทเนเธญเธ•เธฃเธงเธเธชเธญเธเธฃเธฒเธเธฒ`;
+      zoneSummary.textContent = `ระยะประมาณ ${quote.distanceKm.toFixed(1)} กม. เกินพื้นที่ 10 กม. กรุณาติดต่อร้านเพื่อตรวจสอบราคา`;
       return;
     }
-    const tripLabel = quote.legs === 2 ? 'เธฃเธฑเธเนเธฅเธฐเธชเนเธเธเธฅเธฑเธ' : 'เน€เธ—เธตเนเธขเธงเน€เธ”เธตเธขเธง';
+    const tripLabel = quote.legs === 2 ? 'รับและส่งกลับ' : 'เที่ยวเดียว';
     zoneSummary.classList.add('ready');
-    zoneSummary.innerHTML = `เนเธเธ ${quote.zone.key} โ€ข ${quote.distanceKm.toFixed(1)} เธเธก. โ€ข ${tripLabel} <span class="zone-price">${quote.fee} เธเธฒเธ—</span>`;
+    zoneSummary.innerHTML = `โซน ${quote.zone.key} • ${quote.distanceKm.toFixed(1)} กม. • ${tripLabel} <span class="zone-price">${quote.fee} บาท</span>`;
   }
 
   function setCustomerPin(lat, lng, moveMap = true) {
@@ -1957,7 +1822,7 @@
     if (locationMap) {
       if (!customerMarker) {
         customerMarker = L.marker([lat, lng], { draggable: true }).addTo(locationMap);
-        customerMarker.bindTooltip('๏ฟฝ๏ฟฝ๏ฟฝหน๏ฟฝ๏ฟฝูก๏ฟฝ๏ฟฝ๏ฟฝ', { direction: 'top' });
+        customerMarker.bindTooltip('���˹��١���', { direction: 'top' });
         customerMarker.on('dragend', event => {
           const point = event.target.getLatLng();
           setCustomerPin(point.lat, point.lng, false);
@@ -1985,7 +1850,7 @@
       weight: 3,
       fillColor: '#E05A36',
       fillOpacity: 1
-    }).addTo(locationMap).bindTooltip('เธเธธเธ”เธฃเนเธฒเธ', { permanent: false, direction: 'top' });
+    }).addTo(locationMap).bindTooltip('จุดร้าน', { permanent: false, direction: 'top' });
     DELIVERY_ZONES.forEach((zone, index) => {
       const colors = ['#10B981', '#F59E0B', '#E05A36'];
       L.circle([STORE_LOCATION.lat, STORE_LOCATION.lng], {
@@ -2009,22 +1874,22 @@
 
   locateMeBtn.addEventListener('click', () => {
     if (!navigator.geolocation) {
-      setFormStatus('เธญเธธเธเธเธฃเธ“เนเธเธตเนเนเธกเนเธฃเธญเธเธฃเธฑเธเธเธฒเธฃเธฃเธฐเธเธธเธ•เธณเนเธซเธเนเธ เธเธฃเธธเธ“เธฒเนเธ•เธฐเนเธเธเธ—เธตเนเน€เธเธทเนเธญเธเธฑเธเธซเธกเธธเธ”เธเนเธฐ', 'error');
+      setFormStatus('อุปกรณ์นี้ไม่รองรับการระบุตำแหน่ง กรุณาแตะแผนที่เพื่อปักหมุดค่ะ', 'error');
       return;
     }
     locateMeBtn.disabled = true;
-    locateMeBtn.textContent = 'เธเธณเธฅเธฑเธเธซเธฒเธ•เธณเนเธซเธเนเธโ€ฆ';
+    locateMeBtn.textContent = 'กำลังหาตำแหน่ง…';
     navigator.geolocation.getCurrentPosition(
       position => {
         setCustomerPin(position.coords.latitude, position.coords.longitude);
-        setFormStatus('เธเธฑเธเธซเธกเธธเธ”เธเธฒเธเธ•เธณเนเธซเธเนเธเธเธฑเธเธเธธเธเธฑเธเนเธฅเนเธง เธเธฃเธธเธ“เธฒเธ•เธฃเธงเธเธชเธญเธเธซเธกเธธเธ”เธเธเนเธเธเธ—เธตเนเธเนเธฐ', 'success');
+        setFormStatus('ปักหมุดจากตำแหน่งปัจจุบันแล้ว กรุณาตรวจสอบหมุดบนแผนที่ค่ะ', 'success');
         locateMeBtn.disabled = false;
-        locateMeBtn.textContent = '๐“ เนเธเนเธ•เธณเนเธซเธเนเธเธเธฑเธเธเธธเธเธฑเธ';
+        locateMeBtn.textContent = '📍 ใช้ตำแหน่งปัจจุบัน';
       },
       () => {
-        setFormStatus('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธญเนเธฒเธเธ•เธณเนเธซเธเนเธเนเธ”เน เธเธฃเธธเธ“เธฒเธญเธเธธเธเธฒเธ•เธเธฒเธฃเน€เธเนเธฒเธ–เธถเธเธ•เธณเนเธซเธเนเธเธซเธฃเธทเธญเนเธ•เธฐเนเธเธเธ—เธตเนเธเนเธฐ', 'error');
+        setFormStatus('ไม่สามารถอ่านตำแหน่งได้ กรุณาอนุญาตการเข้าถึงตำแหน่งหรือแตะแผนที่ค่ะ', 'error');
         locateMeBtn.disabled = false;
-        locateMeBtn.textContent = '๐“ เนเธเนเธ•เธณเนเธซเธเนเธเธเธฑเธเธเธธเธเธฑเธ';
+        locateMeBtn.textContent = '📍 ใช้ตำแหน่งปัจจุบัน';
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
@@ -2121,8 +1986,8 @@
     const total = calculateTotal();
     const time = calculateWashTime();
 
-    livePriceEl.textContent = `${total} เธฟ`;
-    timeEstEl.textContent = `เน€เธงเธฅเธฒเธเธฑเธเธเธฃเธฐเธกเธฒเธ“: ${time} เธเธฒเธ—เธต`;
+    livePriceEl.textContent = `${total} ฿`;
+    timeEstEl.textContent = `เวลาซักประมาณ: ${time} นาที`;
   }
 
   // Handle Qty Buttons Click
@@ -2168,38 +2033,38 @@
     const note = document.getElementById('note').value.trim();
 
     if(!name || !phone){
-      setFormStatus('เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธเธทเนเธญเนเธฅเธฐเน€เธเธญเธฃเนเนเธ—เธฃเธเนเธฐ', 'error');
+      setFormStatus('กรุณากรอกชื่อและเบอร์โทรค่ะ', 'error');
       return;
     }
 
     if((sizeSQty + sizeMQty + sizeLQty) === 0){
-      setFormStatus('เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเธเธณเธเธงเธเธ•เธฐเธเธฃเนเธฒเธญเธขเนเธฒเธเธเนเธญเธข 1 เนเธเธเนเธฐ', 'error');
+      setFormStatus('กรุณาเลือกจำนวนตะกร้าอย่างน้อย 1 ใบค่ะ', 'error');
       return;
     }
 
     if(dispatchMode === 'driver_pickup' && (!pickupDate || !pickupTime)){
-      setFormStatus('เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธงเธฑเธเธ—เธตเน เน€เธงเธฅเธฒ เนเธฅเธฐเธ—เธตเนเธญเธขเธนเนเธชเธณเธซเธฃเธฑเธเธฃเธฑเธเธเนเธฒเนเธซเนเธเธฃเธเธเนเธฐ', 'error');
+      setFormStatus('กรุณากรอกวันที่ เวลา และที่อยู่สำหรับรับผ้าให้ครบค่ะ', 'error');
       return;
     }
 
     if(dispatchMode === 'driver_pickup' && isPickupSlotPast(pickupDate, pickupTime)){
       refreshPickupTimeOptions();
-      setFormStatus('เธงเธฑเธเธซเธฃเธทเธญเน€เธงเธฅเธฒเธ—เธตเนเน€เธฅเธทเธญเธเธเนเธฒเธเนเธเนเธฅเนเธง เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเน€เธงเธฅเธฒเนเธซเธกเนเธเนเธฐ', 'error');
+      setFormStatus('วันหรือเวลาที่เลือกผ่านไปแล้ว กรุณาเลือกเวลาใหม่ค่ะ', 'error');
       return;
     }
 
     if(usesDriver && !pickupAddress){
-      setFormStatus('เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธ—เธตเนเธญเธขเธนเนเนเธฅเธฐเธเธธเธ”เธชเธฑเธเน€เธเธ•เธชเธณเธซเธฃเธฑเธเธเธเธเธฑเธเธเนเธฐ', 'error');
+      setFormStatus('กรุณากรอกที่อยู่และจุดสังเกตสำหรับคนขับค่ะ', 'error');
       return;
     }
 
     if(usesDriver && !customerLocation){
-      setFormStatus('เธเธฃเธธเธ“เธฒเธเธฑเธเธซเธกเธธเธ”เธเนเธฒเธเธฅเธนเธเธเนเธฒเธเธเนเธเธเธ—เธตเนเธเนเธฐ', 'error');
+      setFormStatus('กรุณาปักหมุดบ้านลูกค้าบนแผนที่ค่ะ', 'error');
       return;
     }
 
     if(deliveryQuote.outside){
-      setFormStatus('เธซเธกเธธเธ”เธเธตเนเธญเธขเธนเนเธเธญเธเธเธทเนเธเธ—เธตเน 10 เธเธก. เธเธฃเธธเธ“เธฒเธ•เธดเธ”เธ•เนเธญเธฃเนเธฒเธเน€เธเธทเนเธญเธ•เธฃเธงเธเธชเธญเธเธฃเธฒเธเธฒเธเนเธญเธเธเนเธฐ', 'error');
+      setFormStatus('หมุดนี้อยู่นอกพื้นที่ 10 กม. กรุณาติดต่อร้านเพื่อตรวจสอบราคาก่อนค่ะ', 'error');
       return;
     }
 
@@ -2223,8 +2088,8 @@
     };
 
     submitOrderBtn.disabled = true;
-    submitOrderBtn.textContent = 'เธเธณเธฅเธฑเธเธชเธฃเนเธฒเธเธเธณเธเธญเนเธฅเธฐ QR...';
-    setFormStatus('เธเธณเธฅเธฑเธเธชเนเธเธเนเธญเธกเธนเธฅเนเธฅเธฐเธชเธฃเนเธฒเธ QR เธเธฃเนเธญเธกเน€เธเธขเนโ€ฆ', 'loading');
+    submitOrderBtn.textContent = 'กำลังสร้างคำขอและ QR...';
+    setFormStatus('กำลังส่งข้อมูลและสร้าง QR พร้อมเพย์…', 'loading');
     setPaymentState('generating');
 
     try {
@@ -2244,7 +2109,7 @@
       });
       const responseBody = await response.json().catch(() => ({}));
       if (!response.ok || !responseBody.success) {
-        throw new Error(responseBody.message || 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธเธฑเธเธ—เธถเธเธเธณเธเธญเธเธฒเธเธเนเธฒเนเธ”เน');
+        throw new Error(responseBody.message || 'ไม่สามารถบันทึกคำขอฝากผ้าได้');
       }
       result = responseBody;
 
@@ -2263,19 +2128,19 @@
       if(sizeMQty > 0) basketLines.push(`M x${sizeMQty}`);
       if(sizeLQty > 0) basketLines.push(`L x${sizeLQty}`);
       const basketLine = basketLines.join(', ');
-      const detergentLine = detergentQty > 0 ? `${detergentQty} เธเธญเธ` : 'เธเธณเธกเธฒเน€เธญเธ';
-      const softenerLine = softenerQty > 0 ? `${softenerQty} เธเธญเธ` : 'เธเธณเธกเธฒเน€เธญเธ';
-      const socksLine = socks ? 'เธกเธต (เนเธขเธเธเธฑเธ)' : 'เนเธกเนเธกเธต';
-      const dispatchLine = dispatchMode === 'driver_pickup' ? 'เนเธซเนเธฃเนเธฒเธเนเธเธฃเธฑเธเธ–เธถเธเธเนเธฒเธ' : 'เธเธณเธกเธฒเธชเนเธเธ—เธตเนเธฃเนเธฒเธเน€เธญเธ';
-      const returnLine = returnMode === 'driver_return' ? 'เนเธซเนเธฃเนเธฒเธเธเธณเนเธเธชเนเธ' : 'เธกเธฒเธฃเธฑเธเธ—เธตเนเธฃเนเธฒเธเน€เธญเธ';
-      const pickupLine = dispatchMode === 'driver_pickup' ? `${pickupDate} เน€เธงเธฅเธฒ ${pickupTime} เธ.` : '-';
-      const pickupStatusLine = 'เธฃเธญเธเธณเธฃเธฐเน€เธเธดเธเนเธฅเธฐเธ•เธฃเธงเธเธชเธญเธเธชเธฅเธดเธ';
+      const detergentLine = detergentQty > 0 ? `${detergentQty} ซอง` : 'นำมาเอง';
+      const softenerLine = softenerQty > 0 ? `${softenerQty} ซอง` : 'นำมาเอง';
+      const socksLine = socks ? 'มี (แยกซัก)' : 'ไม่มี';
+      const dispatchLine = dispatchMode === 'driver_pickup' ? 'ให้ร้านไปรับถึงบ้าน' : 'นำมาส่งที่ร้านเอง';
+      const returnLine = returnMode === 'driver_return' ? 'ให้ร้านนำไปส่ง' : 'มารับที่ร้านเอง';
+      const pickupLine = dispatchMode === 'driver_pickup' ? `${pickupDate} เวลา ${pickupTime} น.` : '-';
+      const pickupStatusLine = 'รอชำระเงินและตรวจสอบสลิป';
       const confirmedFee = Number(result.deliveryFee ?? deliveryQuote.fee);
       const confirmedDistance = Number(result.distanceKm ?? deliveryQuote.distanceKm ?? 0);
       const confirmedZone = result.zone ?? deliveryQuote.zone?.key ?? null;
       const deliveryQuoteLine = usesDriver
-        ? `เนเธเธ ${confirmedZone || '-'} โ€ข ${confirmedDistance.toFixed(1)} เธเธก. โ€ข ${confirmedFee} เธเธฒเธ—`
-        : 'เนเธกเนเธกเธตเธเนเธฒเธฃเธฑเธโ€“เธชเนเธ';
+        ? `โซน ${confirmedZone || '-'} • ${confirmedDistance.toFixed(1)} กม. • ${confirmedFee} บาท`
+        : 'ไม่มีค่ารับ–ส่ง';
       const locationMapLink = customerLocation
         ? `https://www.google.com/maps?q=${customerLocation.lat},${customerLocation.lng}`
         : '-';
@@ -2295,7 +2160,7 @@
       document.getElementById('recPickupAddress').textContent = usesDriver ? pickupAddress : '-';
       document.getElementById('recDeliveryQuote').textContent = deliveryQuoteLine;
       document.getElementById('recNote').textContent = note || '-';
-      document.getElementById('recTotal').textContent = `${total} เธเธฒเธ—`;
+      document.getElementById('recTotal').textContent = `${total} บาท`;
 
       machineTime.textContent = `${String(Math.floor(washTime / 60)).padStart(2, '0')}:${String(washTime % 60).padStart(2, '0')}`;
 
@@ -2310,35 +2175,35 @@
       }
 
       summaryText.value = 
-`๐“ เนเธเนเธเธเธฒเธเธเนเธฒ - Wash Me Pls Laundry
-เน€เธฅเธเธญเธญเน€เธ”เธญเธฃเน: ${result.orderNumber}
-เธชเธ–เธฒเธเธฐ: ${pickupStatusLine}
-เธเธทเนเธญ: ${name}
-เน€เธเธญเธฃเนเนเธ—เธฃ: ${phone}
-เธเธฃเธดเธเธฒเธฃ: ${service.dataset.label}
-เธเธเธฒเธ”เธ•เธฐเธเธฃเนเธฒ: ${basketLine}
-เธเนเธณเธขเธฒเธเธฑเธ: ${detergentLine}
-เธเนเธณเธขเธฒเธเธฃเธฑเธเธเนเธฒเธเธธเนเธก: ${softenerLine}
-เธ–เธธเธเน€เธ—เนเธฒ/เธเธฒเธเน€เธเธเนเธ: ${socksLine}
-เธงเธดเธเธตเธชเนเธเธเนเธฒ: ${dispatchLine}
-เธงเธดเธเธตเธฃเธฑเธเธเนเธฒเธชเธฐเธญเธฒเธ”: ${returnLine}
-เธงเธฑเธโ€“เน€เธงเธฅเธฒเธฃเธฑเธเธเนเธฒ: ${pickupLine}
-เธ—เธตเนเธญเธขเธนเนเธฃเธฑเธ/เธชเนเธ: ${usesDriver ? pickupAddress : '-'}
-เธเธดเธเธฑเธ”เธเนเธฒเธ: ${locationMapLink}
-เนเธเธ/เธเนเธฒเธฃเธฑเธโ€“เธชเนเธ: ${deliveryQuoteLine}
-เธซเธกเธฒเธขเน€เธซเธ•เธธ: ${note || '-'}
+`📋 แจ้งฝากผ้า - Wash Me Pls Laundry
+เลขออเดอร์: ${result.orderNumber}
+สถานะ: ${pickupStatusLine}
+ชื่อ: ${name}
+เบอร์โทร: ${phone}
+บริการ: ${service.dataset.label}
+ขนาดตะกร้า: ${basketLine}
+น้ำยาซัก: ${detergentLine}
+น้ำยาปรับผ้านุ่ม: ${softenerLine}
+ถุงเท้า/กางเกงใน: ${socksLine}
+วิธีส่งผ้า: ${dispatchLine}
+วิธีรับผ้าสะอาด: ${returnLine}
+วัน–เวลารับผ้า: ${pickupLine}
+ที่อยู่รับ/ส่ง: ${usesDriver ? pickupAddress : '-'}
+พิกัดบ้าน: ${locationMapLink}
+โซน/ค่ารับ–ส่ง: ${deliveryQuoteLine}
+หมายเหตุ: ${note || '-'}
 
-๐’ฐ เธขเธญเธ”เธเธณเธฃเธฐ: ${total} เธเธฒเธ—`;
+💰 ยอดชำระ: ${total} บาท`;
 
-      setFormStatus('เธชเธฃเนเธฒเธเธเธณเธเธญเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง เธเธฃเธธเธ“เธฒเธเธณเธฃเธฐเน€เธเธดเธเนเธฅเธฐเธญเธฑเธเนเธซเธฅเธ”เธชเธฅเธดเธเธเนเธฐ', 'success');
+      setFormStatus('สร้างคำขอเรียบร้อยแล้ว กรุณาชำระเงินและอัปโหลดสลิปค่ะ', 'success');
       form.classList.add('hidden');
       summary.classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch(error) {
-      setFormStatus(error.message || 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ” เธเธฃเธธเธ“เธฒเธฅเธญเธเนเธซเธกเนเธญเธตเธเธเธฃเธฑเนเธเธเนเธฐ', 'error');
+      setFormStatus(error.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งค่ะ', 'error');
     } finally {
       submitOrderBtn.disabled = false;
-      submitOrderBtn.textContent = 'เธขเธทเธเธขเธฑเธเธฃเธฒเธขเธเธฒเธฃ ๐งบ';
+      submitOrderBtn.textContent = 'ยืนยันรายการ 🧺';
     }
   });
 
@@ -2353,10 +2218,10 @@
   copyBtn.addEventListener('click', function(){
     const text = summaryText.value;
     const done = () => {
-      copyBtn.textContent = 'โ… เธเธฑเธ”เธฅเธญเธเน€เธฃเธตเธขเธเธฃเนเธญเธข!';
+      copyBtn.textContent = '✅ คัดลอกเรียบร้อย!';
       copyBtn.style.backgroundColor = '#10B981';
       setTimeout(()=>{ 
-        copyBtn.textContent = '๐“ เธเธฑเธ”เธฅเธญเธเธเนเธญเธเธงเธฒเธกเธชเธณเธซเธฃเธฑเธเธชเนเธเน€เธญเธ'; 
+        copyBtn.textContent = '📋 คัดลอกข้อความสำหรับส่งเอง'; 
         copyBtn.style.backgroundColor = '';
       }, 2500);
     };
@@ -2372,8 +2237,8 @@
   // Copy PromptPay number to clipboard
   copyPromptPayBtn.addEventListener('click', function(){
     const done = () => {
-      copyPromptPayBtn.textContent = 'โ… เธเธฑเธ”เธฅเธญเธเน€เธฅเธเธเธฃเนเธญเธกเน€เธเธขเนเนเธฅเนเธง!';
-      setTimeout(()=>{ copyPromptPayBtn.textContent = '๐“ เธเธฑเธ”เธฅเธญเธเน€เธฅเธเธเธฃเนเธญเธกเน€เธเธขเน (เธชเนเธเธเธฃเธนเธเนเธเธเธญเนเธกเนเนเธ”เน)'; }, 2000);
+      copyPromptPayBtn.textContent = '✅ คัดลอกเลขพร้อมเพย์แล้ว!';
+      setTimeout(()=>{ copyPromptPayBtn.textContent = '📋 คัดลอกเลขพร้อมเพย์ (สแกนรูปในจอไม่ได้)'; }, 2000);
     };
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(MERCHANT_PROMPTPAY_ID).then(done).catch(()=>{
@@ -2402,11 +2267,24 @@
     form.classList.remove('hidden');
     setFormStatus();
   });
-</script></div>`n</body>
+</script>
+  <!-- Map Modal -->
+  <div id="mapModal" class="map-modal hidden">
+    <div class="map-modal-content">
+      <div class="map-modal-header">
+        <h3>📍 เลือกตำแหน่งของคุณ</h3>
+        <button type="button" id="closeMapBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="map-modal-body">
+        <div id="locationMap"></div>
+      </div>
+      <div class="map-modal-footer">
+        <button type="button" id="confirmMapBtn" class="btn btn-primary" style="width: 100%;">ยืนยันตำแหน่งนี้</button>
+      </div>
+    </div>
+  </div>
+</body>
 </html>
-
-
-
 
 
 
