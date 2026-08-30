@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>แจ้งฝากผ้า - Wash Me Pls Laundry</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="leaflet.css">
 <style>
   :root {
     --primary: #1E2D4A;          /* Retro Dark Navy */
@@ -1109,6 +1109,24 @@
   #userProfileHeader div {
     font-weight: 600; color: var(--text-main); font-size: 16px; font-family: 'Kanit', sans-serif;
   }
+  .my-orders-card { margin-top: 12px; }
+  .my-orders-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .my-orders-heading h2 { margin-bottom: 0; }
+  .refresh-orders-btn {
+    border: 2px solid var(--primary); border-radius: 10px; padding: 7px 10px;
+    background: #fff; color: var(--primary); font: 600 12px 'Kanit', sans-serif; cursor: pointer;
+  }
+  .my-orders-list { display: grid; gap: 10px; margin-top: 14px; }
+  .customer-order-item {
+    border: 2px solid var(--primary); border-radius: 14px; padding: 12px; background: var(--primary-light);
+  }
+  .customer-order-title { display: flex; justify-content: space-between; gap: 10px; font-weight: 700; }
+  .customer-order-meta { margin-top: 6px; color: var(--text-muted); font-size: 12px; }
+  .privacy-consent {
+    display: flex; align-items: flex-start; gap: 10px; margin: 12px 0 18px;
+    color: var(--text-muted); font-size: 12px; line-height: 1.55;
+  }
+  .privacy-consent input { flex: 0 0 auto; width: 20px; height: 20px; margin-top: 1px; }
 
 </style>
 </head>
@@ -1146,6 +1164,14 @@
     <img id="profileImage" src="" alt="Profile">
     <div id="profileName">สวัสดีครับ!</div>
   </div>
+
+  <section id="myOrdersSection" class="card my-orders-card hidden">
+    <div class="my-orders-heading">
+      <h2>🧾 ออเดอร์ของฉัน</h2>
+      <button id="refreshMyOrdersBtn" type="button" class="refresh-orders-btn">รีเฟรช</button>
+    </div>
+    <div id="myOrdersList" class="my-orders-list" aria-live="polite">กำลังโหลดรายการ…</div>
+  </section>
 
   <form id="orderForm">
 
@@ -1308,6 +1334,11 @@
       <input type="tel" id="phone" placeholder="เบอร์โทร" required>
       <textarea id="note" placeholder="หมายเหตุเพิ่มเติม (ถ้ามี) เช่น ผ้าสีตกง่าย, ระวังกระดุมชำรุด"></textarea>
     </section>
+
+    <label class="privacy-consent">
+      <input type="checkbox" id="privacyConsent" required>
+      <span>ฉันยินยอมให้ร้านใช้ชื่อ เบอร์โทร ที่อยู่ พิกัด และข้อมูลการชำระเงินเพื่อรับ–ส่งผ้า ตรวจสอบการชำระเงิน และให้บริการตามออเดอร์นี้</span>
+    </label>
 
     <!-- Live Pricing Bar -->
     <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
@@ -1519,7 +1550,7 @@
   </div>
 
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="vendor/leaflet/leaflet.js"></script>
+<script src="leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="thai-qr.js"></script>
 <script src="config.js"></script>
@@ -1561,6 +1592,9 @@
   const locateMeBtn = document.getElementById('locateMeBtn');
   const zoneSummary = document.getElementById('zoneSummary');
   const storeLocationWarning = document.getElementById('storeLocationWarning');
+  const myOrdersSection = document.getElementById('myOrdersSection');
+  const myOrdersList = document.getElementById('myOrdersList');
+  const refreshMyOrdersBtn = document.getElementById('refreshMyOrdersBtn');
 
   // Slip Upload UI Elements
   const paymentStateBadge = document.getElementById('paymentStateBadge');
@@ -1583,6 +1617,67 @@
   let currentOrder = null; // { orderNumber, accessToken, total, qrImageLink, paymentStatus }
   let selectedSlipFile = null;
   let statusPollTimer = null;
+  let createRequestKey = null;
+  let activeLineIdToken = null;
+
+  const ORDER_STATUS_LABELS = {
+    awaiting_payment: 'รอชำระเงิน',
+    dispatch_pending: 'กำลังจัดคิวคนขับ',
+    pickup_scheduled: 'นัดรับผ้าแล้ว',
+    paid_waiting_dropoff: 'ชำระแล้ว • รอลูกค้านำผ้ามาส่ง',
+    received: 'ร้านรับผ้าแล้ว',
+    washing: 'กำลังซัก/อบ',
+    ready_for_collection: 'ผ้าเสร็จแล้ว • มารับที่ร้านได้',
+    return_pending: 'ผ้าเสร็จแล้ว • กำลังจัดคิวส่งคืน',
+    return_scheduled: 'นัดส่งผ้าคืนแล้ว',
+    completed: 'เสร็จสมบูรณ์',
+    cancelled: 'ยกเลิก',
+    problem: 'ร้านกำลังตรวจสอบปัญหา'
+  };
+
+  function renderMyOrders(orders = []) {
+    myOrdersList.replaceChildren();
+    if (!orders.length) {
+      myOrdersList.textContent = 'ยังไม่มีออเดอร์ในบัญชี LINE นี้';
+      return;
+    }
+    orders.forEach(order => {
+      const item = document.createElement('article');
+      item.className = 'customer-order-item';
+      const title = document.createElement('div');
+      title.className = 'customer-order-title';
+      const number = document.createElement('span');
+      number.textContent = order.orderNumber;
+      const status = document.createElement('span');
+      status.textContent = ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus || '-';
+      title.append(number, status);
+      const meta = document.createElement('div');
+      meta.className = 'customer-order-meta';
+      const basketCount = Object.values(order.baskets || {}).reduce((sum, value) => sum + Number(value || 0), 0);
+      meta.textContent = `${order.service} • ${basketCount} ตะกร้า • ${Number(order.total).toFixed(0)} บาท`;
+      item.append(title, meta);
+      myOrdersList.appendChild(item);
+    });
+  }
+
+  async function loadMyOrders(lineIdToken = activeLineIdToken) {
+    if (!lineIdToken) return;
+    activeLineIdToken = lineIdToken;
+    myOrdersSection.classList.remove('hidden');
+    myOrdersList.textContent = 'กำลังโหลดรายการ…';
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/my-orders` : '/api/my-orders';
+      const response = await fetch(endpoint, { headers: { 'Authorization': `Bearer ${lineIdToken}` } });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) throw new Error(result.message || 'โหลดออเดอร์ไม่สำเร็จ');
+      renderMyOrders(result.orders || []);
+    } catch (error) {
+      myOrdersList.textContent = error.message || 'โหลดออเดอร์ไม่สำเร็จ กรุณาลองใหม่';
+    }
+  }
+
+  window.loadMyOrders = loadMyOrders;
+  refreshMyOrdersBtn.addEventListener('click', () => loadMyOrders());
 
   // Format and show merchant promptpay ID
   if (MERCHANT_PROMPTPAY_ID.length === 10) {
@@ -2254,7 +2349,8 @@
       phone,
       note,
       dispatchMode,
-      returnMode
+      returnMode,
+      lineIdToken: activeLineIdToken
     };
 
     submitOrderBtn.disabled = true;
@@ -2263,6 +2359,9 @@
     setPaymentState('generating');
 
     try {
+      if (!createRequestKey) {
+        createRequestKey = window.crypto?.randomUUID?.() || `wmp-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      }
       let result = {
         success: true,
         orderNumber: `WMP${Date.now().toString(36).toUpperCase()}`,
@@ -2274,7 +2373,10 @@
 
       const response = await fetch(ORDERS_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Idempotency-Key': createRequestKey
+        },
         body: JSON.stringify(requestBody)
       });
       const responseBody = await response.json().catch(() => ({}));
@@ -2282,6 +2384,7 @@
         throw new Error(responseBody.message || 'ไม่สามารถบันทึกคำขอฝากผ้าได้');
       }
       result = responseBody;
+      createRequestKey = null;
 
       currentOrder = {
         orderNumber: result.orderNumber,
@@ -2366,6 +2469,7 @@
 💰 ยอดชำระ: ${total} บาท`;
 
       setFormStatus('สร้างคำขอเรียบร้อยแล้ว กรุณาชำระเงินและอัปโหลดสลิปค่ะ', 'success');
+      if (activeLineIdToken) loadMyOrders(activeLineIdToken);
       form.classList.add('hidden');
       summary.classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2483,6 +2587,11 @@
         }
 
         showApp();
+        const idToken = window.liff.getIDToken();
+        if (!idToken) {
+          throw new Error('LIFF ID token unavailable');
+        }
+        window.loadMyOrders?.(idToken);
         try {
           const profile = await window.liff.getProfile();
           userProfileHeader.classList.remove('hidden');

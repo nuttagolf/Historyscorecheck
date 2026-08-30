@@ -1,7 +1,11 @@
+const WASH_ME_IS_LOCAL = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
 window.WASH_ME_CONFIG = {
   // ใส่ URL ที่ได้หลัง deploy Cloudflare Worker เช่น
   // https://wash-me-shipday.your-account.workers.dev/api/orders
-  apiUrl: "https://wash-me-pls-shipday.nuttagolf6106.workers.dev/api/orders",
+  apiUrl: WASH_ME_IS_LOCAL
+    ? "http://127.0.0.1:8787/api/orders"
+    : "https://wash-me-pls-shipday.nuttagolf6106.workers.dev/api/orders",
 
   // เลขพร้อมเพย์ร้าน: เบอร์มือถือ 10 หลัก เลขบัตร/เลขภาษี 13 หลัก หรือ e-Wallet 15 หลัก
   promptPayId: "0809614423",
