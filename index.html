@@ -4,6 +4,52 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>แจ้งฝากผ้า - Wash Me Pls Laundry</title>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js">
+  // LIFF LINE Login Logic
+  const LIFF_ID = "2011333676-uXeGHJ2V";
+  const loginOverlay = document.getElementById('loginOverlay');
+  const lineLoginBtn = document.getElementById('lineLoginBtn');
+  const appContainer = document.getElementById('appContainer');
+  const userProfileHeader = document.getElementById('userProfileHeader');
+  const profileImage = document.getElementById('profileImage');
+  const profileName = document.getElementById('profileName');
+  const nameInput = document.getElementById('name');
+
+  async function initializeLiff() {
+    try {
+      await liff.init({ liffId: LIFF_ID });
+      if (liff.isLoggedIn()) {
+        loginOverlay.style.display = 'none';
+        appContainer.style.display = 'block';
+        
+        const profile = await liff.getProfile();
+        userProfileHeader.classList.remove('hidden');
+        profileImage.src = profile.pictureUrl || 'https://via.placeholder.com/40';
+        profileName.textContent = 'สวัสดีคุณ ' + profile.displayName;
+        if (nameInput && !nameInput.value) {
+          nameInput.value = profile.displayName;
+        }
+      } else {
+        loginOverlay.style.display = 'flex';
+        appContainer.style.display = 'none';
+      }
+    } catch (err) {
+      console.error('LIFF init failed', err);
+      // Fallback
+      loginOverlay.style.display = 'none';
+      appContainer.style.display = 'block';
+    }
+  }
+
+  lineLoginBtn.addEventListener('click', () => {
+    if (!liff.isLoggedIn()) {
+      liff.login();
+    }
+  });
+
+  initializeLiff();
+
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynhWMzNCqPDEkssA0XVeqbBqy3wk=" crossorigin="">
 <style>
@@ -1001,12 +1047,78 @@
     color: #1D4ED8;
     border: 2px solid #3B82F6;
   }
+
+  /* LINE Login Overlay */
+  #loginOverlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #E8F0FE;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+  .line-login-btn {
+    background-color: #06C755;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-size: 18px;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    max-width: 320px;
+    margin-top: 24px;
+    box-shadow: 0 4px 12px rgba(6, 199, 85, 0.3);
+    transition: transform 0.1s ease;
+  }
+  .line-login-btn:active {
+    transform: scale(0.98);
+  }
+  #appContainer {
+    display: none;
+  }
+  #userProfileHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    padding: 12px 16px;
+    border-radius: 16px;
+    margin: 16px;
+    margin-top: 80px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 3px solid var(--primary);
+  }
+  #userProfileHeader img {
+    width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-light);
+  }
+  #userProfileHeader div {
+    font-weight: 600; color: var(--text-main); font-size: 16px; font-family: 'Kanit', sans-serif;
+  }
+
 </style>
 </head>
 <body>
 
 <!-- Dynamic Background Bubbles -->
 <div class="bubble-container" id="bubbleContainer"></div>
+
+
+<div id="loginOverlay">
+  <div style="background: white; padding: 32px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 360px;">
+    <div style="font-size: 64px; margin-bottom: 16px;">🧺</div>
+    <h2 style="margin: 0; color: #1E2D4A; font-family: 'Fredoka', sans-serif; font-size: 24px;">WASH ME PLS</h2>
+    <p style="color: #64748B; margin-top: 8px; font-family: 'Kanit', sans-serif;">กรุณาเข้าสู่ระบบด้วย LINE เพื่อทำรายการ</p>
+    <button id="lineLoginBtn" class="line-login-btn">เข้าสู่ระบบด้วย LINE</button>
+  </div>
+</div>
+<div id="appContainer">
 
 <div class="app">
 
@@ -1018,6 +1130,12 @@
       </div>
     </div>
     <h1>WASH ME PLS LAUNDRY</h1>
+  </div>
+
+  
+  <div id="userProfileHeader" class="hidden">
+    <img id="profileImage" src="" alt="Profile">
+    <div id="profileName">สวัสดีครับ!</div>
   </div>
 
   <form id="orderForm">
@@ -2283,6 +2401,7 @@
       </div>
     </div>
   </div>
+</div>
 </body>
 </html>
 
