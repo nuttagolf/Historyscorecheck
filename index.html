@@ -1861,11 +1861,18 @@
     pickupTimeEl.required = hasPickup;
     pickupAddressEl.required = usesDriver;
     storeLocationWarning.classList.toggle('hidden', !usesDriver || !STORE_LOCATION.approximate);
+    
     if (usesDriver) {
-      initializeLocationMap();
-      setTimeout(() => locationMap && locationMap.invalidateSize(), 50);
-      setTimeout(() => locationMap && locationMap.invalidateSize(), 300);
+      // FIX: Wait 350ms for the browser to finish drawing the container at full size
+      // before initializing the map. This guarantees Leaflet knows the exact dimensions.
+      setTimeout(() => {
+        if (!customerLocationFields.classList.contains('hidden')) {
+          initializeLocationMap();
+          if (locationMap) locationMap.invalidateSize(true);
+        }
+      }, 350);
     }
+    
     renderDeliveryQuote();
     updateLiveStats();
   }
@@ -2198,4 +2205,6 @@
 </script>
 </body>
 </html>
+
+
 
