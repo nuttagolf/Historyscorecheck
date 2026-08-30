@@ -392,6 +392,8 @@
   /* Inputs, Select, Textarea */
   input[type="text"], input[type="tel"], input[type="date"], select, textarea {
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box !important;
     border: 3px solid var(--primary);
     border-radius: 16px;
     padding: 14px;
@@ -1813,6 +1815,13 @@
       }).addTo(locationMap);
     });
     locationMap.on('click', event => setCustomerPin(event.latlng.lat, event.latlng.lng));
+
+    // Force map to resize correctly when container changes size (fixes map tile loading issue)
+    if (window.ResizeObserver) {
+      new ResizeObserver(() => {
+        if (locationMap) locationMap.invalidateSize();
+      }).observe(document.getElementById('locationMap'));
+    }
   }
 
   locateMeBtn.addEventListener('click', () => {
@@ -1854,7 +1863,8 @@
     storeLocationWarning.classList.toggle('hidden', !usesDriver || !STORE_LOCATION.approximate);
     if (usesDriver) {
       initializeLocationMap();
-      setTimeout(() => locationMap && locationMap.invalidateSize(), 0);
+      setTimeout(() => locationMap && locationMap.invalidateSize(), 50);
+      setTimeout(() => locationMap && locationMap.invalidateSize(), 300);
     }
     renderDeliveryQuote();
     updateLiveStats();
@@ -2188,3 +2198,4 @@
 </script>
 </body>
 </html>
+
