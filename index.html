@@ -1164,10 +1164,10 @@
 
         <label class="field-label">ปักหมุดบ้านลูกค้า</label>
         <div class="location-actions" style="display: flex; gap: 8px;">
-          <button type="button" id="openMapBtn" class="location-btn" style="background: #E05A36; color: white; flex: 1;">??? �ԴἹ���ѡ��ش</button>
-          <button type="button" id="locateMeBtn" class="location-btn" style="flex: 1;">?? �֧�ԡѴ GPS</button>
+          <button type="button" id="openMapBtn" class="location-btn" style="background: #E05A36; color: white; flex: 1;">🗺️ เปิดแผนที่ปักหมุด</button>
+          <button type="button" id="locateMeBtn" class="location-btn" style="flex: 1;">📍 ดึงพิกัด GPS</button>
         </div>
-        <div id="zoneSummary" class="zone-summary" aria-live="polite">��سһѡ��ش���ʹ֧�ԡѴ GPS ���ͤӹǳ�����</div>
+        <div id="zoneSummary" class="zone-summary" aria-live="polite">กรุณาปักหมุดหรือดึงพิกัด GPS เพื่อคำนวณค่าส่ง</div>
         <p class="map-attribution-note">ระยะที่แสดงเป็นระยะโดยประมาณจากหมุดร้านถึงหมุดลูกค้า</p>
         <p id="storeLocationWarning" class="hint hidden">⚠️ พิกัดร้านในระบบเป็นจุดตั้งต้นชั่วคราว กรุณาให้ร้านยืนยันราคาก่อนชำระเงิน</p>
         <p class="hint">⏰ *หากให้ร้านไปรับ เลือกเวลาได้ตั้งแต่ 08:00–19:00 น.</p>
@@ -1822,7 +1822,7 @@
     if (locationMap) {
       if (!customerMarker) {
         customerMarker = L.marker([lat, lng], { draggable: true }).addTo(locationMap);
-        customerMarker.bindTooltip('���˹��١���', { direction: 'top' });
+        customerMarker.bindTooltip('���˹��١���', { direction: 'top' });
         customerMarker.on('dragend', event => {
           const point = event.target.getLatLng();
           setCustomerPin(point.lat, point.lng, false);
@@ -2272,14 +2272,14 @@
   <div id="mapModal" class="map-modal hidden">
     <div class="map-modal-content">
       <div class="map-modal-header">
-        <h3>?? ���͡���˹觢ͧ�س</h3>
+        <h3>📍 เลือกตำแหน่งของคุณ</h3>
         <button type="button" id="closeMapBtn" class="close-btn">&times;</button>
       </div>
       <div class="map-modal-body">
         <div id="locationMap"></div>
       </div>
       <div class="map-modal-footer">
-        <button type="button" id="confirmMapBtn" class="btn btn-primary" style="width: 100%;">�׹�ѹ���˹觹��</button>
+        <button type="button" id="confirmMapBtn" class="btn btn-primary" style="width: 100%;">ยืนยันตำแหน่งนี้</button>
       </div>
     </div>
   </div>
