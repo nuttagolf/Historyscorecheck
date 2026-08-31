@@ -52,7 +52,7 @@
   <script src="config.js"></script>
   <script>
     const API_BASE_URL = String(window.WASH_ME_CONFIG?.apiUrl || '').replace(/\/api\/orders\/?$/, '').replace(/\/$/, '');
-    const STATUS_LABELS = {awaiting_payment:'รอชำระเงิน',dispatch_pending:'กำลังจัดคิวคนขับ',pickup_scheduled:'นัดรับผ้าแล้ว',paid_waiting_dropoff:'รอลูกค้านำผ้ามาส่ง',received:'ร้านรับผ้าแล้ว',washing:'กำลังซัก/อบ',ready_for_collection:'ผ้าเสร็จ • รอลูกค้ามารับ',return_pending:'กำลังจัดคิวส่งคืน',return_scheduled:'นัดส่งคืนแล้ว',completed:'เสร็จสมบูรณ์',cancelled:'ยกเลิก',problem:'มีปัญหา'};
+    const STATUS_LABELS = {awaiting_payment:'รอชำระเงิน',dispatch_pending:'กำลังจัดคิวคนขับ',pickup_scheduled:'สร้างงานแล้ว • รอคนขับ',driver_assigned:'คนขับรับงานแล้ว',driver_en_route_pickup:'คนขับกำลังไปรับผ้า',picked_up:'รับผ้าจากลูกค้าแล้ว',on_the_way_to_store:'กำลังนำผ้ามาส่งร้าน',paid_waiting_dropoff:'รอลูกค้านำผ้ามาส่ง',received:'ร้านรับผ้าแล้ว',washing:'กำลังซัก/อบ',ready_for_collection:'ผ้าเสร็จ • รอลูกค้ามารับ',return_pending:'กำลังจัดคิวส่งคืน',return_scheduled:'นัดส่งคืนแล้ว',returning:'กำลังส่งผ้าคืนลูกค้า',completed:'เสร็จสมบูรณ์',cancelled:'ยกเลิก',problem:'มีปัญหา'};
     const loginPanel=document.getElementById('loginPanel'),ordersPanel=document.getElementById('ordersPanel'),adminToken=document.getElementById('adminToken'),loginBtn=document.getElementById('loginBtn'),refreshBtn=document.getElementById('refreshBtn'),statusFilter=document.getElementById('statusFilter'),statusEl=document.getElementById('status'),ordersEl=document.getElementById('orders');
     let token='';
     const api=(path,options={})=>fetch(`${API_BASE_URL}${path}`,{...options,headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`,...options.headers}});

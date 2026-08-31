@@ -1649,6 +1649,7 @@
   let currentOrder = null; // { orderNumber, accessToken, total, qrImageLink, paymentStatus }
   let selectedSlipFile = null;
   let statusPollTimer = null;
+  let myOrdersRefreshTimer = null;
   let createRequestKey = null;
   let activeLineIdToken = null;
   let activeLineAccessToken = null;
@@ -1657,12 +1658,17 @@
     awaiting_payment: 'รอชำระเงิน',
     dispatch_pending: 'กำลังจัดคิวคนขับ',
     pickup_scheduled: 'นัดรับผ้าแล้ว',
+    driver_assigned: 'คนขับรับงานแล้ว',
+    driver_en_route_pickup: 'คนขับกำลังเดินทางไปรับผ้า',
+    picked_up: 'คนขับรับผ้าจากลูกค้าแล้ว',
+    on_the_way_to_store: 'กำลังนำผ้ามาส่งที่ร้าน',
     paid_waiting_dropoff: 'ชำระแล้ว • รอลูกค้านำผ้ามาส่ง',
     received: 'ร้านรับผ้าแล้ว',
     washing: 'กำลังซัก/อบ',
     ready_for_collection: 'ผ้าเสร็จแล้ว • มารับที่ร้านได้',
     return_pending: 'ผ้าเสร็จแล้ว • กำลังจัดคิวส่งคืน',
     return_scheduled: 'นัดส่งผ้าคืนแล้ว',
+    returning: 'คนขับกำลังนำผ้าสะอาดไปส่งคืน',
     completed: 'เสร็จสมบูรณ์',
     cancelled: 'ยกเลิก',
     problem: 'ร้านกำลังตรวจสอบปัญหา'
@@ -1709,6 +1715,12 @@
   }
 
   window.loadMyOrders = loadMyOrders;
+  window.startMyOrdersAutoRefresh = function startMyOrdersAutoRefresh() {
+    if (myOrdersRefreshTimer) clearInterval(myOrdersRefreshTimer);
+    myOrdersRefreshTimer = setInterval(() => {
+      if (document.visibilityState === 'visible') loadMyOrders();
+    }, 15000);
+  };
   refreshMyOrdersBtn.addEventListener('click', () => loadMyOrders());
 
   // Format and show merchant promptpay ID
@@ -1897,7 +1909,7 @@
         : (currentOrder.returnRequested ? 'ชำระเงินแล้ว (รอร้านยืนยันการส่งกลับ)' : 'ชำระเงินแล้ว (นำมาส่งและรับที่ร้าน)');
       document.getElementById('recPickupStatus').textContent = receiptStatus;
 
-      stopStatusPolling();
+      startStatusPolling(currentOrder.orderNumber, currentOrder.accessToken);
     } catch (error) {
       setPaymentState('error', 'สลิปไม่ผ่าน');
       setSlipStatus(error.message || 'เกิดข้อผิดพลาดในการตรวจสอบสลิป กรุณาลองใหม่อีกครั้งค่ะ', 'error');
@@ -1913,7 +1925,7 @@
       : `/api/orders/${encodeURIComponent(orderNumber)}/status`;
 
     statusPollTimer = setInterval(async () => {
-      if (!currentOrder || currentOrder.paymentStatus === 'paid') {
+      if (!currentOrder) {
         stopStatusPolling();
         return;
       }
@@ -1923,13 +1935,16 @@
         });
         if (response.ok) {
           const data = await response.json();
+          currentOrder.orderStatus = data.orderStatus;
+          const visibleStatus = ORDER_STATUS_LABELS[data.orderStatus] || data.orderStatus || 'กำลังดำเนินการ';
+          document.getElementById('recPickupStatus').textContent = visibleStatus;
           if (data.paymentStatus === 'paid') {
             currentOrder.paymentStatus = 'paid';
             setPaymentState('paid', 'ชำระเงินแล้ว ✅');
             setSlipStatus('ชำระเงินเรียบร้อยแล้วค่ะ ขอบคุณค่ะ ✅', 'success');
             verifySlipBtn.classList.add('hidden');
-            stopStatusPolling();
           }
+          if (['completed', 'cancelled'].includes(data.orderStatus)) stopStatusPolling();
         }
       } catch {}
     }, 3000);
@@ -2663,6 +2678,7 @@
         activeLineIdToken = idToken || null;
         activeLineAccessToken = accessToken || null;
         window.loadMyOrders?.(accessToken || idToken);
+        window.startMyOrdersAutoRefresh?.();
         try {
           const profile = await window.liff.getProfile();
           userProfileHeader.classList.remove('hidden');
