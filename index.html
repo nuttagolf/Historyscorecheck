@@ -1190,14 +1190,6 @@
     <div id="profileName">สวัสดีครับ!</div>
   </div>
 
-  <section id="myOrdersSection" class="card my-orders-card hidden">
-    <div class="my-orders-heading">
-      <h2>🧾 ออเดอร์ของฉัน</h2>
-      <button id="refreshMyOrdersBtn" type="button" class="refresh-orders-btn">รีเฟรช</button>
-    </div>
-    <div id="myOrdersList" class="my-orders-list" aria-live="polite">กำลังโหลดรายการ…</div>
-  </section>
-
   <form id="orderForm">
 
     <!-- Step 1: Service -->
@@ -1649,7 +1641,6 @@
   let currentOrder = null; // { orderNumber, accessToken, total, qrImageLink, paymentStatus }
   let selectedSlipFile = null;
   let statusPollTimer = null;
-  let myOrdersRefreshTimer = null;
   let createRequestKey = null;
   let activeLineIdToken = null;
   let activeLineAccessToken = null;
@@ -1673,55 +1664,6 @@
     cancelled: 'ยกเลิก',
     problem: 'ร้านกำลังตรวจสอบปัญหา'
   };
-
-  function renderMyOrders(orders = []) {
-    myOrdersList.replaceChildren();
-    if (!orders.length) {
-      myOrdersList.textContent = 'ยังไม่มีออเดอร์ในบัญชี LINE นี้';
-      return;
-    }
-    orders.forEach(order => {
-      const item = document.createElement('article');
-      item.className = 'customer-order-item';
-      const title = document.createElement('div');
-      title.className = 'customer-order-title';
-      const number = document.createElement('span');
-      number.textContent = order.orderNumber;
-      const status = document.createElement('span');
-      status.textContent = ORDER_STATUS_LABELS[order.orderStatus] || order.orderStatus || '-';
-      title.append(number, status);
-      const meta = document.createElement('div');
-      meta.className = 'customer-order-meta';
-      const basketCount = Object.values(order.baskets || {}).reduce((sum, value) => sum + Number(value || 0), 0);
-      meta.textContent = `${order.service} • ${basketCount} ตะกร้า • ${Number(order.total).toFixed(0)} บาท`;
-      item.append(title, meta);
-      myOrdersList.appendChild(item);
-    });
-  }
-
-  async function loadMyOrders(lineToken = activeLineAccessToken || activeLineIdToken) {
-    if (!lineToken) return;
-    myOrdersSection.classList.remove('hidden');
-    myOrdersList.textContent = 'กำลังโหลดรายการ…';
-    try {
-      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/my-orders` : '/api/my-orders';
-      const response = await fetch(endpoint, { headers: { 'Authorization': `Bearer ${lineToken}` } });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok || !result.success) throw new Error(result.message || 'โหลดออเดอร์ไม่สำเร็จ');
-      renderMyOrders(result.orders || []);
-    } catch (error) {
-      myOrdersList.textContent = error.message || 'โหลดออเดอร์ไม่สำเร็จ กรุณาลองใหม่';
-    }
-  }
-
-  window.loadMyOrders = loadMyOrders;
-  window.startMyOrdersAutoRefresh = function startMyOrdersAutoRefresh() {
-    if (myOrdersRefreshTimer) clearInterval(myOrdersRefreshTimer);
-    myOrdersRefreshTimer = setInterval(() => {
-      if (document.visibilityState === 'visible') loadMyOrders();
-    }, 15000);
-  };
-  refreshMyOrdersBtn.addEventListener('click', () => loadMyOrders());
 
   // Format and show merchant promptpay ID
   if (MERCHANT_PROMPTPAY_ID.length === 10) {
@@ -2552,7 +2494,6 @@
 💰 ยอดชำระ: ${total} บาท`;
 
       setFormStatus('สร้างคำขอเรียบร้อยแล้ว กรุณาชำระเงินและอัปโหลดสลิปค่ะ', 'success');
-      if (activeLineAccessToken || activeLineIdToken) loadMyOrders();
       form.classList.add('hidden');
       summary.classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2677,8 +2618,6 @@
         }
         activeLineIdToken = idToken || null;
         activeLineAccessToken = accessToken || null;
-        window.loadMyOrders?.(accessToken || idToken);
-        window.startMyOrdersAutoRefresh?.();
         try {
           const profile = await window.liff.getProfile();
           userProfileHeader.classList.remove('hidden');
